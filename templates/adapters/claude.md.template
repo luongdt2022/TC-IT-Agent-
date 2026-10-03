@@ -1,0 +1,32 @@
+# CLAUDE.md — HƯỚNG DẪN ĐIỀU HÀNH DỰ ÁN {{PROJECT_NAME}} (CLAUDE CODE CLI)
+
+Welcome to {{PROJECT_NAME}}. You are operating under the **TC IT Agent Enterprise Framework (v2.0)**.
+You must adopt the appropriate persona based on the task stage, enforce strict file organization, and execute workflows systematically.
+
+## 1. 6 ROLES & PERSONAS (DEFINED IN `.agents/`)
+- `ps`: Presale & Solution Consultant (`.agents/ps.md`)
+- `po-pm`: Product Owner & Project Manager (`.agents/po-pm.md`)
+- `ba`: Senior Business Analyst (`.agents/ba.md`)
+- `techlead-sa`: Software Architect & Tech Lead (`.agents/techlead-sa.md`)
+- `dev`: Senior Full-Stack Developer (`.agents/dev.md`)
+- `ec`: Edge-Case Hunter & QC Specialist (`.agents/ec.md`)
+
+## 2. STRICT DIRECTORY ROUTING (ANTI-CLUTTER POLICY)
+All generated files MUST adhere to the directory routing matrix:
+- Proposals: `docs/00-presale-proposal/`
+- Basic Design: `docs/01-basic-design/`
+- Detail Design: `docs/02-detail-design/`
+- Backlog & Roadmap: `backlog/`
+- Feature Specs: `specs/[epic-id]/`
+- Source Code: `src/` (Clean Architecture: Domain, Application, Infrastructure, Presentation, WebApp)
+- Test Suites: `tests/` (unit, integration, e2e)
+
+## 3. WORKFLOW COMMANDS
+- `/wf-presale`: Run presale proposal & cost estimation.
+- `/wf-kickoff`: Run kickoff & basic design.
+- `/wf-refactor`: Scan legacy codebase (Read-only) & propose refactoring.
+- `/wf-autopilot [epic-id]`: Run full-cycle autonomous development.
+- `/wf-hotfix [bug-id]`: Emergency surgical bug fix (Red test -> Zero regression).
+- `/wf-delta [cr-id]`: Run spec-first change request flow.
+- `/wf-uiux [epic-id]`: Run 5 UX states & Playwright visual QA.
+- `/wf-audit`: Run architecture & traceability audit.

@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kế Hoạch Tái Cấu Trúc Toàn Diện: TC IT Agent Framework Enterprise v2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-page: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --bg-subtle: #1e293b;
+      --bg-code: #030712;
+      
+      --border-default: #374151;
+      --border-subtle: #1f2937;
+      --border-focus: #3b82f6;
+      
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-sub: #6b7280;
+      
+      --primary: #3b82f6;
+      --primary-soft: rgba(59, 130, 246, 0.12);
+      --primary-border: #2563eb;
+      
+      --accent-ps: #f59e0b; /* Amber for Presale */
+      --ps-soft: rgba(245, 158, 11, 0.12);
+      
+      --accent-po: #ec4899; /* Pink for PO/PM */
+      --po-soft: rgba(236, 72, 153, 0.12);
+      
+      --accent-ba: #10b981; /* Emerald for BA */
+      --ba-soft: rgba(16, 185, 129, 0.12);
+      
+      --accent-sa: #8b5cf6; /* Purple for SA */
+      --sa-soft: rgba(139, 92, 246, 0.12);
+      
+      --accent-dev: #06b6d4; /* Cyan for Dev */
+      --dev-soft: rgba(6, 182, 212, 0.12);
+      
+      --accent-ec: #ef4444; /* Red for EC/QC */
+      --ec-soft: rgba(239, 68, 68, 0.12);
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding-bottom: 80px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header Banner */
+    header {
+      background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--border-default);
+      padding: 56px 0 48px;
+      margin-bottom: 40px;
+    }
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid #6366f1;
+      color: #a5b4fc;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .header-desc {
+      font-size: 1.15rem;
+      color: #cbd5e1;
+      max-width: 900px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .meta-item strong { color: #f8fafc; }
+
+    /* Sticky Nav */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      background: var(--bg-surface);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      position: sticky;
+      top: 16px;
+      z-index: 100;
+      margin-bottom: 36px;
+      overflow-x: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .nav-tab {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .nav-tab:hover, .nav-tab.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    /* Section Styles */
+    section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+    .section-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-size: 1rem;
+    }
+
+    /* Grid for 6 Agents */
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .agent-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .agent-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-focus);
+    }
+    .agent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .agent-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .agent-role {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .agent-card.ps { border-top: 4px solid var(--accent-ps); }
+    .agent-card.ps .agent-tag { background: var(--ps-soft); color: var(--accent-ps); border: 1px solid var(--accent-ps); }
+    
+    .agent-card.po { border-top: 4px solid var(--accent-po); }
+    .agent-card.po .agent-tag { background: var(--po-soft); color: var(--accent-po); border: 1px solid var(--accent-po); }
+    
+    .agent-card.ba { border-top: 4px solid var(--accent-ba); }
+    .agent-card.ba .agent-tag { background: var(--ba-soft); color: var(--accent-ba); border: 1px solid var(--accent-ba); }
+    
+    .agent-card.sa { border-top: 4px solid var(--accent-sa); }
+    .agent-card.sa .agent-tag { background: var(--sa-soft); color: var(--accent-sa); border: 1px solid var(--accent-sa); }
+    
+    .agent-card.dev { border-top: 4px solid var(--accent-dev); }
+    .agent-card.dev .agent-tag { background: var(--dev-soft); color: var(--accent-dev); border: 1px solid var(--accent-dev); }
+    
+    .agent-card.ec { border-top: 4px solid var(--accent-ec); }
+    .agent-card.ec .agent-tag { background: var(--ec-soft); color: var(--accent-ec); border: 1px solid var(--accent-ec); }
+
+    .agent-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .agent-duties {
+      list-style: none;
+      font-size: 0.88rem;
+    }
+    .agent-duties li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      color: #e5e7eb;
+    }
+    .agent-duties li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    /* Tables */
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      font-size: 0.92rem;
+    }
+    .custom-table th, .custom-table td {
+      padding: 14px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .custom-table th {
+      background: #1e293b;
+      color: #f1f5f9;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+    .custom-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .code-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: var(--bg-code);
+      border: 1px solid var(--border-default);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #38bdf8;
+    }
+
+    /* Diagram wrapper */
+    .mermaid-box {
+      background: #030712;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+
+    /* Rule Highlights */
+    .rule-callout {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--accent-ec);
+      padding: 18px 22px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 20px 0;
+    }
+    .rule-callout h4 {
+      color: #fca5a5;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+    .rule-callout p {
+      color: #e5e7eb;
+      font-size: 0.92rem;
+    }
+
+    .success-callout {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--accent-ba);
+      padding: 18px 22px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 20px 0;
+    }
+    .success-callout h4 {
+      color: #6ee7b7;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    /* Tree View */
+    .tree-view {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      background: var(--bg-code);
+      padding: 22px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      line-height: 1.6;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .tree-folder { color: #60a5fa; font-weight: 600; }
+    .tree-file { color: #cbd5e1; }
+    .tree-comment { color: #64748b; font-style: italic; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding-top: 40px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-default);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="badge-top">TC IT AGENT FRAMEWORK • ENTERPRISE EDITION V2.0</div>
+      <h1>Kế Hoạch Tái Cấu Trúc Toàn Diện Hệ Thống Đa Tác Tử</h1>
+      <p class="header-desc">
+        Xây dựng bộ máy phát triển phần mềm chuẩn mực cho doanh nghiệp: Độc lập nền tảng LLM (Antigravity, Cursor, Windsurf, Claude Code, Codex, DeepSeek), 6 Persona chuyên trách (PS, PO, BA, SA, Dev, EC), quản lý thư mục chống rác tuyệt đối và quy trình 2 chiều chống trôi dạt tri thức.
+      </p>
+      <div class="meta-bar">
+        <div class="meta-item">Phiên bản: <strong>2.0.0-Approved</strong></div>
+        <div class="meta-item">Đội ngũ: <strong>6 AI Agents chuyên môn hóa</strong></div>
+        <div class="meta-item">Quy chuẩn kỹ năng: <strong>Tiền tố Role (ps-, po-, ba-, sa-, dev-, ec-)</strong></div>
+        <div class="meta-item">Quy trình: <strong>wf-* Workflows chuẩn</strong></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Sticky Navigation -->
+    <nav class="nav-tabs">
+      <a href="#section-vision" class="nav-tab active">1. Tầm Nhìn & Nền Tảng</a>
+      <a href="#section-agents" class="nav-tab">2. Đội Ngũ 6 Agent</a>
+      <a href="#section-skills" class="nav-tab">3. Bộ Kỹ Năng (ps-, po-...)</a>
+      <a href="#section-folders" class="nav-tab">4. Khung Thư Mục & Chống Rác</a>
+      <a href="#section-workflows" class="nav-tab">5. Quy Trình (wf-*)</a>
+      <a href="#section-roadmap" class="nav-tab">6. Lộ Trình Triển Khai</a>
+    </nav>
+
+    <!-- SECTION 1: VISION & COMPATIBILITY -->
+    <section id="section-vision">
+      <div class="section-title">
+        <span>🌐</span> 1. Độc Lập Môi Trường & Đa Nền Tảng LLM
+      </div>
+      <p class="section-desc">
+        Hệ thống được thiết kế phi phụ thuộc (Agnostic), chạy mượt mà trên bất kỳ LLM và bất kỳ Agentic IDE nào thông qua bộ sinh cấu hình tự động (Universal Adapters).
+      </p>
+
+      <div class="mermaid-box">
+        <div class="mermaid">
+flowchart TD
+    subgraph UNIVERSAL_CORE ["LÕI CHUẨN HÓA TC IT AGENT (Universal Core)"]
+        CORE_AGENTS[".agents/ 6 Persona Chuẩn"]
+        CORE_SKILLS["skills/ Bộ Kỹ Năng Theo Role"]
+        CORE_TEMPLATES["templates/ Bộ Biểu Mẫu Chuẩn"]
+        CORE_WORKFLOWS["workflows/ 6 Quy Trình wf-*"]
+    end
+
+    subgraph PLATFORM_ADAPTERS ["BỘ ADAPTERS ĐA NỀN TẢNG (install.sh)"]
+        CORE_AGENTS & CORE_SKILLS --> ADAPT_AGY["Google Antigravity\n(~/.gemini/antigravity/)"]
+        CORE_AGENTS & CORE_SKILLS --> ADAPT_CUR["Cursor IDE\n(.cursorrules & .cursor/rules/)"]
+        CORE_AGENTS & CORE_SKILLS --> ADAPT_WIN["Windsurf IDE\n(.windsurfrules)"]
+        CORE_AGENTS & CORE_SKILLS --> ADAPT_CLA["Claude Code\n(CLAUDE.md & slash commands)"]
+        CORE_AGENTS & CORE_SKILLS --> ADAPT_GEN["Codex / DeepSeek / Aider\n(AGENTS.md universal)"]
+    end
+
+    subgraph LLM_ENGINES ["MÔ HÌNH LLM BẤT KỲ"]
+        ADAPT_AGY & ADAPT_CUR & ADAPT_WIN & ADAPT_CLA & ADAPT_GEN --> LLMS["Claude 3.7 / GPT-4o / Gemini 3.0 / DeepSeek R1/V3"]
+    end
+        </div>
+      </div>
+
+      <div class="success-callout">
+        <h4>Cam kết Decoupling 100%</h4>
+        <p>Loại bỏ toàn bộ dữ liệu mẫu hardcode (như NacenTech). Mọi dự án mới khi khởi tạo qua <code>./install.sh</code> sẽ tự động nhận diện tên dự án, Tech Stack và cơ sở dữ liệu qua các biến động <code>{{PROJECT_NAME}}</code>, <code>{{TECH_STACK}}</code>, <code>{{DB_ENGINE}}</code>.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 2: 6 AGENTS -->
+    <section id="section-agents">
+      <div class="section-title">
+        <span>👥</span> 2. Đội Ngũ 6 Agent Chuyên Trách Toàn Vòng Đời Dự Án
+      </div>
+      <p class="section-desc">
+        Phân định rạch ròi giữa <strong>Giai đoạn tiền dự án (Pre-sales)</strong> và <strong>Giai đoạn thực thi (5 Stage-Gates)</strong> theo nguyên tắc Phân lập trách nhiệm (Separation of Concerns) và Maker – Checker.
+      </p>
+
+      <div class="agent-grid">
+        <!-- Agent 0: PS -->
+        <div class="agent-card ps">
+          <div class="agent-header">
+            <span class="agent-role">PS Agent</span>
+            <span class="agent-tag">Presale & Solution</span>
+          </div>
+          <p class="agent-desc">Chuyên gia tư vấn kỹ thuật cao cấp & tài chính dự án. Cầu nối giữa khách hàng/C-Level và đội ngũ kỹ thuật.</p>
+          <ul class="agent-duties">
+            <li>Thẩm định đề bài thầu (RFP / RFI) & tính khả thi.</li>
+            <li>Đề xuất giải pháp kiến trúc tối ưu (So sánh Trade-off).</li>
+            <li>Bóc tách Man-Month (MM), dự toán chi phí Cloud & TCO.</li>
+            <li>Lập hồ sơ kỹ thuật chuyên nghiệp (IT Technical Proposal).</li>
+          </ul>
+        </div>
+
+        <!-- Agent 1: PO/PM -->
+        <div class="agent-card po">
+          <div class="agent-header">
+            <span class="agent-role">PO/PM Agent</span>
+            <span class="agent-tag">Gate 1 & Gate 5</span>
+          </div>
+          <p class="agent-desc">Product Owner kiêm Project Manager. Người giữ chìa khóa phạm vi, giá trị sản phẩm và nghiệm thu xuất xưởng.</p>
+          <ul class="agent-duties">
+            <li>Sàng lọc yêu cầu (Scope Triage), xác định MVP / Post-MVP.</li>
+            <li>Quản lý Master Roadmap, Milestones & Story Mapping.</li>
+            <li>Điều phối các cuộc họp đa tác tử (Party Mode).</li>
+            <li>Gác cổng Gate 1 (duyệt đề bài) & Gate 5 (nghiệm thu DoD).</li>
+          </ul>
+        </div>
+
+        <!-- Agent 2: BA -->
+        <div class="agent-card ba">
+          <div class="agent-header">
+            <span class="agent-role">BA Agent</span>
+            <span class="agent-tag">Gate 1 Specialist</span>
+          </div>
+          <p class="agent-desc">Senior Business Analyst. Chuyên sâu khơi gợi yêu cầu tiềm ẩn và chuẩn hóa tài liệu thiết kế cơ sở.</p>
+          <ul class="agent-duties">
+            <li>9 kỹ thuật khơi gợi nghiệp vụ (5 Whys, Laddering...).</li>
+            <li>Xây dựng Thiết kế Cơ sở (Basic Design - Kihon Sekkei).</li>
+            <li>Đặc tả yêu cầu phần mềm SRS 7 mục (mã hóa REQ-*, BR-*).</li>
+            <li>Kiểm soát ma trận truy vết khép kín (Traceability).</li>
+          </ul>
+        </div>
+
+        <!-- Agent 3: TL/SA -->
+        <div class="agent-card sa">
+          <div class="agent-header">
+            <span class="agent-role">TL/SA Agent</span>
+            <span class="agent-tag">Gate 2 & Gate 3</span>
+          </div>
+          <p class="agent-desc">Software Architect & Tech Lead. Người gác cổng kiến trúc sạch và chất lượng kỹ thuật mã nguồn.</p>
+          <ul class="agent-duties">
+            <li>Thiết kế kỹ thuật chi tiết (Detail Design: ERD, API, Sequence).</li>
+            <li>Lập kế hoạch phân rã module kiến trúc (plan.md).</li>
+            <li>Bảo vệ ranh giới Clean Architecture (Chống rò rỉ dữ liệu).</li>
+            <li>Rà soát code đối kháng (Adversarial Code Review).</li>
+          </ul>
+        </div>
+
+        <!-- Agent 4: Dev -->
+        <div class="agent-card dev">
+          <div class="agent-header">
+            <span class="agent-role">Dev Agent</span>
+            <span class="agent-tag">Execution Specialist</span>
+          </div>
+          <p class="agent-desc">Senior Full-Stack Developer. Thực thi chính xác 1:1 theo tasks.md, không đoán mò, không sinh code thừa.</p>
+          <ul class="agent-duties">
+            <li>Phân rã checklist công việc chi tiết [BE]/[FE].</li>
+            <li>Lập trình tuần tự bám sát task có kiểm chứng [x].</li>
+            <li>Chuẩn hóa giao diện 5 trạng thái UX qua component &lt;Async&gt;.</li>
+            <li>Viết Unit Test cho 100% Business Rules (TDD).</li>
+          </ul>
+        </div>
+
+        <!-- Agent 5: EC -->
+        <div class="agent-card ec">
+          <div class="agent-header">
+            <span class="agent-role">EC Agent</span>
+            <span class="agent-tag">Gate 4 Guard</span>
+          </div>
+          <p class="agent-desc">Edge-Case Hunter & QC Specialist. "Thợ săn lỗi góc khuất" đóng vai trò đối kháng để bảo vệ chất lượng.</p>
+          <ul class="agent-duties">
+            <li>Săn kịch bản ngoại lệ, lỗi biên logic, spam click.</li>
+            <li>Fuzzing ma trận phân quyền RBAC & lỗ hổng leo thang quyền.</li>
+            <li>Tự động sinh kịch bản Playwright E2E từ Acceptance Criteria.</li>
+            <li>Gác cổng Quality Gate 4 (Unit + DB Integration + E2E).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SKILL MATRIX -->
+    <section id="section-skills">
+      <div class="section-title">
+        <span>⚡</span> 3. Bộ Kỹ Năng Đặt Tên Theo Tiền Tố Role (ps-, po-, ba-, sa-, dev-, ec-)
+      </div>
+      <p class="section-desc">
+        Tất cả các kỹ năng được tinh giản tên gọi tối đa: <strong>[tiền-tố]-[hành-động-ngắn-gọn]</strong>, giúp con người và agent dễ nhớ, dễ gõ lệnh.
+      </p>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th width="12%">Role</th>
+            <th width="20%">Tên Kỹ Năng</th>
+            <th width="25%">Chức Năng Thực Thi</th>
+            <th>Tệp Đầu Ra Bắt Buộc (Enforced Output)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Presale -->
+          <tr>
+            <td><strong style="color: var(--accent-ps)">ps-</strong> (Presale)</td>
+            <td><span class="code-badge">ps-proposal</span></td>
+            <td>Soạn thảo IT Proposal kỹ thuật</td>
+            <td><code>docs/00-presale-proposal/PROPOSAL.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ps)">ps-</strong> (Presale)</td>
+            <td><span class="code-badge">ps-estimate</span></td>
+            <td>Bóc tách Man-Month & dự toán TCO</td>
+            <td><code>docs/00-presale-proposal/ESTIMATION_AND_COST.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ps)">ps-</strong> (Presale)</td>
+            <td><span class="code-badge">ps-solution</span></td>
+            <td>So sánh Trade-off giải pháp kỹ thuật</td>
+            <td><code>docs/00-presale-proposal/SOLUTION_COMPARISON.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ps)">ps-</strong> (Presale)</td>
+            <td><span class="code-badge">ps-rfp</span></td>
+            <td>Thẩm định hồ sơ thầu & độ khả thi</td>
+            <td><code>docs/00-presale-proposal/FEASIBILITY_REPORT.md</code></td>
+          </tr>
+
+          <!-- PO/PM -->
+          <tr>
+            <td><strong style="color: var(--accent-po)">po-</strong> (PO/PM)</td>
+            <td><span class="code-badge">po-scope</span></td>
+            <td>Sàng lọc yêu cầu & Ma trận ảnh hưởng</td>
+            <td><code>backlog/SCOPE_TRIAGE.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-po)">po-</strong> (PO/PM)</td>
+            <td><span class="code-badge">po-roadmap</span></td>
+            <td>Quản trị Master Roadmap & Epics</td>
+            <td><code>backlog/ROADMAP.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-po)">po-</strong> (PO/PM)</td>
+            <td><span class="code-badge">po-gate</span></td>
+            <td>Biên bản nghiệm thu DoD (Gate 5)</td>
+            <td><code>docs/decisions/GATE5_ACCEPTANCE.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-po)">po-</strong> (PO/PM)</td>
+            <td><span class="code-badge">po-party</span></td>
+            <td>Hội nghị bàn tròn đa tác tử tranh biện</td>
+            <td><code>docs/decisions/PARTY_CONSENSUS.md</code></td>
+          </tr>
+
+          <!-- BA -->
+          <tr>
+            <td><strong style="color: var(--accent-ba)">ba-</strong> (BA)</td>
+            <td><span class="code-badge">ba-elicit</span></td>
+            <td>Khơi gợi nghiệp vụ chuyên sâu 9D</td>
+            <td><code>docs/01-basic-design/ELICITATION_LOG.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ba)">ba-</strong> (BA)</td>
+            <td><span class="code-badge">ba-design</span></td>
+            <td>Xây dựng Thiết kế Cơ sở (Kihon Sekkei)</td>
+            <td><code>docs/01-basic-design/BD-*.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ba)">ba-</strong> (BA)</td>
+            <td><span class="code-badge">ba-srs</span></td>
+            <td>Đặc tả yêu cầu SRS 7 mục khép kín</td>
+            <td><code>specs/[epic-id]/spec.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ba)">ba-</strong> (BA)</td>
+            <td><span class="code-badge">ba-trace</span></td>
+            <td>Kiểm toán truy vết REQ- ↔ BR- ↔ DB-</td>
+            <td><code>docs/decisions/TRACEABILITY_MATRIX.md</code></td>
+          </tr>
+
+          <!-- SA -->
+          <tr>
+            <td><strong style="color: var(--accent-sa)">sa-</strong> (SA/TL)</td>
+            <td><span class="code-badge">sa-design</span></td>
+            <td>Thiết kế kỹ thuật (ERD, API, Sequence)</td>
+            <td><code>docs/02-detail-design/DD-*.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-sa)">sa-</strong> (SA/TL)</td>
+            <td><span class="code-badge">sa-plan</span></td>
+            <td>Lập kế hoạch kiến trúc & phân tầng</td>
+            <td><code>specs/[epic-id]/plan.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-sa)">sa-</strong> (SA/TL)</td>
+            <td><span class="code-badge">sa-guard</span></td>
+            <td>Vệ binh kiến trúc sạch & chống rác</td>
+            <td>Quét tự động & cảnh báo vi phạm</td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-sa)">sa-</strong> (SA/TL)</td>
+            <td><span class="code-badge">sa-refactor</span></td>
+            <td>Quét dự án cũ & Lập đề xuất Refactor</td>
+            <td><code>docs/00-presale-proposal/REFACTORING_PROPOSAL.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-sa)">sa-</strong> (SA/TL)</td>
+            <td><span class="code-badge">sa-review</span></td>
+            <td>Rà soát mã nguồn đối kháng (Gate 3)</td>
+            <td><code>docs/decisions/CODE_REVIEW_GATE3.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-sa)">sa-</strong> (SA/TL)</td>
+            <td><span class="code-badge">sa-analyze</span></td>
+            <td>Phân tích nhất quán Spec - Plan - Tasks</td>
+            <td>Báo cáo thẩm định Gate 2</td>
+          </tr>
+
+          <!-- Dev -->
+          <tr>
+            <td><strong style="color: var(--accent-dev)">dev-</strong> (Dev)</td>
+            <td><span class="code-badge">dev-tasks</span></td>
+            <td>Phân rã checklist công việc [BE]/[FE]</td>
+            <td><code>specs/[epic-id]/tasks.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-dev)">dev-</strong> (Dev)</td>
+            <td><span class="code-badge">dev-code</span></td>
+            <td>Lập trình thực thi bám sát tasks.md</td>
+            <td><code>src/[Domain|App|Infra|API|Web]/</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-dev)">dev-</strong> (Dev)</td>
+            <td><span class="code-badge">dev-uiux</span></td>
+            <td>Chuẩn hóa 5 UX States (&lt;Async&gt;)</td>
+            <td><code>src/WebApp/components/</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-dev)">dev-</strong> (Dev)</td>
+            <td><span class="code-badge">dev-unit</span></td>
+            <td>Viết Unit Test cho Business Rules</td>
+            <td><code>tests/unit/</code></td>
+          </tr>
+
+          <!-- EC -->
+          <tr>
+            <td><strong style="color: var(--accent-ec)">ec-</strong> (EC/QC)</td>
+            <td><span class="code-badge">ec-hunt</span></td>
+            <td>Săn tìm lỗi biên & kịch bản ngoại lệ</td>
+            <td><code>tests/edge-cases/DEFECT_LOG.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ec)">ec-</strong> (EC/QC)</td>
+            <td><span class="code-badge">ec-e2e</span></td>
+            <td>Tự động sinh kịch bản Playwright E2E</td>
+            <td><code>tests/e2e/[epic-id].spec.ts</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ec)">ec-</strong> (EC/QC)</td>
+            <td><span class="code-badge">ec-fuzz</span></td>
+            <td>Fuzzing bảo mật & ma trận phân quyền</td>
+            <td><code>tests/security/FUZZING_REPORT.md</code></td>
+          </tr>
+          <tr>
+            <td><strong style="color: var(--accent-ec)">ec-</strong> (EC/QC)</td>
+            <td><span class="code-badge">ec-test</span></td>
+            <td>Điều phối kiểm thử 3 tầng (Gate 4)</td>
+            <td><code>docs/decisions/GATE4_VERIFICATION.md</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 4: FOLDER & ANTI-CLUTTER -->
+    <section id="section-folders">
+      <div class="section-title">
+        <span>📁</span> 4. Khung Kiến Trúc Quản Lý Thư Mục & Cơ Chế Chống Rác
+      </div>
+      <p class="section-desc">
+        Mỗi tệp tin sinh ra hoặc cập nhật đều có một địa chỉ cố định duy nhất. Áp dụng kỷ luật <strong>Zero-Tolerance Root Dumping</strong>: Cấm tuyệt đối xả file bừa bãi ra thư mục gốc.
+      </p>
+
+      <div class="tree-view">
+<span class="tree-folder">{{PROJECT_ROOT}}/</span>
+├── <span class="tree-folder">.agents/</span>                   <span class="tree-comment"># 6 Persona chuẩn (ps, po-pm, ba, techlead-sa, dev, ec)</span>
+├── <span class="tree-file">AGENTS.md</span>                  <span class="tree-comment"># Quy chế điều phối đa nền tảng tối cao</span>
+├── <span class="tree-file">constitution.md</span>            <span class="tree-comment"># Hiến pháp kỹ thuật & Ranh giới chất lượng</span>
+│
+├── <span class="tree-folder">docs/</span>                      <span class="tree-comment"># TOÀN BỘ TÀI LIỆU DỰ ÁN (Có địa chỉ cố định)</span>
+│   ├── <span class="tree-folder">00-presale-proposal/</span>   <span class="tree-comment"># [PS] PROPOSAL.md, ESTIMATION_AND_COST.md, SOLUTION_COMPARISON.md</span>
+│   ├── <span class="tree-folder">01-basic-design/</span>       <span class="tree-comment"># [BA] BD-00-overview.md, BD-01-c4-context.md, BD-02-domain.md</span>
+│   ├── <span class="tree-folder">02-detail-design/</span>      <span class="tree-comment"># [SA] DD-01-database-erd.md, DD-02-api-contracts.md, DD-03-sequence.md</span>
+│   ├── <span class="tree-folder">decisions/</span>             <span class="tree-comment"># [SA] Architecture Decision Records (ADR-001, ADR-002...)</span>
+│   └── <span class="tree-folder">change-requests/</span>       <span class="tree-comment"># [PO/BA] Quản lý yêu cầu thay đổi (CR-001, CR-002...)</span>
+│
+├── <span class="tree-folder">backlog/</span>                   <span class="tree-comment"># [PO] ROADMAP.md, EPICS/, USER_STORIES/</span>
+├── <span class="tree-folder">specs/</span>                     <span class="tree-comment"># [TEAM] ĐẶC TẢ TÍNH NĂNG THEO SPEC KIT</span>
+│   └── <span class="tree-folder">[epic-id]/</span>             <span class="tree-comment"># Ví dụ: specs/EPIC-01-AUTH/ (spec.md, plan.md, tasks.md, checklist.md)</span>
+│
+├── <span class="tree-folder">src/</span>                       <span class="tree-comment"># [DEV] MÃ NGUỒN CHUẨN CLEAN ARCHITECTURE</span>
+│   ├── <span class="tree-folder">Domain/</span>                <span class="tree-comment"># Entities, Value Objects, Domain Events (Không phụ thuộc gì)</span>
+│   ├── <span class="tree-folder">Application/</span>           <span class="tree-comment"># Use Cases, DTOs, Business Rules Validators, Interfaces</span>
+│   ├── <span class="tree-folder">Infrastructure/</span>        <span class="tree-comment"># DB Context, Repositories, Third-party SDKs, Cache, Queue</span>
+│   ├── <span class="tree-folder">Presentation/</span> (API/)   <span class="tree-comment"># Controllers, Middlewares, Scoped RBAC Filters</span>
+│   └── <span class="tree-folder">WebApp/</span> (Client/)      <span class="tree-comment"># Frontend React/Vue chuẩn 5 trạng thái UX qua &lt;Async&gt;</span>
+│
+└── <span class="tree-folder">tests/</span>                     <span class="tree-comment"># [EC/DEV] HỆ THỐNG KIỂM THỬ 3 TẦNG</span>
+    ├── <span class="tree-folder">unit/</span>                  <span class="tree-comment"># Unit test Business Rules (Coverage 100% BR-*)</span>
+    ├── <span class="tree-folder">integration/</span>           <span class="tree-comment"># Database Integration test & API Endpoints test</span>
+    └── <span class="tree-folder">e2e/</span>                   <span class="tree-comment"># Playwright End-to-End Visual QA</span>
+      </div>
+
+      <div class="rule-callout">
+        <h4>Cơ chế kiểm soát 3 tầng chống xả rác (3-Tier Anti-Clutter):</h4>
+        <p><strong>Tầng 1 (Luật Root)</strong>: Chỉ cho phép các file config chuẩn ở root. Cấm file rác .md hay script tạm.<br>
+        <strong>Tầng 2 (Hợp đồng I/O của Skill)</strong>: Từng file SKILL.md quy định cứng thuộc tính <code>Target Output File</code>. Agent chỉ được ghi file vào đúng path quy định.<br>
+        <strong>Tầng 3 (Gác cổng sa-guard)</strong>: Quét kiểm tra cấu trúc định kỳ, tự động dọn dẹp file lạc vị trí và chặn Quality Gate nếu còn rác.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 5: WORKFLOWS -->
+    <section id="section-workflows">
+      <div class="section-title">
+        <span>🔄</span> 5. Các Quy Trình Chuẩn (Standard Workflows: wf-*)
+      </div>
+      <p class="section-desc">
+        Con người kích hoạt bằng lệnh hoặc ngôn ngữ tự nhiên. Bên trong từng workflow là kịch bản điều phối liên tác tử (Multi-Agent Choreography) chuyển giao đúng người, đúng việc.
+      </p>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th width="16%">Lệnh Workflow</th>
+            <th width="15%">Agent Chủ Trì</th>
+            <th width="35%">Luồng Phối Hợp Bên Trong</th>
+            <th>Mục Đích & Giá Trị</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code-badge">wf-presale</span></td>
+            <td><strong style="color: var(--accent-ps)">PS Agent</strong></td>
+            <td>PS (Đề bài) ➔ SA (Kiến trúc đề xuất) ➔ PS (Proposal & Báo giá)</td>
+            <td>Chuyển đề bài thô / RFP thành Hồ sơ giải pháp IT hoàn chỉnh và bảng tính Man-Month.</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-kickoff</span></td>
+            <td><strong style="color: var(--accent-po)">PO/PM Agent</strong></td>
+            <td>PO (Nhận bàn giao) ➔ BA (Elicitation & Basic Design) ➔ SA (C4) ➔ PO (Roadmap)</td>
+            <td>Khởi động dự án mới, thiết lập khung xương sống kiến trúc (Walking Skeleton).</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-refactor</span></td>
+            <td><strong style="color: var(--accent-sa)">SA Agent</strong></td>
+            <td>SA (Quét mã nguồn cũ) ➔ SA (Kiến trúc đích) ➔ PS (Dự toán chi phí) ➔ PO (Lộ trình)</td>
+            <td>Quét dự án cũ (Chỉ đọc), phát hiện nợ kỹ thuật và lập đề xuất Refactor an toàn 100%.</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-autopilot</span></td>
+            <td><strong style="color: var(--accent-po)">PO/PM Agent</strong></td>
+            <td>BA (Spec) ➔ SA (Plan) ➔ Dev (Tasks & Code) ➔ EC (Hunt & Test) ➔ PO (Gate 5)</td>
+            <td>Phát triển tự động toàn trình 1 Epic/Tính năng từ Spec đến Code hoàn thiện.</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-hotfix</span></td>
+            <td><strong style="color: var(--accent-ec)">EC + Dev Agent</strong></td>
+            <td>EC (Tái hiện lỗi Red Test) ➔ SA/Dev (Sửa mã tối thiểu) ➔ EC (Regression Pass) ➔ PO (Post-Mortem)</td>
+            <td>Vá lỗi khẩn cấp Production/UAT theo chuẩn phẫu thuật tối thiểu (Surgical Fix) và Zero Regression.</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-delta</span></td>
+            <td><strong style="color: var(--accent-sa)">SA + BA</strong></td>
+            <td>PO (Duyệt CR) ➔ SA/BA (Sửa Design trước) ➔ Dev (Sửa Code sau) ➔ EC (Test)</td>
+            <td>Xử lý yêu cầu thay đổi (Change Request) đảm bảo tài liệu và code luôn đồng bộ 100%.</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-uiux</span></td>
+            <td><strong style="color: var(--accent-dev)">Dev Agent</strong></td>
+            <td>Dev (Dựng 5 UX States với &lt;Async&gt;) ➔ EC (Chụp ảnh Playwright Visual QA)</td>
+            <td>Chuẩn hóa giao diện frontend mượt mà: Loading, Empty, Error, Success, Updating.</td>
+          </tr>
+          <tr>
+            <td><span class="code-badge">wf-audit</span></td>
+            <td><strong style="color: var(--accent-sa)">SA Agent</strong></td>
+            <td>SA (Clean Arch) ➔ BA (Traceability REQ-BR-DB) ➔ EC (Test Coverage)</td>
+            <td>Kiểm toán toàn diện định kỳ trước khi phát hành (Release Gatekeeper).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin: 30px 0 16px; font-size: 1.25rem;">Trình Tự Điều Phối Của wf-autopilot (Đa Tác Tử Chuẩn Xác):</h3>
+      <div class="mermaid-box">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as Con người (User)
+    participant PO as PO/PM Agent (Nhạc trưởng)
+    participant BA as BA Agent
+    participant SA as TL/SA Agent
+    participant Dev as Dev Agent
+    participant EC as EC Agent
+
+    User->>PO: "Kích hoạt wf-autopilot cho Epic Giỏ hàng"
+    activate PO
+    
+    PO->>BA: Giao việc: Đặc tả nghiệp vụ
+    activate BA
+    BA->>BA: Thực thi [ba-srs] (Đặc tả 7 mục)
+    BA->>BA: Thực thi [ba-clarify] (Làm rõ vùng mơ hồ)
+    BA-->>PO: Sinh specs/EPIC-01/spec.md (REQ-*, BR-*)
+    deactivate BA
+
+    PO->>SA: Yêu cầu thiết kế kỹ thuật
+    activate SA
+    SA->>SA: Thực thi [sa-plan] & [sa-design]
+    SA-->>PO: Sinh specs/EPIC-01/plan.md (DB-*, API-*, C4)
+    deactivate SA
+
+    PO->>Dev: Yêu cầu phân rã công việc
+    activate Dev
+    Dev->>Dev: Thực thi [dev-tasks]
+    Dev-->>PO: Sinh specs/EPIC-01/tasks.md (Checklist)
+    deactivate Dev
+
+    PO->>SA: Thẩm định Gate 2
+    activate SA
+    SA->>SA: Thực thi [sa-analyze]
+    SA-->>PO: Xác nhận PASS Gate 2 (Đồng nhất)
+    deactivate SA
+
+    PO->>Dev: Lệnh lập trình & Hội tụ
+    activate Dev
+    Dev->>Dev: Thực thi [dev-code], [dev-uiux] & [dev-unit]
+    Dev->>Dev: Thực thi [dev-converge] (Quét hội tụ 100%)
+    Dev-->>PO: Hoàn thành src/ và tests/unit/
+    deactivate Dev
+
+    PO->>EC: Yêu cầu kiểm thử độc lập
+    activate EC
+    EC->>EC: Thực thi [ec-hunt] & [ec-fuzz]
+    EC->>EC: Thực thi [ec-e2e] (Sinh test Playwright)
+    EC->>EC: Thực thi [ec-test] (Chạy bộ test 3 tầng)
+    EC-->>PO: Ký biên bản Quality Gate 4 [PASS]
+    deactivate EC
+
+    PO->>PO: Thực thi [po-gate] (Kiểm tra DoD)
+    PO->>PO: Cập nhật backlog/ROADMAP.md [SHIPPED]
+    PO-->>User: "Đã hoàn thành xuất sắc tính năng!"
+    deactivate PO
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: ROADMAP -->
+    <section id="section-roadmap">
+      <div class="section-title">
+        <span>🚀</span> 6. Kế Hoạch 5 Bước Thực Thi Tái Cấu Trúc
+      </div>
+      <p class="section-desc">
+        Quy trình triển khai có kiểm chứng từng giai đoạn, đảm bảo không làm gián đoạn hay hỏng hóc các tài nguyên hiện hữu.
+      </p>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th width="15%">Giai Đoạn</th>
+            <th width="30%">Hành Động Cụ Thể</th>
+            <th>Kết Quả Đầu Ra Kiểm Chứng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bước 1</strong></td>
+            <td>Chuẩn hóa 6 Persona trong <code>.agents/</code></td>
+            <td>Tạo mới <code>ps.md</code>, nâng cấp <code>ec.md</code>, tinh gọn <code>po-pm.md</code>, <code>ba.md</code>, <code>techlead-sa.md</code>, <code>dev.md</code>. Dọn dẹp mẫu cũ.</td>
+          </tr>
+          <tr>
+            <td><strong>Bước 2</strong></td>
+            <td>Tái cấu trúc thư mục <code>skills/</code> theo Role</td>
+            <td>Tạo các folder <code>00-presale/</code> đến <code>05-ec/</code>. Đổi tên toàn bộ 30 skills sang tiền tố <code>ps-*</code>, <code>po-*</code>, <code>ba-*</code>, <code>sa-*</code>, <code>dev-*</code>, <code>ec-*</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>Bước 3</strong></td>
+            <td>Đóng gói 6 Workflow <code>wf-*</code></td>
+            <td>Soạn thảo chi tiết 6 kịch bản điều phối liên tác tử: <code>wf-presale</code>, <code>wf-kickoff</code>, <code>wf-autopilot</code>, <code>wf-delta</code>, <code>wf-uiux</code>, <code>wf-audit</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>Bước 4</strong></td>
+            <td>Xây dựng Bộ Template & Khung Thư Mục Mẫu</td>
+            <td>Tạo <code>TEMPLATE-it-proposal.md</code>, <code>TEMPLATE-cost-estimation.md</code>, và thư mục mẫu <code>template-workspace/</code> sạch sẽ, chống rác.</td>
+          </tr>
+          <tr>
+            <td><strong>Bước 5</strong></td>
+            <td>Nâng cấp <code>install.sh</code> & Cập nhật <code>README.md</code></td>
+            <td>Script tự động hỗ trợ cài đặt đa nền tảng (<code>--antigravity</code>, <code>--cursor</code>, <code>--windsurf</code>, <code>--claude</code>, <code>--all</code>) và tài liệu cẩm nang mới.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>TC IT AGENT FRAMEWORK ENTERPRISE V2.0 • ARCHITECTURE BOARD APPROVED</p>
+      <p style="margin-top: 6px;">Tài liệu sẵn sàng để phê duyệt và bắt đầu triển khai mã nguồn.</p>
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#030712',
+        primaryColor: '#3b82f6',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#60a5fa',
+        lineColor: '#94a3b8',
+        secondaryColor: '#1e293b',
+        tertiaryColor: '#0f172a'
+      }
+    });
+  </script>
+</body>
+</html>
