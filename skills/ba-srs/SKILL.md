@@ -11,7 +11,7 @@ description: "Biên soạn tài liệu Đặc tả Yêu cầu Phần mềm (SRS)
 ---
 
 ## 1. ENFORCED ARTIFACT CONTRACT (QUY ĐỊNH GHI FILE BẮT BUỘC)
-- **Input**: Thiết kế cơ sở tại `docs/01-basic-design/` và phạm vi Epic từ `backlog/ROADMAP.md`.
+- **Input**: Thiết kế cơ sở tại `docs/01-basic-design/` (hoặc `docs/system/`) và phạm vi Epic từ `specs/ROADMAP.md` (hoặc `backlog/ROADMAP.md`).
 - **Target Output File**: `specs/[epic-id]/spec.md` (Ví dụ: `specs/EPIC-01-AUTH/spec.md`).
 - **NGHIÊM CẤM**: Không tạo các file đặc tả lẻ tẻ ngoài thư mục `specs/[epic-id]/`.
 

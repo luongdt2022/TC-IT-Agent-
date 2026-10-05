@@ -1,7 +1,7 @@
-# TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v2.0)
+# TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v2.1)
 
 > **TC IT Agent** là bộ khung điều phối AI Agent toàn diện dành cho phát triển phần mềm doanh nghiệp, được đúc kết từ tinh hoa của hai phương pháp luận hàng đầu: **GitHub Spec Kit** (Đặc tả chính xác) và **BMad Method** (Tranh biện đối kháng đa tác tử & kiểm thử đa tầng).  
-> **Phiên bản 2.0 Enterprise**: Độc lập 100% môi trường và mô hình LLM, hỗ trợ 6 Persona chuyên trách (Presale, PO/PM, BA, SA, Dev, EC), bộ kỹ năng theo role, kỷ luật thư mục chống rác tuyệt đối và cơ chế 2 chiều chống trôi dạt tri thức.
+> **Phiên bản 2.1 Enterprise**: Bổ sung bộ kỷ luật **Chống ảo giác tuyệt đối (Anti-Hallucination Guardrails Protocol)**, quản trị tài liệu sống **Living Docs & ADR**, kịch bản gác cổng toán học `guard-rails.sh`, và trọn bộ 4 kỹ thuật kiểm định QC chuyên sâu (`ec-chaos`, `ec-contract`, `ec-load`, `ec-mutation`).
 
 ---
 
@@ -28,11 +28,12 @@ TC IT Agent/
 │   ├── po-party/                 # [PO] Triệu tập hội nghị bàn tròn đa tác tử (Party Mode)
 │   ├── po-course/                # [PO] Nắn dòng dự án & phát hiện trôi dạt yêu cầu (Anti-Drift)
 │   ├── po-issues/                # [PO] Đồng bộ danh sách tasks thành GitHub Issues
+│   ├── xong/                     # [PO] Nghiệm thu toàn diện DoD, cập nhật Living Docs & đóng spec xuất xưởng
 │   ├── ba-elicit/                # [BA] 9 kỹ thuật khơi gợi nghiệp vụ chuyên sâu (5 Whys...)
-│   ├── ba-design/                # [BA] Soạn thảo Thiết kế Cơ sở (Kihon Sekkei)
+│   ├── ba-design/                # [BA] Soạn thảo Thiết kế Cơ sở (Kihon Sekkei) & Living Docs
 │   ├── ba-srs/                   # [BA] Soạn thảo đặc tả SRS 7 mục khép kín (REQ-, BR-)
-│   ├── ba-trace/                 # [BA] Kiểm toán ma trận truy vết khép kín REQ ↔ BR ↔ DB
-│   ├── ba-clarify/               # [BA] Đặt tối đa 5 câu hỏi trọng tâm làm rõ điểm nghẽn
+│   ├── ba-trace/                 # [BA] Kiểm toán ma trận truy vết khép kín REQ ↔ BR ↔ DB ↔ Test
+│   ├── ba-clarify/               # [BA] Đặt tối đa 5 câu hỏi trọng tâm làm rõ điểm nghẽn (Cấm đoán mò)
 │   ├── ba-docx/                  # [BA] Xuất bản tài liệu sang định dạng Word DOCX trình ký
 │   ├── sa-design/                # [SA] Thiết kế kỹ thuật chi tiết (ERD, OpenAPI, Sequences)
 │   ├── sa-plan/                  # [SA] Lập kế hoạch kiến trúc kỹ thuật theo Epic (plan.md)
@@ -40,6 +41,7 @@ TC IT Agent/
 │   ├── sa-review/                # [SA] Rà soát mã nguồn đối kháng khắt khe (Gate 3)
 │   ├── sa-analyze/               # [SA] Phân tích tính nhất quán chéo 3 chiều (Gate 2)
 │   ├── sa-refactor/              # [SA] Quét dự án cũ (Chỉ đọc) & Đề xuất giải pháp Refactor
+│   ├── chot/                     # [SA] Chốt quyết định kiến trúc thành ADR & cập nhật open-questions.md
 │   ├── dev-tasks/                # [Dev] Phân rã checklist công việc kỹ thuật [BE]/[FE]
 │   ├── dev-code/                 # [Dev] Lập trình thực thi bám sát task có kiểm chứng [x]
 │   ├── dev-uiux/                 # [Dev] Chuẩn hóa giao diện 5 trạng thái UX qua <Async>
@@ -48,10 +50,16 @@ TC IT Agent/
 │   ├── ec-hunt/                  # [EC] Săn tìm lỗi biên, kịch bản ngoại lệ & dữ liệu cực hạn
 │   ├── ec-e2e/                   # [EC] Tự động sinh kịch bản Playwright E2E từ AC
 │   ├── ec-fuzz/                  # [EC] Fuzzing bảo mật & kiểm tra phân quyền RBAC/IDOR
+│   ├── ec-contract/              # [EC] Kiểm định hợp đồng API Consumer-Provider, chống Breaking Changes
+│   ├── ec-load/                  # [EC] Kiểm thử tải và stress testing (k6/autocannon), tìm điểm sập
+│   ├── ec-chaos/                 # [EC] Kiểm thử hỗn loạn (Chaos Engineering), bơm lỗi DB/Queue/Timeout
+│   ├── ec-mutation/              # [EC] Kiểm thử đột biến (Mutation Testing), thử lửa chất lượng test
 │   ├── ec-test/                  # [EC] Điều phối bộ kiểm thử 3 tầng khép kín (Gate 4)
-│   └── wf-*/                     # [Workflows] Các quy trình thực thi chuẩn (autopilot, delta...)
+│   └── wf-*/                     # [Workflows] Các quy trình thực thi chuẩn (autopilot, delta, audit...)
 │
-├── workflows/                    # 6 Quy trình phối hợp chuẩn hóa (wf-*)
+├── scripts/                      # Kịch bản tự động hóa & chốt chặn chất lượng
+│   ├── guard-rails.sh            # Chốt chặn toán học tự động chống ảo giác & vi phạm kiến trúc
+│   └── render_srs_html.py        # Kịch bản render tài liệu SRS sang HTML báo cáo trực quan
 │   ├── wf-presale.md             # Đề bài thô -> Thẩm định khả thi -> Proposal & Báo giá
 │   ├── wf-kickoff.md             # Hợp đồng duyệt -> Basic Design (Walking Skeleton) & Roadmap
 │   ├── wf-autopilot.md           # Toàn trình tự động 1 Epic: Spec -> Plan -> Code -> Test -> Ship

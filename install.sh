@@ -180,8 +180,20 @@ if [[ "$IS_UPDATE" == true ]]; then
     mkdir -p "${TARGET_DIR}/workflows"
     cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
 
-    # 4. Cập nhật các Adapters cấu hình IDE (Không ghi đè constitution hay dữ liệu dự án)
-    echo -e "${CYAN}[4/4] Cập nhật các Platform Adapters...${NC}"
+    # 4. Cập nhật scripts/ gác cổng kiến trúc
+    echo -e "${CYAN}[4/5] Cập nhật scripts gác cổng (scripts/guard-rails.sh)...${NC}"
+    mkdir -p "${TARGET_DIR}/scripts"
+    if [[ -f "${SCRIPT_DIR}/scripts/guard-rails.sh" ]]; then
+        cp -Rf "${SCRIPT_DIR}/scripts/guard-rails.sh" "${TARGET_DIR}/scripts/"
+        chmod +x "${TARGET_DIR}/scripts/guard-rails.sh" 2>/dev/null || true
+    fi
+    mkdir -p "${TARGET_DIR}/docs/decisions" "${TARGET_DIR}/docs/system"
+    if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
+        touch "${TARGET_DIR}/docs/open-questions.md"
+    fi
+
+    # 5. Cập nhật các Adapters cấu hình IDE (Không ghi đè constitution hay dữ liệu dự án)
+    echo -e "${CYAN}[5/5] Cập nhật các Platform Adapters...${NC}"
     if [[ -f "${TARGET_DIR}/.cursorrules" || "$OPT_ALL" == true ]]; then
         sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" > "${TARGET_DIR}/.cursorrules"
         mkdir -p "${TARGET_DIR}/.cursor/rules"
@@ -197,7 +209,7 @@ if [[ "$IS_UPDATE" == true ]]; then
     fi
 
     echo -e "\n${GREEN}${BOLD}✓ CẬP NHẬT HOÀN TẤT!${NC}"
-    echo -e "Toàn bộ Agent Personas, Skills và Workflows đã được nâng cấp lên phiên bản mới nhất."
+    echo -e "Toàn bộ Agent Personas, Skills, Workflows và Guardrails đã được nâng cấp lên phiên bản mới nhất."
     echo -e "Lưu ý: Mã nguồn, tài liệu dự án trong ${BOLD}src/, docs/, backlog/, specs/${NC} được bảo toàn nguyên vẹn 100%.\n"
     exit 0
 fi
@@ -217,6 +229,7 @@ mkdir -p "${TARGET_DIR}/.agents" \
          "${TARGET_DIR}/docs/01-basic-design" \
          "${TARGET_DIR}/docs/02-detail-design" \
          "${TARGET_DIR}/docs/decisions" \
+         "${TARGET_DIR}/docs/system" \
          "${TARGET_DIR}/docs/change-requests" \
          "${TARGET_DIR}/backlog/EPICS" \
          "${TARGET_DIR}/backlog/USER_STORIES" \
@@ -230,12 +243,14 @@ mkdir -p "${TARGET_DIR}/.agents" \
          "${TARGET_DIR}/tests/integration" \
          "${TARGET_DIR}/tests/e2e/screenshots" \
          "${TARGET_DIR}/workflows" \
-         "${TARGET_DIR}/skills"
+         "${TARGET_DIR}/skills" \
+         "${TARGET_DIR}/scripts"
 
 touch "${TARGET_DIR}/docs/00-presale-proposal/.gitkeep" \
       "${TARGET_DIR}/docs/01-basic-design/.gitkeep" \
       "${TARGET_DIR}/docs/02-detail-design/.gitkeep" \
       "${TARGET_DIR}/docs/decisions/.gitkeep" \
+      "${TARGET_DIR}/docs/system/.gitkeep" \
       "${TARGET_DIR}/docs/change-requests/.gitkeep" \
       "${TARGET_DIR}/backlog/EPICS/.gitkeep" \
       "${TARGET_DIR}/backlog/USER_STORIES/.gitkeep" \
@@ -249,6 +264,15 @@ touch "${TARGET_DIR}/docs/00-presale-proposal/.gitkeep" \
       "${TARGET_DIR}/tests/integration/.gitkeep" \
       "${TARGET_DIR}/tests/e2e/screenshots/.gitkeep"
 
+if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
+    touch "${TARGET_DIR}/docs/open-questions.md"
+fi
+
+if [[ -f "${SCRIPT_DIR}/scripts/guard-rails.sh" ]]; then
+    cp -Rf "${SCRIPT_DIR}/scripts/guard-rails.sh" "${TARGET_DIR}/scripts/"
+    chmod +x "${TARGET_DIR}/scripts/guard-rails.sh" 2>/dev/null || true
+fi
+
 echo -e "${GREEN}✓ Đã tạo thành công cây thư mục phân tầng chuẩn Clean Architecture & Docs!${NC}"
 
 # 2. Cài đặt 6 Personas vào .agents/
@@ -257,7 +281,7 @@ cp -Rf "${SCRIPT_DIR}/.agents/"*.md "${TARGET_DIR}/.agents/"
 echo -e "${GREEN}✓ Đã sao chép 6 Personas vào .agents/!${NC}"
 
 # 3. Cài đặt Kỹ năng theo Role & Workflows
-echo -e "\n${YELLOW}[3/6] Cài đặt bộ Kỹ năng & 6 Quy trình chuẩn (wf-*)...${NC}"
+echo -e "\n${YELLOW}[3/6] Cài đặt bộ Kỹ năng & Quy trình chuẩn (wf-*)...${NC}"
 cp -Rf "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
 cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
 echo -e "${GREEN}✓ Đã cài đặt bộ Kỹ năng và Quy trình chuẩn!${NC}"
