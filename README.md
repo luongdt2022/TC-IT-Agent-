@@ -57,15 +57,19 @@ TC IT Agent/
 │   ├── ec-load/                  # [EC] Kiểm thử tải và stress testing (k6/autocannon), tìm điểm sập
 │   ├── ec-chaos/                 # [EC] Kiểm thử hỗn loạn (Chaos Engineering), bơm lỗi DB/Queue/Timeout
 │   ├── ec-mutation/              # [EC] Kiểm thử đột biến (Mutation Testing), thử lửa chất lượng test
+│   ├── pr-review-guard/          # [SA/Dev] Gác cổng thẩm định Task DoD và Pull Request theo 6 trục kiểm soát (Gate 3)
 │   ├── ec-test/                  # [EC] Điều phối bộ kiểm thử 4 tầng khép kín (Gate 4) & Screen Coverage Guard
-│   └── wf-*/                     # [Workflows] Các quy trình thực thi chuẩn (autopilot, delta, audit...)
+│   └── wf-*/                     # [Workflows] Các quy trình thực thi chuẩn (autopilot, delta, pr-review, audit...)
 │
 ├── scripts/                      # Kịch bản tự động hóa & chốt chặn chất lượng
 │   ├── guard-rails.sh            # Chốt chặn toán học tự động chống ảo giác & vi phạm kiến trúc
 │   └── render_srs_html.py        # Kịch bản render tài liệu SRS sang HTML báo cáo trực quan
+│
+├── workflows/                    # Bộ quy trình vận hành liên Agent
 │   ├── wf-presale.md             # Đề bài thô -> Thẩm định khả thi -> Proposal & Báo giá
 │   ├── wf-kickoff.md             # Hợp đồng duyệt -> Basic Design (Walking Skeleton) & Roadmap
 │   ├── wf-autopilot.md           # Toàn trình tự động 1 Epic: Spec -> Plan -> Code -> Test -> Ship
+│   ├── wf-pr-review.md           # Kỷ luật gác cổng Task DoD, Pull Request & Stage-Gate 3 & 4
 │   ├── wf-delta.md               # Tiếp nhận Change Request: Tài liệu đi trước, Code theo sau
 │   ├── wf-uiux.md                # Chuẩn hóa 5 trạng thái UX & Chụp ảnh Visual QA Playwright
 │   └── wf-audit.md               # Kiểm toán hệ thống toàn diện trước ngày phát hành
@@ -74,6 +78,9 @@ TC IT Agent/
 │   ├── TEMPLATE-it-proposal.md   # Mẫu IT Technical Proposal chuẩn trình C-Level / Khách hàng
 │   ├── TEMPLATE-cost-estimation.md # Mẫu bảng tính Man-Month, chi phí Cloud & TCO
 │   ├── TEMPLATE-basic-design.md  # Mẫu Thiết kế Cơ sở (Kihon Sekkei)
+│   ├── TEMPLATE-task-review-checklist.md # Mẫu checklist tự rà soát cho từng Task
+│   ├── TEMPLATE-pull-request.md  # Mẫu Pull Request theo 6 trục kiểm soát & 2 cổng duyệt
+│   ├── pull_request_template.md  # Template Pull Request dùng sẵn cho GitHub
 │   ├── TEMPLATE-detail-design-erd.md # Mẫu Thiết kế CSDL, Data Dictionary & ERD
 │   ├── TEMPLATE-detail-design-api.md # Mẫu Hợp đồng API RESTful chuẩn
 │   ├── TEMPLATE-SRS-7-muc.md     # Mẫu đặc tả phần mềm 7 mục khép kín

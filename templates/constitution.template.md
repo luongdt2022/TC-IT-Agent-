@@ -80,6 +80,14 @@ Tất cả các thực thể trong tài liệu đặc tả, kế hoạch, mã ng
 
 - **Gate 1 (Nghiệp vụ)**: Basic Design và `spec.md` đạt chuẩn 7 mục, 100% tiêu chí AC có mã hóa, được PO/PM ký duyệt.
 - **Gate 2 (Kiến trúc)**: `plan.md` phân tầng Clean Architecture, schema CSDL `DB-*`, hợp đồng API `API-*`, và `sa-analyze` PASS.
-- **Gate 3 (Code Review)**: TL/SA duyệt đối kháng (`sa-review`), không có lỗi N+1 query, rò rỉ bộ nhớ hay vi phạm Clean Architecture.
+- **Gate 3 (Code Review)**: TL/SA duyệt đối kháng qua `pr-review-guard` (6 trục kiểm soát: Clean Architecture, Schema phi phá hủy, Scoped RBAC, Concurrency, UX 5 States, Unit Test).
 - **Gate 4 (Kiểm định)**: EC Agent kiểm thử 3 tầng đạt 100% Green (Unit, Integration, Playwright E2E), Fuzzing RBAC an toàn.
 - **Gate 5 (Xuất xưởng)**: PO/PM nghiệm thu trực quan 5 trạng thái UX qua ảnh chụp màn hình, xác nhận Definition of Done (DoD).
+
+---
+
+## 5. KỶ LUẬT GÁC CỔNG TASK & PULL REQUEST (STAGE-GATE DISCIPLINE & ZERO-BYPASS)
+
+1. **Kỷ luật Task (Task DoD)**: CẤM Developer đánh dấu `[x]` vào `tasks.md` khi chưa tự rà soát qua 3 giai đoạn theo `TEMPLATE-task-review-checklist.md` (Pre-task, In-progress, DoD với Unit Test 100% `BR-*`).
+2. **Kỷ luật Pull Request (PR 6-Axis Checklist)**: Mọi PR bắt buộc áp dụng `TEMPLATE-pull-request.md` (hoặc `.github/pull_request_template.md`), tick đầy đủ 6 trục kiểm soát và đính kèm Test Evidence (ảnh chụp UI/log test pass).
+3. **Quy tắc Cấm Vượt Rào (Zero-Bypass SoD)**: Tuyệt đối CẤM merge code khi chưa có đồng thuận từ 2 cổng độc lập: **Gate 3 (TechLead/SA Approve)** và **Gate 4 (QC Verification PASS)**. CẤM tick checklist hình thức.
