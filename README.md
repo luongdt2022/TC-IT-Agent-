@@ -1,7 +1,7 @@
 # TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v2.1)
 
 > **TC IT Agent** là bộ khung điều phối AI Agent toàn diện dành cho phát triển phần mềm doanh nghiệp, được đúc kết từ tinh hoa của hai phương pháp luận hàng đầu: **GitHub Spec Kit** (Đặc tả chính xác) và **BMad Method** (Tranh biện đối kháng đa tác tử & kiểm thử đa tầng).  
-> **Phiên bản 2.1 Enterprise**: Bổ sung bộ kỷ luật **Chống ảo giác tuyệt đối (Anti-Hallucination Guardrails Protocol)**, quản trị tài liệu sống **Living Docs & ADR**, kịch bản gác cổng toán học `guard-rails.sh`, và trọn bộ 4 kỹ thuật kiểm định QC chuyên sâu (`ec-chaos`, `ec-contract`, `ec-load`, `ec-mutation`).
+> **Phiên bản 2.2 Enterprise**: Bổ sung **Tiêu Chuẩn Kiểm Soát Bề Mặt Toàn Diện & Kiểm Thử 4 Tầng (`TC-IT-STANDARD-04`)**, cơ chế Grep-first Surface Discovery, User Scope Gate, Kỷ luật Zero-Mock trên Client, và nâng cấp `ec-test` sang chuẩn kiểm định 4 tầng khép kín kèm Screen Coverage Guard.
 
 ---
 
@@ -16,6 +16,9 @@ TC IT Agent/
 │   ├── techlead-sa.md            # Software Architect & Tech Lead (Detail Design, Gate 2 & 3 Review)
 │   ├── dev.md                    # Senior Full-Stack Developer (Thực thi 1:1, 5 UX States, TDD)
 │   └── ec.md                     # Edge-Case Hunter & QC Specialist (Gate 4, Fuzzing, Playwright E2E)
+│
+├── docs/                         # Tài liệu tiêu chuẩn và hướng dẫn kiến trúc
+│   └── CROSS_SURFACE_AND_4TIER_TESTING_STANDARD.md # [MỚI] Tiêu chuẩn kiểm soát bề mặt & test 4 tầng
 │
 ├── skills/                       # Thư viện kỹ năng chuẩn hóa 100% theo tiền tố Role & Workflows
 │   ├── ps-proposal/              # [PS] Soạn thảo IT Technical Proposal chuyên nghiệp
@@ -54,7 +57,7 @@ TC IT Agent/
 │   ├── ec-load/                  # [EC] Kiểm thử tải và stress testing (k6/autocannon), tìm điểm sập
 │   ├── ec-chaos/                 # [EC] Kiểm thử hỗn loạn (Chaos Engineering), bơm lỗi DB/Queue/Timeout
 │   ├── ec-mutation/              # [EC] Kiểm thử đột biến (Mutation Testing), thử lửa chất lượng test
-│   ├── ec-test/                  # [EC] Điều phối bộ kiểm thử 3 tầng khép kín (Gate 4)
+│   ├── ec-test/                  # [EC] Điều phối bộ kiểm thử 4 tầng khép kín (Gate 4) & Screen Coverage Guard
 │   └── wf-*/                     # [Workflows] Các quy trình thực thi chuẩn (autopilot, delta, audit...)
 │
 ├── scripts/                      # Kịch bản tự động hóa & chốt chặn chất lượng

@@ -37,14 +37,19 @@ flowchart TD
     REGRESS --> SIGN["7. Đóng Phiếu CR & Cập Nhật Roadmap\n(PO/PM: po-gate)"]
 ```
 
-### Bước 1: Tiếp Nhận & Khởi Tạo Phiếu CR [PO/PM + BA]
-- **Kỹ năng sử dụng**: `po-scope`
-- **Hành động**: Tiếp nhận yêu cầu mới, phân loại Scope Triage và điền đầy đủ thông tin vào mẫu `docs/change-requests/CR-[MÃ_CR].md`: Mô tả thay đổi, Lý do thay đổi, Người yêu cầu.
+### Bước 1: Tiếp Nhận, Khởi Tạo Phiếu CR & Quét Bề Mặt Toàn Cục [PO/PM + BA]
+- **Kỹ năng sử dụng**: `po-scope` & `ba-clarify`
+- **Hành động**:
+  1. Tiếp nhận yêu cầu mới, điền vào mẫu `docs/change-requests/CR-[MÃ_CR].md`.
+  2. **BƯỚC BẮT BUỘC (Grep-First Surface Discovery)**: Chạy lệnh grep toàn bộ codebase Frontend & Backend để tìm tất cả các vị trí tiêu thụ từ khóa/mã/enum bị thay đổi.
+  3. Lập **Cross-Surface Impact Matrix**: Bảng 4 cột liệt kê tất cả các Bảng CSDL, API Endpoints và Màn hình UI bị tác động.
+  4. **🛑 CỔNG DUYỆT PHẠM VI (USER SCOPE GATE)**: Trình Bảng Ma trận Bề mặt cho User/PO và đặt câu hỏi xác nhận phạm vi. **Chỉ chuyển sang Bước 2 khi nhận được xác nhận tường minh `XÁC NHẬN SCOPE`.**
 
 ### Bước 2: Phân Tích Tác Động Chéo & Chống Trôi Dạt Nghiệp Vụ [TL/SA + PO/PM]
 - **Kỹ năng sử dụng**: `sa-guard`, `sa-analyze` & `po-course`
 - **Hành động**:
   - SA rà soát: Có đổi cấu trúc DB không? Có ảnh hưởng breaking changes lên API hiện hữu không? Module nào bị ảnh hưởng lan truyền?
+  - **Kiến trúc Dữ liệu Tập trung**: SA thiết kế Client Hook/SDK dùng chung (`useMasterData()`), cấm từng màn hình UI tự hardcode mảng danh mục tĩnh.
   - PO chạy `po-course` để đối chiếu trạng thái thay đổi với PRD/Basic Design ban đầu, phát hiện độ lệch (Drift) và lập kế hoạch nắn dòng dự án về đúng quỹ đạo.
 
 ### Bước 3: Cập Nhật Ngược Tài Liệu (Upstream Documentation Update) [BA + SA]
@@ -58,10 +63,16 @@ flowchart TD
 - **Kỹ năng sử dụng**: `dev-tasks`
 - **Hành động**: Thêm các task mới vào `specs/[epic-id]/tasks.md` mang ký hiệu `[DELTA-01]`, `[DELTA-02]` với đầy đủ thứ tự phụ thuộc.
 
-### Bước 5: Thực Thi, Kiểm Thử Hồi Quy & Đóng CR [Dev + EC + BA + PO]
-- **Kỹ năng sử dụng**: `dev-code`, `dev-unit`, `dev-converge`, `ec-test`, `ba-trace` & `po-gate`
-- **Hành động**:
-  - Dev sửa code theo đúng task `[DELTA-xx]`, chạy `dev-unit` và `dev-converge` để đảm bảo không bỏ sót bất kỳ điểm thay đổi nào.
-  - EC Agent chạy toàn bộ test suite để đảm bảo không bị hỏng hóc tính năng cũ (Regression Test Pass 100%).
-  - BA Agent quét lại ma trận truy vết (`ba-trace`).
-  - PO/PM Agent nghiệm thu đóng phiếu CR và cập nhật `backlog/ROADMAP.md`.
+### Bước 5: Thực Thi Mã Nguồn — Kỷ Luật Zero-Mock & Global Sweep [Dev Agent]
+- **Kỹ năng sử dụng**: `dev-code`, `dev-unit` & `dev-converge`
+- **Kỷ luật bắt buộc**:
+  - **Zero-Mock Rule**: Mọi màn hình CRUD/Quản trị phải có kết nối API thật, cấm dùng biến mock trong RAM.
+  - **Global Sweep Rule**: Khi đổi mã/enum, Dev bắt buộc chạy lệnh `grep -rn "<MA_CU>" src/` kiểm tra toàn cục; **chỉ được tick `[x]` khi kết quả bằng 0**.
+
+### Bước 6: Kiểm Thử 4 Tầng & Đối Soát Độ Phủ Màn Hình [EC Agent]
+- **Kỹ năng sử dụng**: `ec-test` (Mô hình 4 Tầng: Unit $\rightarrow$ Contracts $\rightarrow$ DB Integration $\rightarrow$ E2E/RBAC Fuzzing).
+- **Screen Coverage Guard**: QC bắt buộc đối soát Test Matrix bao phủ 100% các màn hình trong Cross-Surface Impact Matrix của Bước 1. Cấm ký Gate 4 nếu chỉ test Backend.
+
+### Bước 7: Đóng Phiếu CR & Xuất Xưởng (Gate 5 Sign-off) [PO/PM]
+- **Kỹ năng sử dụng**: `po-gate`
+- **Hành động**: PO đối soát Definition of Done (DoD) và ký biên bản xuất xưởng khi đã có đầy đủ hồ sơ kiểm định Gate 4.
