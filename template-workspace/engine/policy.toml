@@ -1,0 +1,57 @@
+# ==============================================================================
+# TC IT AGENT — AUTONOMOUS LOOP & E2E PIPELINE POLICY
+# Kế thừa triết lý bmad-loop & spec-kit: Deterministic control, No-LLM-in-the-control-loop, Fresh Context
+# ==============================================================================
+
+[project]
+name = "TC IT Enterprise Project"
+
+[loop]
+project_root = "."
+# Thư mục chứa đặc tả specs (hỗ trợ "specs" hoặc "SourceCode/specs")
+task_specs_dir = "specs"
+# File chứa danh sách ý tưởng / Change Requests cho Macro Pipeline E2E
+backlog_file = "backlog/BACKLOG.md"
+# Thư mục Thiết kế cơ sở (Basic Design)
+basic_design_dir = "docs/01-basic-design"
+# Giới hạn số lần thử tối đa cho một task trước khi chuyển sang Attention escalation
+max_attempts_per_task = 3
+# Timeout cho mỗi phiên làm việc của Agent CLI (giây)
+session_timeout_seconds = 600
+# Ngưỡng số lượng files thay đổi tối đa cho 1 task (chống sửa lan tràn)
+blast_radius_max_files = 8
+# Tự động tạo git commit sau khi task vượt qua verify gates
+auto_commit = true
+# Tự động chuyển sang task tiếp theo
+auto_advance = true
+
+[agents]
+# CLI runner: "auto" (tự động phát hiện agy hoặc claude có sẵn trên PATH), "claude", "agy"
+cli = "auto"
+dev_model = "sonnet"
+review_model = "opus"
+
+[verify]
+# Danh sách các lệnh kiểm tra toán học tĩnh bắt buộc phải pass 100% trước khi commit & tick [x]
+# Bật/tắt hoặc bổ sung các lệnh phù hợp với tech stack của dự án bạn:
+commands = [
+    "bash scripts/guard-rails.sh"
+    # Ví dụ với .NET:
+    # "dotnet test tests/unit --no-build",
+    # Ví dụ với TypeScript/React:
+    # "pnpm test --run",
+    # Ví dụ với Python:
+    # "pytest tests/unit",
+]
+
+[scm]
+# Chế độ cách ly: "branch" (nhánh riêng trên repo) hoặc "worktree"
+isolation = "branch"
+base_branch = "main"
+branch_prefix = "loop/"
+commit_prefix = "feat"
+
+[escalation]
+# Khi gặp lỗi quá max_attempts_per_task lần liên tiếp, tự động dừng và bắn thông báo
+notify_mac_desktop = true
+attention_file = ".tc-loop/ATTENTION.md"

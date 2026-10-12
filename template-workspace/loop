@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+# ==============================================================================
+# TC IT AGENT — AUTONOMOUS LOOP & E2E PIPELINE SHORTCUT CONTROLLER
+# Điều khiển vòng lặp tự trị đa tác tử chỉ bằng 1 phím bấm
+# ==============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_EXEC="python3"
+ENGINE_SCRIPT="$SCRIPT_DIR/engine/tc-loop.py"
+
+# Màu hiển thị Terminal
+C_RESET="\033[0m"
+C_BOLD="\033[1m"
+C_CYAN="\033[36m"
+C_GREEN="\033[32m"
+C_YELLOW="\033[33m"
+C_RED="\033[31m"
+C_MAGENTA="\033[35m"
+C_GRAY="\033[90m"
+
+# Xử lý tham số dòng lệnh ngắn
+SPEC_PARAM=""
+if [ -n "$2" ]; then
+    SPEC_PARAM="--spec $2"
+fi
+
+if [ "$1" == "dash" ] || [ "$1" == "dashboard" ] || [ "$1" == "status" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" dashboard $SPEC_PARAM
+    exit 0
+elif [ "$1" == "pipeline" ] || [ "$1" == "auto" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" pipeline --bg
+    exit 0
+elif [ "$1" == "backlog" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" backlog
+    exit 0
+elif [ "$1" == "add" ]; then
+    shift
+    $PYTHON_EXEC "$ENGINE_SCRIPT" add "$*"
+    exit 0
+elif [ "$1" == "run" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" run --bg $SPEC_PARAM
+    exit 0
+elif [ "$1" == "view" ] || [ "$1" == "attach" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" attach
+    exit 0
+elif [ "$1" == "stop" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" stop
+    exit 0
+elif [ "$1" == "check" ] || [ "$1" == "verify" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" verify $SPEC_PARAM
+    exit 0
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ] || [ "$1" == "help" ]; then
+    $PYTHON_EXEC "$ENGINE_SCRIPT" --help
+    exit 0
+elif [ -n "$1" ]; then
+    # Nếu người dùng gõ: ./loop 01 hoặc ./loop TASK-01
+    $PYTHON_EXEC "$ENGINE_SCRIPT" dashboard --spec "$1"
+    exit 0
+fi
+
+# ==============================================================================
+# GIAO DIỆN MENU BẤM SỐ TƯƠNG TÁC
+# ==============================================================================
+while true; do
+    clear
+    CURRENT_SPEC=$($PYTHON_EXEC -c "
+import json, pathlib
+for p in [pathlib.Path('.tc-loop/state.json'), pathlib.Path('.nacen-loop/state.json')]:
+    if p.exists():
+        try:
+            print(json.load(open(p)).get('spec', 'Tự động'))
+            break
+        except:
+            pass
+else:
+    print('Tự động')
+")
+    echo -e "${C_CYAN}${C_BOLD}╔══════════════════════════════════════════════════════════════════════╗${C_RESET}"
+    echo -e "${C_CYAN}${C_BOLD}║              TC IT AGENT AI LOOP — BẢNG ĐIỀU KHIỂN NHANH             ║${C_RESET}"
+    echo -e "${C_CYAN}${C_BOLD}╚══════════════════════════════════════════════════════════════════════╝${C_RESET}"
+    echo -e "  • Epic Đang Chọn: ${C_YELLOW}${C_BOLD}${CURRENT_SPEC}${C_RESET}"
+    echo ""
+    echo -e "  ${C_MAGENTA}${C_BOLD}─── VÒNG LẶP TOÀN TRÌNH E2E (PO -> BA -> SA -> DEV -> QC) ──────────────${C_RESET}"
+    echo -e "  ${C_BOLD}[7]${C_RESET} ${C_MAGENTA}${C_BOLD}Khởi động Toàn trình E2E Pipeline${C_RESET} (Tự động chạy hết Backlog)"
+    echo -e "  ${C_BOLD}[8]${C_RESET} ${C_CYAN}Xem Bảng Điều Khiển Backlog Ý Tưởng${C_RESET} (BACKLOG.md)"
+    echo -e "  ${C_BOLD}[9]${C_RESET} ${C_GREEN}Thêm ý tưởng / CR mới vào Backlog${C_RESET}"
+    echo ""
+    echo -e "  ${C_YELLOW}${C_BOLD}─── THỰC THI CHO 1 EPIC ĐANG CHỌN ─────────────────────────────────────${C_RESET}"
+    echo -e "  ${C_BOLD}[1]${C_RESET} ${C_GREEN}Xem tiến độ công việc${C_RESET} (Dashboard trực quan)"
+    echo -e "  ${C_BOLD}[2]${C_RESET} ${C_YELLOW}Bật AI chạy ngầm âm thầm${C_RESET} (Run in Background qua tmux)"
+    echo -e "  ${C_BOLD}[3]${C_RESET} ${C_CYAN}Xem trực tiếp AI đang làm gì${C_RESET} (Attach Live Screen)"
+    echo -e "  ${C_BOLD}[4]${C_RESET} ${C_RED}Dừng AI chạy ngầm${C_RESET} (Stop Background Process)"
+    echo -e "  ${C_BOLD}[5]${C_RESET} ${C_BOLD}Kiểm tra chất lượng code & test${C_RESET} (Verify Gates 100% Green)"
+    echo -e "  ${C_BOLD}[6]${C_RESET} ${C_BOLD}Đổi Epic mục tiêu${C_RESET} (VD: gõ 01, 02...)"
+    echo -e "  ${C_BOLD}[0]${C_RESET} ${C_GRAY}Thoát${C_RESET}"
+    echo ""
+    echo -e "${C_GRAY}----------------------------------------------------------------------${C_RESET}"
+    read -p " Bạn chọn chức năng [1-9, 0 để thoát]: " choice
+
+    case $choice in
+        7)
+            echo ""
+            echo -e "${C_MAGENTA}Đang khởi động Toàn Trình E2E Pipeline qua tmux session 'tc-pipeline'...${C_RESET}"
+            $PYTHON_EXEC "$ENGINE_SCRIPT" pipeline --bg
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        8)
+            echo ""
+            $PYTHON_EXEC "$ENGINE_SCRIPT" backlog
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        9)
+            echo ""
+            read -p "Nhập nội dung ý tưởng hoặc Change Request mới: " idea_text
+            if [ -n "$idea_text" ]; then
+                $PYTHON_EXEC "$ENGINE_SCRIPT" add "$idea_text"
+            fi
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        1)
+            echo ""
+            $PYTHON_EXEC "$ENGINE_SCRIPT" dashboard
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        2)
+            echo ""
+            echo -e "${C_YELLOW}Đang khởi động AI chạy ngầm trong tmux session...${C_RESET}"
+            $PYTHON_EXEC "$ENGINE_SCRIPT" run --bg
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        3)
+            echo ""
+            echo -e "${C_CYAN}Đang kết nối vào màn hình ngầm...${C_RESET}"
+            echo -e "${C_GRAY}(Mẹo: Muốn thoát ra lại terminal mà không tắt AI, bấm: Ctrl + B rồi bấm D)${C_RESET}"
+            sleep 1
+            $PYTHON_EXEC "$ENGINE_SCRIPT" attach
+            ;;
+        4)
+            echo ""
+            $PYTHON_EXEC "$ENGINE_SCRIPT" stop
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        5)
+            echo ""
+            $PYTHON_EXEC "$ENGINE_SCRIPT" verify
+            echo ""
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        6)
+            echo ""
+            echo -e "${C_BOLD}Danh sách các Epic trong thư mục specs/:${C_RESET}"
+            SPECS_DIR="specs"
+            if [ ! -d "$SPECS_DIR" ] && [ -d "SourceCode/specs" ]; then
+                SPECS_DIR="SourceCode/specs"
+            fi
+            if [ -d "$SPECS_DIR" ]; then
+                ls -1 "$SPECS_DIR" | grep -v '^\.' | sed 's/^/  - /'
+            else
+                echo -e "  (Chưa có thư mục specs)"
+            fi
+            echo ""
+            read -p "Nhập mã Epic muốn chọn (VD: 01, TASK-01...): " new_spec
+            if [ -n "$new_spec" ]; then
+                $PYTHON_EXEC "$ENGINE_SCRIPT" dashboard --spec "$new_spec"
+            fi
+            read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        0|q|Q)
+            echo -e "\nTạm biệt!"
+            exit 0
+            ;;
+        *)
+            echo -e "\n${C_RED}Lựa chọn không hợp lệ, vui lòng chọn từ 0 đến 9.${C_RESET}"
+            sleep 1
+            ;;
+    esac
+done

@@ -4,8 +4,9 @@
 # Chốt chặn kiểm tra toán học tự động chống ảo giác & bảo vệ toàn vẹn kiến trúc:
 # 1. TypeCheck & Compiler Validation (TypeScript, Python, .NET, Go...)
 # 2. Schema & Data Model Validation (Prisma, Entity Framework, Alembic...)
-# 3. Anti-Clutter Directory Linter (Chống xả rác thư mục gốc)
-# 4. Shared Catalog Grounding Check (Bảo đảm có từ điển dùng chung)
+# 3. Kỷ luật Zero-Mock trên Client (Cấm fake arrays / dummy fallbacks trong catch)
+# 4. Anti-Clutter Directory Linter (Chống xả rác thư mục gốc)
+# 5. Shared Catalog Grounding Check (Bảo đảm có từ điển dùng chung)
 # ==============================================================================
 
 set -euo pipefail
@@ -28,7 +29,7 @@ echo -e "${BLUE}${BOLD}=========================================================
 # ------------------------------------------------------------------------------
 # 1. COMPILER & TYPECHECK VALIDATION (CHỐNG IMPORT / HÀM / TYPE ẢO)
 # ------------------------------------------------------------------------------
-echo -e "${YELLOW}[1/4] Kiểm tra TypeCheck / Compiler tĩnh...${NC}"
+echo -e "${YELLOW}[1/5] Kiểm tra TypeCheck / Compiler tĩnh...${NC}"
 
 # Case A: TypeScript / JavaScript Monorepo hoặc Single Repo
 if command -v pnpm >/dev/null 2>&1 && [[ -f "${PROJECT_ROOT}/pnpm-workspace.yaml" ]]; then
@@ -60,7 +61,7 @@ if [[ -f "${PROJECT_ROOT}/pyproject.toml" || -f "${PROJECT_ROOT}/requirements.tx
 fi
 
 # Case C: .NET Core / C#
-if compgen -G "${PROJECT_ROOT}/*.sln" > /dev/null || compgen -G "${PROJECT_ROOT}/*/*.csproj" > /dev/null; then
+if compgen -G "${PROJECT_ROOT}/*.sln" > /dev/null || compgen -G "${PROJECT_ROOT}/*/*.csproj" > /dev/null || compgen -G "${PROJECT_ROOT}/*/*/*.csproj" > /dev/null; then
     if command -v dotnet >/dev/null 2>&1; then
         echo -e "  -> Chạy dotnet build kiểm tra mã nguồn C#..."
         if dotnet build -v q --nologo; then
@@ -75,7 +76,7 @@ fi
 # ------------------------------------------------------------------------------
 # 2. SCHEMA & DATA MODEL VALIDATION (CHỐNG FIELD / QUAN HỆ CSDL ẢO)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[2/4] Kiểm tra Schema & Data Model CSDL...${NC}"
+echo -e "\n${YELLOW}[2/5] Kiểm tra Schema & Data Model CSDL...${NC}"
 
 PRISMA_SCHEMAS=$(find "${PROJECT_ROOT}" -name "schema.prisma" -not -path "*/node_modules/*" 2>/dev/null || true)
 if [[ -n "${PRISMA_SCHEMAS}" ]]; then
@@ -93,9 +94,29 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 3. KỶ LUẬT THƯ MỤC CHỐNG RÁC (ANTI-CLUTTER ROOT LINTER)
+# 3. KỶ LUẬT ZERO-MOCK TRÊN CLIENT (CHỐNG FAKE DATA TRONG CATCH/FALLBACK)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[3/4] Quét kỷ luật thư mục (Zero-Tolerance Root Dumping)...${NC}"
+echo -e "\n${YELLOW}[3/5] Quét mã nguồn kiểm tra Kỷ luật Zero-Mock trên Client...${NC}"
+
+MOCK_LEAKS=""
+if [[ -d "${PROJECT_ROOT}/src" ]]; then
+    MOCK_LEAKS=$(grep -rnE "(fakeItem|fakeCode|dummyData|mockRecords|fallbackFake)" "${PROJECT_ROOT}/src" \
+        --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=tests --exclude="*.test.*" --exclude="*.spec.*" 2>/dev/null || true)
+fi
+
+if [[ -n "${MOCK_LEAKS}" ]]; then
+    echo -e "${RED}  ✗ Phát hiện Mock ngầm hoặc dữ liệu giả che giấu lỗi API trong mã nguồn Client:${NC}"
+    echo "${MOCK_LEAKS}"
+    echo -e "${YELLOW}  -> Kỷ luật Zero-Mock: Bắt buộc hiển thị trạng thái Error thật hoặc Empty state qua <Async>, không được nuốt lỗi bằng fake data.${NC}"
+    ERRORS=$((ERRORS + 1))
+else
+    echo -e "${GREEN}  ✓ 100% Client tuân thủ Kỷ luật Zero-Mock, không phát hiện mã giả lập ngầm.${NC}"
+fi
+
+# ------------------------------------------------------------------------------
+# 4. KỶ LUẬT THƯ MỤC CHỐNG RÁC (ANTI-CLUTTER ROOT LINTER)
+# ------------------------------------------------------------------------------
+echo -e "\n${YELLOW}[4/5] Quét kỷ luật thư mục (Zero-Tolerance Root Dumping)...${NC}"
 
 ROOGUE_FILES=$(find "${PROJECT_ROOT}" -maxdepth 1 -type f \
     -not -name "README.md" \
@@ -104,6 +125,7 @@ ROOGUE_FILES=$(find "${PROJECT_ROOT}" -maxdepth 1 -type f \
     -not -name "constitution.md" \
     -not -name "install.sh" \
     -not -name "update-tc-agent.sh" \
+    -not -name "loop" \
     -not -name ".gitignore" \
     -not -name ".env*" \
     -not -name "*.json" \
@@ -126,10 +148,10 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 4. KIỂM TRA GROUNDING CATALOG
+# 5. KIỂM TRA GROUNDING CATALOG
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[4/4] Kiểm tra các điểm neo Grounding...${NC}"
-if [[ -d "${PROJECT_ROOT}/specs" && ( -d "${PROJECT_ROOT}/docs" || -d "${PROJECT_ROOT}/src" ) ]]; then
+echo -e "\n${YELLOW}[5/5] Kiểm tra các điểm neo Grounding...${NC}"
+if [[ ( -d "${PROJECT_ROOT}/specs" || -d "${PROJECT_ROOT}/SourceCode/specs" ) && ( -d "${PROJECT_ROOT}/docs" || -d "${PROJECT_ROOT}/src" ) ]]; then
     echo -e "${GREEN}  ✓ Cấu trúc dự án có sẵn các điểm neo xác thực (specs/, docs/, src/).${NC}"
 else
     echo -e "${YELLOW}  ⚠ Cảnh báo: Chưa khởi tạo đủ thư mục specs/ hoặc docs/ cho việc Grounding.${NC}"

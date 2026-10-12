@@ -181,7 +181,7 @@ if [[ "$IS_UPDATE" == true ]]; then
     cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
 
     # 4. Cập nhật scripts/ gác cổng kiến trúc
-    echo -e "${CYAN}[4/5] Cập nhật scripts gác cổng (scripts/guard-rails.sh)...${NC}"
+    echo -e "${CYAN}[4/6] Cập nhật scripts gác cổng (scripts/guard-rails.sh)...${NC}"
     mkdir -p "${TARGET_DIR}/scripts"
     if [[ -f "${SCRIPT_DIR}/scripts/guard-rails.sh" ]]; then
         cp -Rf "${SCRIPT_DIR}/scripts/guard-rails.sh" "${TARGET_DIR}/scripts/"
@@ -192,8 +192,23 @@ if [[ "$IS_UPDATE" == true ]]; then
         touch "${TARGET_DIR}/docs/open-questions.md"
     fi
 
-    # 5. Cập nhật các Adapters cấu hình IDE (Không ghi đè constitution hay dữ liệu dự án)
-    echo -e "${CYAN}[5/5] Cập nhật các Platform Adapters...${NC}"
+    # 5. Cập nhật Autonomous Loop Engine & Shortcut Controller
+    echo -e "${CYAN}[5/6] Cập nhật Autonomous Loop Engine & Bảng điều khiển ./loop...${NC}"
+    mkdir -p "${TARGET_DIR}/engine"
+    if [[ -f "${SCRIPT_DIR}/engine/tc-loop.py" ]]; then
+        cp -f "${SCRIPT_DIR}/engine/tc-loop.py" "${TARGET_DIR}/engine/"
+        chmod +x "${TARGET_DIR}/engine/tc-loop.py" 2>/dev/null || true
+    fi
+    if [[ ! -f "${TARGET_DIR}/engine/policy.toml" && -f "${SCRIPT_DIR}/engine/policy.toml" ]]; then
+        cp -f "${SCRIPT_DIR}/engine/policy.toml" "${TARGET_DIR}/engine/"
+    fi
+    if [[ -f "${SCRIPT_DIR}/loop" ]]; then
+        cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
+        chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
+    fi
+
+    # 6. Cập nhật các Adapters cấu hình IDE (Không ghi đè constitution hay dữ liệu dự án)
+    echo -e "${CYAN}[6/6] Cập nhật các Platform Adapters...${NC}"
     if [[ -f "${TARGET_DIR}/.cursorrules" || "$OPT_ALL" == true ]]; then
         sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" > "${TARGET_DIR}/.cursorrules"
         mkdir -p "${TARGET_DIR}/.cursor/rules"
@@ -209,7 +224,7 @@ if [[ "$IS_UPDATE" == true ]]; then
     fi
 
     echo -e "\n${GREEN}${BOLD}✓ CẬP NHẬT HOÀN TẤT!${NC}"
-    echo -e "Toàn bộ Agent Personas, Skills, Workflows và Guardrails đã được nâng cấp lên phiên bản mới nhất."
+    echo -e "Toàn bộ Agent Personas, Skills, Workflows, Guardrails, Engine và ./loop đã được nâng cấp lên phiên bản mới nhất."
     echo -e "Lưu ý: Mã nguồn, tài liệu dự án trong ${BOLD}src/, docs/, backlog/, specs/${NC} được bảo toàn nguyên vẹn 100%.\n"
     exit 0
 fi
@@ -223,8 +238,9 @@ echo -e "Tên dự án: ${BOLD}${PROJECT_NAME}${NC}"
 echo -e "${BLUE}==============================================================================${NC}\n"
 
 # 1. Tạo Khung Thư Mục Chuẩn Chống Rác (Anti-Clutter Directory Matrix)
-echo -e "${YELLOW}[1/6] Khởi tạo khung thư mục chuẩn mực (Zero-Tolerance Root Dumping)...${NC}"
+echo -e "${YELLOW}[1/7] Khởi tạo khung thư mục chuẩn mực (Zero-Tolerance Root Dumping)...${NC}"
 mkdir -p "${TARGET_DIR}/.agents" \
+         "${TARGET_DIR}/engine" \
          "${TARGET_DIR}/docs/00-presale-proposal" \
          "${TARGET_DIR}/docs/01-basic-design" \
          "${TARGET_DIR}/docs/02-detail-design" \
@@ -273,7 +289,17 @@ if [[ -f "${SCRIPT_DIR}/scripts/guard-rails.sh" ]]; then
     chmod +x "${TARGET_DIR}/scripts/guard-rails.sh" 2>/dev/null || true
 fi
 
-echo -e "${GREEN}✓ Đã tạo thành công cây thư mục phân tầng chuẩn Clean Architecture & Docs!${NC}"
+# Cài đặt Autonomous Loop Engine và Shortcut Controller
+if [[ -d "${SCRIPT_DIR}/engine" ]]; then
+    cp -Rf "${SCRIPT_DIR}/engine/"* "${TARGET_DIR}/engine/"
+    chmod +x "${TARGET_DIR}/engine/tc-loop.py" 2>/dev/null || true
+fi
+if [[ -f "${SCRIPT_DIR}/loop" ]]; then
+    cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
+    chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
+fi
+
+echo -e "${GREEN}✓ Đã tạo thành công cây thư mục phân tầng chuẩn Clean Architecture, Docs & Loop Engine!${NC}"
 
 # 2. Cài đặt 6 Personas vào .agents/
 echo -e "\n${YELLOW}[2/6] Cài đặt 6 Persona chuyên trách (PS, PO/PM, BA, SA, Dev, EC)...${NC}"
@@ -345,10 +371,11 @@ chmod +x "${TARGET_DIR}/update-tc-agent.sh"
 echo -e "${GREEN}  ✓ Đã tạo script '${BOLD}update-tc-agent.sh${NC}' trong thư mục dự án.${NC}"
 
 echo -e "\n${BLUE}${BOLD}==============================================================================${NC}"
-echo -e "${GREEN}${BOLD}✓ CÀI ĐẶT THÀNH CÔNG TC IT AGENT FRAMEWORK V2.0 VÀO DỰ ÁN!${NC}"
+echo -e "${GREEN}${BOLD}✓ CÀI ĐẶT THÀNH CÔNG TC IT AGENT FRAMEWORK V2.3 ENTERPRISE VÀO DỰ ÁN!${NC}"
 echo -e "${BLUE}${BOLD}==============================================================================${NC}"
 echo -e "Thư mục dự án: ${BOLD}${TARGET_DIR}${NC}"
 echo -e "Các bước tiếp theo:"
-echo -e "  1. Mở dự án trong Cursor, Antigravity, Windsurf hoặc Claude Code."
-echo -e "  2. Bắt đầu bằng lệnh: ${CYAN}/wf-presale${NC} (để lên Proposal) hoặc ${CYAN}/wf-kickoff${NC} (để khởi tạo Basic Design)."
-echo -e "  3. Khi TC IT Agent gốc có bản nâng cấp trên Git, ở dự án này chỉ cần chạy: ${BOLD}./update-tc-agent.sh${NC}\n"
+echo -e "  1. Mở dự án trong Google Antigravity, Claude Code, Cursor hoặc Windsurf."
+echo -e "  2. Bật Vòng lặp Tự trị AI: gõ ${CYAN}./loop${NC} (Bảng điều khiển 1 chạm, chạy ngầm tmux, E2E Pipeline tự động giải quyết backlog)."
+echo -e "  3. Tác vụ điều phối qua chat: ${CYAN}/wf-presale${NC} (lên Proposal), ${CYAN}/wf-kickoff${NC} (Basic Design), ${CYAN}/wf-autopilot${NC} (thực thi Epic)."
+echo -e "  4. Khi TC IT Agent gốc có bản nâng cấp trên Git, ở dự án này chỉ cần chạy: ${BOLD}./update-tc-agent.sh${NC}\n"

@@ -2,7 +2,6 @@
 name: ec-test
 description: "Chuyên gia Thiết kế & Thực thi Kiểm thử Toàn diện (Testing Specialist): Tự động điều phối trọn bộ kiểm thử 4 tầng (Unit Test, API Contract Test, Database Integration Test, Playwright E2E & Scoped RBAC Fuzzing) đạt chuẩn Quality Gate 4 (100% Green)."
 ---
-
 # Kỹ Năng: ec-test (Điều Phối Kiểm Thử 4 Tầng — Quality Gate 4)
 
 > **Role Chịu Trách Nhiệm**: EC Agent (`ec`) — Edge-Case Hunter & QC Specialist.  
@@ -43,10 +42,18 @@ description: "Chuyên gia Thiết kế & Thực thi Kiểm thử Toàn diện (T
 3. **Tầng 3 - Database Integration Tests**:
    - Chạy test tương tác CSDL thực tế (sử dụng Docker Postgres / Testcontainers).
    - Kiểm tra nạp seed dữ liệu, kích hoạt unique constraints, bảo toàn khóa ngoại không bị mồ côi (orphan records).
-4. **Tầng 4 - Playwright E2E Visual QA & Scoped RBAC Fuzzing**:
-   - Khởi động web dev server, chạy headless browser kịch bản `tests/e2e/` bao phủ trọn vẹn các màn hình từ Surface Impact Matrix.
+4. **Tầng 4 - Playwright E2E Visual QA & Scoped RBAC Fuzzing (Đối Soát CSDL Thật - Zero Mock)**:
+   - Khởi động web dev server, chạy browser kịch bản `tests/e2e/` bao phủ trọn vẹn các màn hình từ Surface Impact Matrix.
    - Săn lỗi biên (`ec-hunt`): Bơm payload cũ/lỗi thời, ký tự đặc biệt, chuỗi rỗng.
    - Fuzzing phân quyền (`ec-fuzz`): Kiểm tra từ chối `403 Forbidden` khi người dùng không đủ quyền.
+   - **KỶ LUẬT ZERO-MOCK & ĐỐI SOÁT CSDL ĐẦU CUỐI (DEEP DB STATE VERIFICATION)**:
+     + **Cấm kiểm thử bề mặt (No Shallow UI Assertions)**: Tuyệt đối không chỉ kiểm tra chuỗi text hiển thị trên UI (`is_visible()`) rồi vội vàng kết luận PASS.
+     + **Triệt tiêu Mock Ngầm**: Quét mã nguồn Frontend để loại bỏ hoàn toàn các mảng tĩnh `useState([...])` hoặc khối `catch / else` tự sinh dữ liệu giả `fakeItem / fakeCode` khi API trả về 404/500. Phát hiện mock ngầm $\rightarrow$ ĐÁNH FAIL GATE 4 NGAY LẬP TỨC.
+     + **Đối soát đóng vòng CSDL**: Mọi thao tác Mutation trên giao diện (Tạo, Sửa, Duyệt, Gán chuyên gia...) bắt buộc phải có câu lệnh SQL truy vấn trực tiếp CSDL PostgreSQL thật để xác minh:
+       1. Bản ghi thực sự được INSERT thành công.
+       2. Thuộc tính, điểm số, mã code khớp 100% với dữ liệu nhập.
+       3. Trường `status` / `assigned_expert_id` thực sự được UPDATE trong PostgreSQL.
+       4. Nếu UI báo thành công nhưng trong CSDL không có bản ghi hoặc trạng thái không đổi $\rightarrow$ ĐÁNH LỖI CRITICAL (DATA HOLLOW BUG).
 
 ---
 

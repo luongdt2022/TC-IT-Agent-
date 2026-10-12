@@ -28,3 +28,7 @@ dist/
 build/
 __pycache__/
 *.pyc
+
+# Autonomous loop runtime state & logs
+.tc-loop/
+.nacen-loop/

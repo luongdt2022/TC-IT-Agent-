@@ -1,7 +1,7 @@
-# TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v2.1)
+# TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v2.3)
 
 > **TC IT Agent** là bộ khung điều phối AI Agent toàn diện dành cho phát triển phần mềm doanh nghiệp, được đúc kết từ tinh hoa của hai phương pháp luận hàng đầu: **GitHub Spec Kit** (Đặc tả chính xác) và **BMad Method** (Tranh biện đối kháng đa tác tử & kiểm thử đa tầng).  
-> **Phiên bản 2.2 Enterprise**: Bổ sung **Tiêu Chuẩn Kiểm Soát Bề Mặt Toàn Diện & Kiểm Thử 4 Tầng (`TC-IT-STANDARD-04`)**, cơ chế Grep-first Surface Discovery, User Scope Gate, Kỷ luật Zero-Mock trên Client, và nâng cấp `ec-test` sang chuẩn kiểm định 4 tầng khép kín kèm Screen Coverage Guard.
+> **Phiên bản 2.3 Enterprise**: Bổ sung **Autonomous Loop & E2E Pipeline Engine (`./loop` & `engine/`)**, cơ chế No-LLM-in-the-control-loop, Fresh Context per session, Deterministic Verify Gate, Atomic Commit, kiểm soát Blast Radius, triệt tiêu Mock ngầm trên Client (Zero-Mock Discipline), đối soát CSDL thật (Deep DB State Verification) và 12 kỹ năng chuyên trách mở rộng.
 
 ---
 
@@ -9,6 +9,11 @@
 
 ```text
 TC IT Agent/
+├── loop                          # [MỚI] Bảng điều khiển 1 chạm TUI & Shortcut CLI điều khiển vòng lặp AI
+├── engine/                       # [MỚI] Bộ máy thực thi Vòng lặp Tự trị & E2E Macro Pipeline
+│   ├── tc-loop.py                # Động cơ tự trị độc lập (Native Tmux, Fresh Context, Deterministic Gates)
+│   └── policy.toml               # Cấu hình chính sách vận hành dự án (timeout, blast radius, verify commands)
+│
 ├── .agents/                      # 6 Persona tác tử chuyên trách toàn vòng đời dự án
 │   ├── ps.md                     # Presale & IT Solution Consultant (Proposal, WBS, TCO, RFP)
 │   ├── po-pm.md                  # Product Owner & Project Manager (Scope, Roadmap, Gate 1 & 5)
@@ -18,7 +23,8 @@ TC IT Agent/
 │   └── ec.md                     # Edge-Case Hunter & QC Specialist (Gate 4, Fuzzing, Playwright E2E)
 │
 ├── docs/                         # Tài liệu tiêu chuẩn và hướng dẫn kiến trúc
-│   └── CROSS_SURFACE_AND_4TIER_TESTING_STANDARD.md # [MỚI] Tiêu chuẩn kiểm soát bề mặt & test 4 tầng
+│   ├── HUONG_DAN_SU_DUNG_AUTONOMOUS_LOOP.md # [MỚI] Hướng dẫn vận hành Vòng lặp Tự trị & Pipeline
+│   └── CROSS_SURFACE_AND_4TIER_TESTING_STANDARD.md # Tiêu chuẩn kiểm soát bề mặt & test 4 tầng
 │
 ├── skills/                       # Thư viện kỹ năng chuẩn hóa 100% theo tiền tố Role & Workflows
 │   ├── ps-proposal/              # [PS] Soạn thảo IT Technical Proposal chuyên nghiệp
@@ -26,11 +32,14 @@ TC IT Agent/
 │   ├── ps-solution/              # [PS] So sánh Trade-off các phương án kiến trúc
 │   ├── ps-rfp/                   # [PS] Thẩm định hồ sơ thầu & báo cáo tính khả thi
 │   ├── po-scope/                 # [PO] Sàng lọc yêu cầu & Ma trận tác động lan truyền
+│   ├── po-scope-triage/          # [PO] [MỚI] Sàng lọc phạm vi, phân loại P1/P2/P3 & Cross-Surface Matrix
 │   ├── po-roadmap/               # [PO] Quản trị Master Roadmap, Milestones & Epics
 │   ├── po-gate/                  # [PO] Biên bản nghiệm thu DoD & Phê duyệt xuất xưởng (Gate 5)
 │   ├── po-party/                 # [PO] Triệu tập hội nghị bàn tròn đa tác tử (Party Mode)
 │   ├── po-course/                # [PO] Nắn dòng dự án & phát hiện trôi dạt yêu cầu (Anti-Drift)
 │   ├── po-issues/                # [PO] Đồng bộ danh sách tasks thành GitHub Issues
+│   ├── bmad-party-mode/          # [PO/PM] [MỚI] Điều phối Hội nghị Bàn tròn Đa tác tử giải quyết bài toán khó
+│   ├── bmad-correct-course/      # [PO/PM] [MỚI] Nắn dòng và chống trôi dạt mục tiêu dự án
 │   ├── xong/                     # [PO] Nghiệm thu toàn diện DoD, cập nhật Living Docs & đóng spec xuất xưởng
 │   ├── ba-elicit/                # [BA] 9 kỹ thuật khơi gợi nghiệp vụ chuyên sâu (5 Whys...)
 │   ├── ba-design/                # [BA] Soạn thảo Thiết kế Cơ sở (Kihon Sekkei) & Living Docs
@@ -38,9 +47,12 @@ TC IT Agent/
 │   ├── ba-trace/                 # [BA] Kiểm toán ma trận truy vết khép kín REQ ↔ BR ↔ DB ↔ Test
 │   ├── ba-clarify/               # [BA] Đặt tối đa 5 câu hỏi trọng tâm làm rõ điểm nghẽn (Cấm đoán mò)
 │   ├── ba-docx/                  # [BA] Xuất bản tài liệu sang định dạng Word DOCX trình ký
+│   ├── bmad-advanced-elicitation/# [BA] [MỚI] Bộ 9 kỹ thuật khơi gợi nghiệp vụ chuyên sâu
+│   ├── traceability-auditor/     # [BA/SA] [MỚI] Kiểm toán ma trận truy vết khép kín, bắt mã mồ côi
 │   ├── sa-design/                # [SA] Thiết kế kỹ thuật chi tiết (ERD, OpenAPI, Sequences)
 │   ├── sa-plan/                  # [SA] Lập kế hoạch kiến trúc kỹ thuật theo Epic (plan.md)
 │   ├── sa-guard/                 # [SA] Vệ binh ranh giới Clean Architecture & dọn rác thư mục
+│   ├── clean-arch-guard/         # [SA] [MỚI] Vệ binh kiến trúc sạch quét AST & ranh giới namespace
 │   ├── sa-review/                # [SA] Rà soát mã nguồn đối kháng khắt khe (Gate 3)
 │   ├── sa-analyze/               # [SA] Phân tích tính nhất quán chéo 3 chiều (Gate 2)
 │   ├── sa-refactor/              # [SA] Quét dự án cũ (Chỉ đọc) & Đề xuất giải pháp Refactor
@@ -50,9 +62,15 @@ TC IT Agent/
 │   ├── dev-uiux/                 # [Dev] Chuẩn hóa giao diện 5 trạng thái UX qua <Async>
 │   ├── dev-unit/                 # [Dev] Viết Unit Test TDD cho toàn bộ Business Rules
 │   ├── dev-converge/             # [Dev] Quét hội tụ mã nguồn và sinh bổ sung tasks còn thiếu
+│   ├── speckit-autopilot/        # [Dev/PO] [MỚI] Trục cao tốc tự động hóa toàn trình Epic (Specify -> Converge)
+│   ├── speckit-delta/            # [SA/Dev] [MỚI] Cập nhật Change Request phi phá hủy (Non-destructive)
+│   ├── speckit-uiux/             # [Dev] [MỚI] Chuẩn hóa 5 trạng thái UX & chụp ảnh Visual QA Playwright
+│   ├── speckit-converge/         # [Dev/SA] [MỚI] Quét mức độ hội tụ mã nguồn so với đặc tả sống
 │   ├── ec-hunt/                  # [EC] Săn tìm lỗi biên, kịch bản ngoại lệ & dữ liệu cực hạn
 │   ├── ec-e2e/                   # [EC] Tự động sinh kịch bản Playwright E2E từ AC
+│   ├── bmad-qa-generate-e2e-tests/# [EC] [MỚI] Tự động sinh kịch bản Playwright E2E từ AC & User Journey
 │   ├── ec-fuzz/                  # [EC] Fuzzing bảo mật & kiểm tra phân quyền RBAC/IDOR
+│   ├── rbac-permission-fuzzer/   # [EC] [MỚI] Fuzzing ma trận phân quyền 3D Scoped RBAC, chống leo thang đặc quyền
 │   ├── ec-contract/              # [EC] Kiểm định hợp đồng API Consumer-Provider, chống Breaking Changes
 │   ├── ec-load/                  # [EC] Kiểm thử tải và stress testing (k6/autocannon), tìm điểm sập
 │   ├── ec-chaos/                 # [EC] Kiểm thử hỗn loạn (Chaos Engineering), bơm lỗi DB/Queue/Timeout
@@ -101,7 +119,27 @@ TC IT Agent/
 
 ---
 
-## 2. Hướng Dẫn Tích Hợp Vào Các Dự Án IT Khác
+## 2. Vận Hành Vòng Lặp Tự Trị AI Bằng Bảng Điều Khiển 1 Chạm (`./loop`)
+
+Khác biệt lớn nhất của **TC IT Agent v2.3** là **Autonomous Loop Engine** — cho phép AI Agent tự động thực thi tuần tự các task kỹ thuật mà **không cần con người phải ngồi canh từng câu lệnh chat**.
+
+```bash
+# Mở Bảng điều khiển Terminal TUI tương tác:
+./loop
+```
+
+### Các tính năng vượt trội:
+1. **Triết lý No-LLM-in-the-control-loop**: Engine Python bên ngoài (`engine/tc-loop.py`) điều phối tiến trình, kiểm tra số lần retry, đo lường blast radius và kích hoạt verify gates. LLM chỉ thuần túy nhận prompt thực thi task cụ thể.
+2. **Fresh Context per session**: Mỗi task chạy trong một process CLI riêng biệt (`agy` hoặc `claude`), ngăn chặn hoàn toàn hiện tượng tràn bộ nhớ ngữ cảnh và trôi dạt yêu cầu (Context Drift).
+3. **Chạy ngầm âm thầm qua Tmux (Background Daemon)**: Bấm `[2]` để Agent chạy ngầm trong session `tc-loop`. Bạn có thể đóng cửa sổ terminal hoặc làm việc khác. Bấm `[3]` hoặc gõ `./loop view` để kết nối xem Agent đang gõ phím theo thời gian thực.
+4. **Deterministic Verify Gate & Atomic Git Commit**: Chỉ khi 100% các lệnh kiểm thử trong `engine/policy.toml` vượt qua (0 lỗi biên dịch, tests pass), task mới được tick `[x]` và commit git nguyên tử ngay cùng một transaction.
+5. **Macro Pipeline Toàn Trình (PO -> BA -> SA -> Dev -> QC)**: Bấm `[7]` hoặc gõ `./loop pipeline`, hệ thống tự động quét toàn bộ backlog trong `BACKLOG.md` (hoặc `backlog/BACKLOG.md`), tự động phân tích tính năng mới vs change request, triệu hồi các Agent tương ứng và tự động chạy khép kín đến khi hoàn tất 100%.
+
+> 📖 **Xem hướng dẫn chi tiết**: [docs/HUONG_DAN_SU_DUNG_AUTONOMOUS_LOOP.md](docs/HUONG_DAN_SU_DUNG_AUTONOMOUS_LOOP.md)
+
+---
+
+## 3. Hướng Dẫn Tích Hợp Vào Các Dự Án IT Khác
 
 ### Trường Hợp 1: Tích Hợp Vào Dự Án Mới Tinh (Greenfield Project)
 
@@ -161,7 +199,7 @@ Dành cho dự án đã có sẵn mã nguồn, đang chạy thực tế mà bạ
 
 ---
 
-## 3. Cơ Chế Nâng Cấp & Đồng Bộ Khi Team Agent Được Cập Nhật
+## 4. Cơ Chế Nâng Cấp & Đồng Bộ Khi Team Agent Được Cập Nhật
 
 ### Câu hỏi: *"Khi nâng cấp agent thì tôi nâng cấp ở folder dự án này và đẩy lên git, các dự án tích hợp lấy code mới nhất về là update được đúng không?"*
 
@@ -206,7 +244,7 @@ Nếu bạn sử dụng Google Antigravity IDE và muốn **mọi dự án trên
 
 ---
 
-## 4. Chu Trình 6 Tác Tử Toàn Vòng Đời Phần Mềm
+## 5. Chu Trình 6 Tác Tử Toàn Vòng Đời Phần Mềm
 
 ```mermaid
 flowchart TD
@@ -229,10 +267,11 @@ flowchart TD
 
 ---
 
-## 5. Bảng Tra Cứu Nhanh Lệnh & Quy Trình
+## 6. Bảng Tra Cứu Nhanh Lệnh & Quy Trình
 
 | Lệnh Gõ Tắt / Chat | Role Chủ Trì | Tác Vụ Cụ Thể |
 | :--- | :--- | :--- |
+| **`./loop`** | **Toàn đội** (Loop Engine) | Bảng điều khiển Vòng lặp tự trị, chạy ngầm tmux, E2E Pipeline tự động. |
 | **`/wf-presale`** | **`ps`** (Presale) | Lập IT Technical Proposal, tính toán Man-Month và dự toán chi phí TCO Cloud. |
 | **`/wf-kickoff`** | **`po-pm`** (PO/PM) | Khởi tạo Basic Design (Walking Skeleton) và Master Roadmap ban đầu. |
 | **`/wf-refactor`** | **`sa`** (TL/SA) | Quét toàn diện dự án cũ (Chỉ đọc) & Đề xuất giải pháp Refactor an toàn 100%. |
@@ -245,7 +284,7 @@ flowchart TD
 
 ---
 
-## 6. Tài Liệu Báo Cáo Trực Quan
+## 7. Tài Liệu Báo Cáo Trực Quan
 Để xem phân tích kiến trúc trực quan, sơ đồ tuần tự và so sánh phương pháp luận:
 - [docs/KE_HOACH_TAI_CAU_TRUC_TC_IT_AGENT.html](docs/KE_HOACH_TAI_CAU_TRUC_TC_IT_AGENT.html) — Báo cáo giao diện trực quan v2.0 hiện đại (Theme tối, biểu đồ Mermaid).
 - [docs/TC_IT_AGENT_MASTER_PRD.md](docs/TC_IT_AGENT_MASTER_PRD.md) — Đặc tả sản phẩm và tài liệu PRD chi tiết.
