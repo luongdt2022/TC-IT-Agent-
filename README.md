@@ -80,10 +80,15 @@ TC IT Agent/
 │   ├── ec-test/                  # [EC] Điều phối bộ kiểm thử 4 tầng khép kín (Gate 4 & Deep DB State)
 │   ├── qa-gate-audit/            # [QA] [MỚI] Kiểm toán độc lập 5 Cổng Chất Lượng Stage-Gate (Gate 1 - Gate 5)
 │   ├── qa-shadow-sentinel/       # [QA] [MỚI] Bóng ma kiểm toán độc lập: Token Context 60%-80% & Zero-Mock
+│   ├── handoff/                  # [ALL] [ECC] Bàn giao ca làm việc & xuất checkpoint an toàn khi context >= 70%
 │   └── wf-*/                     # [Workflows] Các quy trình thực thi chuẩn (autopilot, delta, pr-review, audit...)
 │
 ├── scripts/                      # Kịch bản tự động hóa & chốt chặn chất lượng
-│   ├── guard-rails.sh            # Chốt chặn toán học tĩnh chống ảo giác, rò rỉ kiến trúc & Zero-Mock
+│   ├── guard-rails.sh            # Chốt chặn toán học tĩnh 8 tầng (chống ảo giác, rò rỉ kiến trúc & Zero-Mock)
+│   ├── block-no-verify.py        # [ECC] Chốt chặn cứng ngăn chặn AI Agent bypass hooks (--no-verify, -n)
+│   ├── fact-forcing-guard.py     # [ECC] Ép khai báo sự thật (Fact-Sheet) trước khi can thiệp tệp Tier-1 Domain/DB
+│   ├── memory-vault.py           # [ECC] Quản trị kho tri thức bền vững & bàn giao ca làm việc (.memory/)
+│   ├── install-hooks.sh          # [ECC] Trình cài đặt tự động Git Hooks (pre-commit, commit-msg, pre-push)
 │   ├── qa-shadow-sentinel.sh     # [MỚI] Script Shadow QA kiểm toán thời gian thực (Context Telemetry, Gate 2)
 │   ├── audit_wireframe_fields.py # [MỚI] Chốt chặn cơ học kiểm tra độ phủ trường biểu mẫu (Controls >= 80%)
 │   ├── send_po_report.py         # [MỚI] Kịch bản tự động dispatch email báo cáo tiến độ PO/PM
@@ -301,7 +306,24 @@ flowchart TD
 
 ---
 
-## 8. Tài Liệu Báo Cáo Trực Quan
+## 8. Hệ Thống Chốt Chặn ECC Toàn Diện (Enterprise Coding Copilot Guardrails Suite)
+
+Nhằm đảm bảo AI Agent vận hành với tính kỷ luật tuyệt đối, hệ thống tích hợp bộ chốt chặn lấy cảm hứng từ phương pháp luận **ECC (Enterprise Coding Copilot / GateGuard / GAN-Evaluator)**:
+
+| Chốt Chặn ECC | Công Cụ / Kịch Bản | Mục Đích & Cơ Chế Kiểm Soát |
+| :--- | :--- | :--- |
+| **Zero-Bypass Git Sentinel** | `scripts/block-no-verify.py` | Ngăn chặn cứng AI Agent tự ý thêm cờ `--no-verify`, `-n` hoặc cấu hình `-c core.hooksPath=...` để trốn tránh quality gates. Ghi vết vi phạm vào `logs/guard-violations.log`. |
+| **Fact-Forcing Gatekeeper** | `scripts/fact-forcing-guard.py` | Ép Agent phải chứng minh ngữ cảnh (Importers, Schema impact, Rollback plan) nộp tại `.facts/` trước khi được phép ghi đè các tệp Tier-1 Lõi (Domain Entities, Migrations, RBAC, Master Specs). |
+| **Enterprise Memory Vault** | `scripts/memory-vault.py` | Quản trị tri thức bền vững tại `.memory/` theo tôn chỉ *"Memory là Context, KHÔNG PHẢI Instruction"* (chống AI Recommendation Poisoning). Hỗ trợ checkpoint ca làm việc, bài học kỹ thuật và tìm kiếm ngữ cảnh. |
+| **Shift Handoff Skill** | `/handoff` (`skills/handoff/`) | Tự động đóng gói bối cảnh phiên làm việc khi token context đạt $\ge 70\%$ (~100k tokens), giải phóng ngữ cảnh sạch cho phiên mới mà không mất lịch sử. |
+| **Universal Git Hooks** | `scripts/install-hooks.sh` | Cài đặt tự động `pre-commit` (quét secrets, chạy `guard-rails.sh` và `fact-forcing-guard.py`), `commit-msg` (Conventional Commits), và `pre-push` cho toàn bộ repositories. |
+| **Ruthless Visual QA** | Persona `ec.md` (Gate 4) | Tiếp thu tinh hoa ECC GAN-Evaluator: chấm điểm trực quan theo thang 10 trọng số (Consistency 0.3, 5 UX States 0.3, Responsive 0.2, Polish 0.2), bắt buộc $\ge 8.0/10$ mới được ký duyệt Gate 4. |
+
+---
+
+## 9. Tài Liệu Báo Cáo Trực Quan
 Để xem phân tích kiến trúc trực quan, sơ đồ tuần tự và so sánh phương pháp luận:
+- Báo cáo HTML trực quan: `docs/TC_IT_AGENT_ENTERPRISE_ARCHITECTURE_REPORT.html`
+
 - [docs/KE_HOACH_TAI_CAU_TRUC_TC_IT_AGENT.html](docs/KE_HOACH_TAI_CAU_TRUC_TC_IT_AGENT.html) — Báo cáo giao diện trực quan v2.0 hiện đại (Theme tối, biểu đồ Mermaid).
 - [docs/TC_IT_AGENT_MASTER_PRD.md](docs/TC_IT_AGENT_MASTER_PRD.md) — Đặc tả sản phẩm và tài liệu PRD chi tiết.

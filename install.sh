@@ -187,7 +187,12 @@ if [[ "$IS_UPDATE" == true ]]; then
         cp -Rf "${SCRIPT_DIR}/scripts/"* "${TARGET_DIR}/scripts/"
         chmod +x "${TARGET_DIR}/scripts/"*.sh "${TARGET_DIR}/scripts/"*.py 2>/dev/null || true
     fi
-    mkdir -p "${TARGET_DIR}/docs/decisions" "${TARGET_DIR}/docs/system"
+    mkdir -p "${TARGET_DIR}/docs/decisions" "${TARGET_DIR}/docs/system" \
+             "${TARGET_DIR}/.facts" \
+             "${TARGET_DIR}/.memory/checkpoints" \
+             "${TARGET_DIR}/.memory/learnings" \
+             "${TARGET_DIR}/.memory/handoffs" \
+             "${TARGET_DIR}/logs"
     if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
         touch "${TARGET_DIR}/docs/open-questions.md"
     fi
@@ -238,8 +243,13 @@ echo -e "Tên dự án: ${BOLD}${PROJECT_NAME}${NC}"
 echo -e "${BLUE}==============================================================================${NC}\n"
 
 # 1. Tạo Khung Thư Mục Chuẩn Chống Rác (Anti-Clutter Directory Matrix)
-echo -e "${YELLOW}[1/7] Khởi tạo khung thư mục chuẩn mực (Zero-Tolerance Root Dumping)...${NC}"
+echo -e "${YELLOW}[1/7] Khởi tạo khung thư mục chuẩn mực (Zero-Tolerance Root Dumping & ECC Compliance)...${NC}"
 mkdir -p "${TARGET_DIR}/.agents" \
+         "${TARGET_DIR}/.facts" \
+         "${TARGET_DIR}/.memory/checkpoints" \
+         "${TARGET_DIR}/.memory/learnings" \
+         "${TARGET_DIR}/.memory/handoffs" \
+         "${TARGET_DIR}/logs" \
          "${TARGET_DIR}/engine" \
          "${TARGET_DIR}/docs/00-presale-proposal" \
          "${TARGET_DIR}/docs/01-basic-design" \

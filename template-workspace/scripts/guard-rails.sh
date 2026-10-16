@@ -190,11 +190,27 @@ fi
 # ------------------------------------------------------------------------------
 # 7. KIỂM TRA GROUNDING CATALOG
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[7/7] Kiểm tra các điểm neo Grounding...${NC}"
+echo -e "\n${YELLOW}[7/8] Kiểm tra các điểm neo Grounding...${NC}"
 if [[ ( -d "${PROJECT_ROOT}/specs" || -d "${PROJECT_ROOT}/SourceCode/specs" ) && ( -d "${PROJECT_ROOT}/docs" || -d "${PROJECT_ROOT}/src" ) ]]; then
     echo -e "${GREEN}  ✓ Cấu trúc dự án có sẵn các điểm neo xác thực (specs/, docs/, src/).${NC}"
 else
     echo -e "${YELLOW}  ⚠ Cảnh báo: Chưa khởi tạo đủ thư mục specs/ hoặc docs/ cho việc Grounding.${NC}"
+fi
+
+# ------------------------------------------------------------------------------
+# 8. KIỂM TOÁN TỆP LÕI TIER-1 (ECC FACT-FORCING GATEGUARD)
+# ------------------------------------------------------------------------------
+echo -e "\n${YELLOW}[8/8] Kiểm toán tệp lõi Tier-1 (Fact-Forcing Gatekeeper)...${NC}"
+FACT_SCRIPT="${SCRIPT_DIR}/fact-forcing-guard.py"
+if [[ -f "${FACT_SCRIPT}" ]]; then
+    if python3 "${FACT_SCRIPT}" --audit; then
+        echo -e "${GREEN}  ✓ Chốt chặn Fact-Forcing: 100% tệp Tier-1 hợp lệ hoặc có Fact-Sheet.${NC}"
+    else
+        echo -e "${RED}  ✗ Phát hiện tệp Tier-1 bị can thiệp khi chưa nộp Fact-Sheet!${NC}"
+        ERRORS=$((ERRORS + 1))
+    fi
+else
+    echo -e "  -> Bỏ qua: Chưa cài đặt fact-forcing-guard.py."
 fi
 
 # ------------------------------------------------------------------------------

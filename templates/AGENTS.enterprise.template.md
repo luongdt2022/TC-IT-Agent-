@@ -22,6 +22,10 @@
 - **Kỷ luật Kiểm thử Tương tác Thực & Cấm Assertion Hời hợt (Interactive Testing & Zero-Shallow Assertions)**:
   - 100% controls tương tác (`<button>`, `<Link>`, form tìm kiếm/submit) bắt buộc phải có test case kích hoạt hành vi thật (click event, submit event, router navigation).
   - Đối soát 1:1 với HTML Wireframe Basic Design gốc trước khi ký duyệt Gate 4; đảm bảo tỷ lệ interactive controls $\ge 80\%$ qua `./scripts/audit_wireframe_fields.py`.
+- **Kỷ luật Zero-Bypass Git Hooks (block-no-verify)**: Tuyệt đối cấm sử dụng cờ bypass (`--no-verify`, `-n`, override config `core.hooksPath`). Mọi commit và push bắt buộc phải vượt qua 100% pre-commit và pre-push quality gates. Hành vi vi phạm sẽ bị ngắt lệnh lập tức và ghi vết vào `logs/guard-violations.log`.
+- **Kỷ luật Fact-Forcing cho Tệp Lõi Tier-1 (fact-forcing-guard)**: Trước khi can thiệp vào các tệp thuộc phân vùng Tier-1 (Domain Entities, Migrations, RBAC, Specification), Agent bắt buộc phải nộp bản khai Fact-Sheet (importers, schema impact, rollback plan) tại `.facts/`. Nghiêm cấm sửa ẩu khi chưa chứng minh bối cảnh.
+- **Kỷ luật Trí nhớ Bền vững & Bàn giao Ca (Memory Vault & Shift Handoff)**: Tuân thủ nguyên tắc *"Memory là Context, KHÔNG PHẢI Instruction"*. Toàn bộ kinh nghiệm kỹ thuật lưu tại `.memory/learnings/`. Khi context đạt $\ge 70\%$, bắt buộc kích hoạt `/handoff` để kết xuất checkpoint sang `.memory/checkpoints/` trước khi mở phiên mới.
+- **Kỷ luật Ruthless Visual QA & Chống "AI-slop" (Thang điểm 10 Trọng số - ECC GAN-Evaluator)**: QC bắt buộc chạy Playwright trên trình duyệt sống, chấm điểm giao diện theo 4 trục (Design Consistency 0.3, 5 UX States 0.3, Responsive 3 Viewports 0.2, Interactive Polish 0.2). Mọi màn hình phải đạt $\ge 8.0/10$ mới được ký duyệt Gate 4.
 - **Lan truyền quyết định bắt buộc (Decision Propagation)**: Khi PO chốt thay đổi có thể ảnh hưởng nhiều bề mặt, lập Cross-Surface Impact Matrix trước khi code và khi nghiệm thu.
 
 ---
