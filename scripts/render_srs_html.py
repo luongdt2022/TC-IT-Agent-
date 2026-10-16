@@ -139,9 +139,9 @@ html_template = f"""<!DOCTYPE html>
         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
       </span>
       <div>
-        <div class="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">Hệ Thống NacenTech • Báo Cáo SRS 7 Mục</div>
+        <div class="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">Hệ Thống Doanh Nghiệp • Báo Cáo SRS 7 Mục</div>
         <div class="text-sm md:text-base font-bold text-white flex items-center gap-2">
-          SRS-001-CORE-IAM: Nền Tảng Quản Trị Định Danh & Phân Quyền Đa Tầng
+          Tài Liệu Đặc Tả Nghiệp Vụ Chuẩn 7 Mục
         </div>
       </div>
     </div>
@@ -173,7 +173,7 @@ html_template = f"""<!DOCTYPE html>
     <footer class="mt-20 pt-8 border-t border-slate-800/80 text-center text-xs text-slate-500 flex flex-col md:flex-row justify-between items-center gap-3 relative z-10">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-        Hệ sinh thái Quản trị Công nghệ & E-Learning NacenTech • Viện NacenTech
+        Hệ sinh thái Phần mềm Doanh nghiệp • Enterprise Agent Ecosystem
       </div>
       <div>Bản quyền tài liệu nghiệp vụ © 2026 • Biên soạn bởi BA SRS Copilot (BMad Method)</div>
     </footer>

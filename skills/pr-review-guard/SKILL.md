@@ -54,9 +54,11 @@ flowchart TD
   - Component tải dữ liệu có bọc đủ 5 trạng thái UX không (`Loading`, `Empty`, `Error`, `Success`, `Partial`)?
   - Có nút bấm Submit nào bị thiếu xử lý disable chống Double-click không?
   - Có hardcode dữ liệu tĩnh trong file trang thay vì dùng hook/SDK tập trung không?
-- Với Test Coverage:
+- Với Test Coverage & Kiểm Thử:
   - Đã có Unit Test bao phủ 100% các quy tắc `BR-*` trong spec chưa?
-  - Có test assertion hình thức (`assertNotNull`) mà không assert giá trị thật không?
+  - Có test assertion hình thức (`assertNotNull`, `toBeInTheDocument()`, `is_visible()`) mà không assert giá trị thật hoặc không test hành vi click/submit/router navigation không? $\rightarrow$ Nếu có, **REQUEST CHANGES NGAY LẬP TỨC**.
+  - Đã chạy `./scripts/audit_wireframe_fields.py` đối soát 1:1 với HTML Wireframe Basic Design gốc để đảm bảo không bị cắt xén controls/tabs/filters chưa? (Tỷ lệ $\ge 80\%$).
+  - Có hiện tượng Mock ngầm (`fakeItem`, dummy array) trong khối `catch` hoặc nhánh `else` của frontend không? $\rightarrow$ Nếu có, **REJECT NGAY LẬP TỨC**.
 
 ---
 

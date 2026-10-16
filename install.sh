@@ -166,26 +166,26 @@ if [[ "$IS_UPDATE" == true ]]; then
     echo -e "Dự án: ${BOLD}${PROJECT_NAME}${NC} (${TARGET_DIR})\n"
 
     # 1. Cập nhật .agents/
-    echo -e "${CYAN}[1/4] Cập nhật 6 Persona (.agents/)...${NC}"
+    echo -e "${CYAN}[1/6] Cập nhật 7 Persona (.agents/)...${NC}"
     mkdir -p "${TARGET_DIR}/.agents"
     cp -Rf "${SCRIPT_DIR}/.agents/"*.md "${TARGET_DIR}/.agents/"
 
     # 2. Cập nhật skills/
-    echo -e "${CYAN}[2/4] Cập nhật bộ Kỹ năng (skills/)...${NC}"
+    echo -e "${CYAN}[2/6] Cập nhật bộ Kỹ năng (skills/)...${NC}"
     mkdir -p "${TARGET_DIR}/skills"
     cp -Rf "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
 
     # 3. Cập nhật workflows/
-    echo -e "${CYAN}[3/4] Cập nhật các Quy trình chuẩn (workflows/)...${NC}"
+    echo -e "${CYAN}[3/6] Cập nhật các Quy trình chuẩn (workflows/)...${NC}"
     mkdir -p "${TARGET_DIR}/workflows"
     cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
 
-    # 4. Cập nhật scripts/ gác cổng kiến trúc
-    echo -e "${CYAN}[4/6] Cập nhật scripts gác cổng (scripts/guard-rails.sh)...${NC}"
+    # 4. Cập nhật scripts/ gác cổng kiến trúc & Shadow QA
+    echo -e "${CYAN}[4/6] Cập nhật scripts gác cổng & Shadow QA...${NC}"
     mkdir -p "${TARGET_DIR}/scripts"
-    if [[ -f "${SCRIPT_DIR}/scripts/guard-rails.sh" ]]; then
-        cp -Rf "${SCRIPT_DIR}/scripts/guard-rails.sh" "${TARGET_DIR}/scripts/"
-        chmod +x "${TARGET_DIR}/scripts/guard-rails.sh" 2>/dev/null || true
+    if [[ -d "${SCRIPT_DIR}/scripts" ]]; then
+        cp -Rf "${SCRIPT_DIR}/scripts/"* "${TARGET_DIR}/scripts/"
+        chmod +x "${TARGET_DIR}/scripts/"*.sh "${TARGET_DIR}/scripts/"*.py 2>/dev/null || true
     fi
     mkdir -p "${TARGET_DIR}/docs/decisions" "${TARGET_DIR}/docs/system"
     if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
@@ -284,9 +284,9 @@ if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
     touch "${TARGET_DIR}/docs/open-questions.md"
 fi
 
-if [[ -f "${SCRIPT_DIR}/scripts/guard-rails.sh" ]]; then
-    cp -Rf "${SCRIPT_DIR}/scripts/guard-rails.sh" "${TARGET_DIR}/scripts/"
-    chmod +x "${TARGET_DIR}/scripts/guard-rails.sh" 2>/dev/null || true
+if [[ -d "${SCRIPT_DIR}/scripts" ]]; then
+    cp -Rf "${SCRIPT_DIR}/scripts/"* "${TARGET_DIR}/scripts/"
+    chmod +x "${TARGET_DIR}/scripts/"*.sh "${TARGET_DIR}/scripts/"*.py 2>/dev/null || true
 fi
 
 # Cài đặt Autonomous Loop Engine và Shortcut Controller
@@ -301,10 +301,10 @@ fi
 
 echo -e "${GREEN}✓ Đã tạo thành công cây thư mục phân tầng chuẩn Clean Architecture, Docs & Loop Engine!${NC}"
 
-# 2. Cài đặt 6 Personas vào .agents/
-echo -e "\n${YELLOW}[2/6] Cài đặt 6 Persona chuyên trách (PS, PO/PM, BA, SA, Dev, EC)...${NC}"
+# 2. Cài đặt 7 Personas vào .agents/
+echo -e "\n${YELLOW}[2/6] Cài đặt 7 Persona chuyên trách (PS, PO/PM, BA, SA, Dev, QC/EC, QA)...${NC}"
 cp -Rf "${SCRIPT_DIR}/.agents/"*.md "${TARGET_DIR}/.agents/"
-echo -e "${GREEN}✓ Đã sao chép 6 Personas vào .agents/!${NC}"
+echo -e "${GREEN}✓ Đã sao chép 7 Personas vào .agents/!${NC}"
 
 # 3. Cài đặt Kỹ năng theo Role & Workflows
 echo -e "\n${YELLOW}[3/6] Cài đặt bộ Kỹ năng & Quy trình chuẩn (wf-*)...${NC}"

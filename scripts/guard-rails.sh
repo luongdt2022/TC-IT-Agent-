@@ -5,13 +5,16 @@
 # 1. TypeCheck & Compiler Validation (TypeScript, Python, .NET, Go...)
 # 2. Schema & Data Model Validation (Prisma, Entity Framework, Alembic...)
 # 3. Kỷ luật Zero-Mock trên Client (Cấm fake arrays / dummy fallbacks trong catch)
-# 4. Anti-Clutter Directory Linter (Chống xả rác thư mục gốc)
-# 5. Shared Catalog Grounding Check (Bảo đảm có từ điển dùng chung)
+# 4. Kỷ luật Pure Black-Box & Zero-Mock trong bộ E2E Test của QC
+# 5. Kiểm toán độ phủ trường biểu mẫu Wireframe (audit_wireframe_fields.py)
+# 6. Anti-Clutter Directory Linter (Chống xả rác thư mục gốc)
+# 7. Shared Catalog Grounding Check (Bảo đảm có từ điển dùng chung)
 # ==============================================================================
 
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -29,7 +32,7 @@ echo -e "${BLUE}${BOLD}=========================================================
 # ------------------------------------------------------------------------------
 # 1. COMPILER & TYPECHECK VALIDATION (CHỐNG IMPORT / HÀM / TYPE ẢO)
 # ------------------------------------------------------------------------------
-echo -e "${YELLOW}[1/5] Kiểm tra TypeCheck / Compiler tĩnh...${NC}"
+echo -e "${YELLOW}[1/7] Kiểm tra TypeCheck / Compiler tĩnh...${NC}"
 
 # Case A: TypeScript / JavaScript Monorepo hoặc Single Repo
 if command -v pnpm >/dev/null 2>&1 && [[ -f "${PROJECT_ROOT}/pnpm-workspace.yaml" ]]; then
@@ -76,7 +79,7 @@ fi
 # ------------------------------------------------------------------------------
 # 2. SCHEMA & DATA MODEL VALIDATION (CHỐNG FIELD / QUAN HỆ CSDL ẢO)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[2/5] Kiểm tra Schema & Data Model CSDL...${NC}"
+echo -e "\n${YELLOW}[2/7] Kiểm tra Schema & Data Model CSDL...${NC}"
 
 PRISMA_SCHEMAS=$(find "${PROJECT_ROOT}" -name "schema.prisma" -not -path "*/node_modules/*" 2>/dev/null || true)
 if [[ -n "${PRISMA_SCHEMAS}" ]]; then
@@ -96,17 +99,21 @@ fi
 # ------------------------------------------------------------------------------
 # 3. KỶ LUẬT ZERO-MOCK TRÊN CLIENT (CHỐNG FAKE DATA TRONG CATCH/FALLBACK)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[3/5] Quét mã nguồn kiểm tra Kỷ luật Zero-Mock trên Client...${NC}"
+echo -e "\n${YELLOW}[3/7] Quét mã nguồn kiểm tra Kỷ luật Zero-Mock trên Client...${NC}"
 
 MOCK_LEAKS=""
-if [[ -d "${PROJECT_ROOT}/src" ]]; then
-    MOCK_LEAKS=$(grep -rnE "(fakeItem|fakeCode|dummyData|mockRecords|fallbackFake)" "${PROJECT_ROOT}/src" \
+SCAN_DIRS=()
+[[ -d "${PROJECT_ROOT}/src" ]] && SCAN_DIRS+=("${PROJECT_ROOT}/src")
+[[ -d "${PROJECT_ROOT}/SourceCode" ]] && SCAN_DIRS+=("${PROJECT_ROOT}/SourceCode")
+
+if [[ ${#SCAN_DIRS[@]} -gt 0 ]]; then
+    MOCK_LEAKS=$(grep -rnE "(fakeItem|fakeCode|dummyData|mockRecords|fallbackFake)" "${SCAN_DIRS[@]}" \
         --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=tests --exclude="*.test.*" --exclude="*.spec.*" 2>/dev/null || true)
 fi
 
 if [[ -n "${MOCK_LEAKS}" ]]; then
     echo -e "${RED}  ✗ Phát hiện Mock ngầm hoặc dữ liệu giả che giấu lỗi API trong mã nguồn Client:${NC}"
-    echo "${MOCK_LEAKS}"
+    echo "${MOCK_LEAKS}" | head -n 5
     echo -e "${YELLOW}  -> Kỷ luật Zero-Mock: Bắt buộc hiển thị trạng thái Error thật hoặc Empty state qua <Async>, không được nuốt lỗi bằng fake data.${NC}"
     ERRORS=$((ERRORS + 1))
 else
@@ -114,9 +121,45 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 4. KỶ LUẬT THƯ MỤC CHỐNG RÁC (ANTI-CLUTTER ROOT LINTER)
+# 4. KỶ LUẬT PURE BLACK-BOX & ZERO-MOCK TRONG BỘ E2E TEST CỦA QC
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[4/5] Quét kỷ luật thư mục (Zero-Tolerance Root Dumping)...${NC}"
+echo -e "\n${YELLOW}[4/7] Quét kỷ luật Pure Black-Box & Zero-Mock trong bộ E2E Test của QC...${NC}"
+
+E2E_DIRS=$(find "${PROJECT_ROOT}" -type d \( -name "e2e" -o -name "tests" \) -not -path "*/node_modules/*" 2>/dev/null || true)
+if [[ -n "${E2E_DIRS}" ]]; then
+    MOCK_INFRACTIONS=$(grep -rnE --exclude-dir="__pycache__" --exclude-dir="node_modules" "(page\.route\(|route\.fulfill\(|mock_auth_token|mock_token)" ${E2E_DIRS} 2>/dev/null || true)
+    if [[ -n "${MOCK_INFRACTIONS}" ]]; then
+        echo -e "${RED}  ✗ LỖI NGHIÊM TRỌNG: Phát hiện mock route hoặc mock auth token trong thư mục E2E của QC:${NC}"
+        echo "${MOCK_INFRACTIONS}" | head -n 5
+        echo -e "${RED}  -> Vi phạm kỷ luật Quality Gate 4: Bắt buộc test trên môi trường thật (Pure Black-Box), không tự mớm mock!${NC}"
+        ERRORS=$((ERRORS + 1))
+    else
+        echo -e "${GREEN}  ✓ Bộ test E2E sạch bóng mock: 100% Pure Black-Box Testing.${NC}"
+    fi
+else
+    echo -e "${GREEN}  ✓ Bỏ qua: Chưa khởi tạo thư mục e2e.${NC}"
+fi
+
+# ------------------------------------------------------------------------------
+# 5. KIỂM TOÁN ĐỘ PHỦ TRƯỜNG BIỂU MẪU WIREFRAME
+# ------------------------------------------------------------------------------
+echo -e "\n${YELLOW}[5/7] Kiểm toán độ phủ trường biểu mẫu Wireframe vs Component (Controls Coverage)...${NC}"
+AUDIT_SCRIPT="${SCRIPT_DIR}/audit_wireframe_fields.py"
+if [[ -f "${AUDIT_SCRIPT}" ]]; then
+    if python3 "${AUDIT_SCRIPT}" >/dev/null 2>&1; then
+        echo -e "${GREEN}  ✓ Chốt chặn độ phủ trường biểu mẫu: Đạt chuẩn (>= 80% controls).${NC}"
+    else
+        echo -e "${RED}  ✗ Phát hiện biểu mẫu bị cắt xén trường so với Wireframe HTML gốc!${NC}"
+        ERRORS=$((ERRORS + 1))
+    fi
+else
+    echo -e "  -> Bỏ qua: Chưa cài đặt audit_wireframe_fields.py."
+fi
+
+# ------------------------------------------------------------------------------
+# 6. KỶ LUẬT THƯ MỤC CHỐNG RÁC (ANTI-CLUTTER ROOT LINTER)
+# ------------------------------------------------------------------------------
+echo -e "\n${YELLOW}[6/7] Quét kỷ luật thư mục (Zero-Tolerance Root Dumping)...${NC}"
 
 ROOGUE_FILES=$(find "${PROJECT_ROOT}" -maxdepth 1 -type f \
     -not -name "README.md" \
@@ -148,9 +191,9 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 5. KIỂM TRA GROUNDING CATALOG
+# 7. KIỂM TRA GROUNDING CATALOG
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[5/5] Kiểm tra các điểm neo Grounding...${NC}"
+echo -e "\n${YELLOW}[7/7] Kiểm tra các điểm neo Grounding...${NC}"
 if [[ ( -d "${PROJECT_ROOT}/specs" || -d "${PROJECT_ROOT}/SourceCode/specs" ) && ( -d "${PROJECT_ROOT}/docs" || -d "${PROJECT_ROOT}/src" ) ]]; then
     echo -e "${GREEN}  ✓ Cấu trúc dự án có sẵn các điểm neo xác thực (specs/, docs/, src/).${NC}"
 else

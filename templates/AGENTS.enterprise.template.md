@@ -16,6 +16,13 @@
   2. **Thực Thi Nguyên Tử (Atomic Chunking)**: 1 task / 1 chu kỳ kiểm tra, giữ context window < 15,000 tokens.
   3. **Chốt Chặn Toán Học Tự Động**: Bắt buộc chạy `./scripts/guard-rails.sh` kiểm chứng TypeCheck / Compiler trước khi tick `[x]`.
   4. **Red Test Bất Biến (Test Immobility)**: Dev tuyệt đối không được sửa assertion trong file test để pass giả tạo; chỉ sửa mã nguồn nghiệp vụ.
+- **Kỷ luật Zero-Mock & Đối soát CSDL thật (Deep DB State Verification)**:
+  - Tuyệt đối cấm Frontend che giấu lỗi bằng mock ngầm (`fakeItem`, `fakeCode`, static dummy arrays trong khối `catch`).
+  - QC tuyệt đối không chỉ kiểm tra bề mặt giao diện (`is_visible()`), mà bắt buộc phải đối soát trực tiếp dòng dữ liệu và trạng thái trong CSDL thật để chứng minh toàn trình backend-frontend-database hoạt động thông suốt.
+- **Kỷ luật Kiểm thử Tương tác Thực & Cấm Assertion Hời hợt (Interactive Testing & Zero-Shallow Assertions)**:
+  - 100% controls tương tác (`<button>`, `<Link>`, form tìm kiếm/submit) bắt buộc phải có test case kích hoạt hành vi thật (click event, submit event, router navigation).
+  - Đối soát 1:1 với HTML Wireframe Basic Design gốc trước khi ký duyệt Gate 4; đảm bảo tỷ lệ interactive controls $\ge 80\%$ qua `./scripts/audit_wireframe_fields.py`.
+- **Lan truyền quyết định bắt buộc (Decision Propagation)**: Khi PO chốt thay đổi có thể ảnh hưởng nhiều bề mặt, lập Cross-Surface Impact Matrix trước khi code và khi nghiệm thu.
 
 ---
 
@@ -51,7 +58,9 @@ Mọi tệp tin sinh ra BẮT BUỘC phải lưu đúng địa chỉ theo Bảng
 
 ---
 
-## 4. ĐỘI NGŨ 6 AGENT CHUYÊN TRÁCH & QUY TRÌNH PHỐI HỢP
+## 4. ĐỘI NGŨ 7 AGENT CHUYÊN TRÁCH & QUY TRÌNH PHỐI HỢP (STAGE-GATE & SHADOW AUDIT)
+
+Hệ thống vận hành theo mô hình phân công trách nhiệm (SoD), Maker – Checker và Shadow Auditing với 7 Agent chuyên trách tại `.agents/`:
 
 | STT | Agent Chuyên Trách | Định Vị Vai Trò | Cổng Kiểm Soát (Gate) Phụ Trách |
 | :---: | :--- | :--- | :--- |
@@ -59,8 +68,12 @@ Mọi tệp tin sinh ra BẮT BUỘC phải lưu đúng địa chỉ theo Bảng
 | **1** | [`po-pm`](.agents/po-pm.md) | Product Owner & Project Manager | **Gate 1**: Phê duyệt Basic Design & Scope.<br>**Gate 5**: Nghiệm thu DoD & Xuất xưởng (`xong`). |
 | **2** | [`ba`](.agents/ba.md) | Senior Business Analyst | **Gate 1**: Khơi gợi 9D (`ba-elicit`), Basic Design, SRS 7 mục (`ba-srs`), làm rõ (`ba-clarify`), xuất Word (`ba-docx`). |
 | **3** | [`techlead-sa`](.agents/techlead-sa.md) | Software Architect & Tech Lead | **Gate 2**: sa-analyze (Nhất quán chéo).<br>**Gate 3**: Adversarial Review, sa-guard, chốt ADR (`chot`). |
-| **4** | [`dev`](.agents/dev.md) | Senior Full-Stack Developer | Thực thi tuần tự 1:1 `tasks.md`, 5 UX States qua `<Async>`, Unit Test 100% `BR-*`, hội tụ (`dev-converge`). |
-| **5** | [`ec`](.agents/ec.md) | Edge-Case Hunter & QC Specialist | **Gate 4**: Săn lỗi biên (`ec-hunt`), Fuzzing Security (`ec-fuzz`), E2E Playwright (`ec-e2e`), Tải (`ec-load`), Hợp đồng (`ec-contract`), Hỗn loạn (`ec-chaos`), Đột biến (`ec-mutation`). |
+| **4** | [`dev`](.agents/dev.md) | Senior Full-Stack Developer | Thực thi tuần tự 1:1 `tasks.md`, 5 Entity Lifecycle & 5 UX States qua `<Async>`, Unit Test 100% `BR-*`. |
+| **5** | [`ec`](.agents/ec.md) | Edge-Case Hunter & QC Specialist | **Gate 4**: Pure Black-Box Testing, Zero-Mock, Deep DB Assertion, E2E Playwright, Fuzzing Security. |
+| **6** | [`qa`](.agents/qa.md) | Software Quality Assurance & Shadow Inspector | **Gác cổng toàn trình**: Kiểm toán độc lập Gate 1–5, "Bóng ma giám sát" chống làm ẩu, bắt mock ngầm, đo lường context 60%–80% và cố vấn Go/No-Go Release. |
+
+### Chu trình luân chuyển liên Agent có QA Shadow bảo vệ:
+$$\text{Presale} \xrightarrow{\text{Chốt thầu}} \text{PO/PM} \xrightarrow{\text{Đề bài}} \text{BA} \xrightarrow[\text{QA Audit DoR}]{\text{Gate 1}} \text{SA} \xrightarrow[\text{QA Audit Arch}]{\text{Gate 2}} \text{Dev} \xrightarrow[\text{QA Audit Code/Mock}]{\text{Gate 3}} \text{QC} \xrightarrow[\text{QA Audit DB/Zero-Mock}]{\text{Gate 4}} \text{QA (Readiness)} \xrightarrow[\text{Go/No-Go}]{\text{Gate 5}} \text{PO/PM (DoD Sign-off)}$$
 
 ---
 
@@ -70,9 +83,9 @@ Mọi tệp tin sinh ra BẮT BUỘC phải lưu đúng địa chỉ theo Bảng
 | :--- | :--- | :--- |
 | **`/wf-presale`** | **`ps`** | Biến đề bài thô / RFP thành IT Proposal và bảng tính Man-Month chi tiết. |
 | **`/wf-kickoff`** | **`po-pm`** | Khởi động dự án, thiết lập Basic Design (Walking Skeleton) và Master Roadmap. |
-| **`/wf-autopilot [epic-id]`** | **`po-pm`** | Điều phối toàn trình tự động một Epic từ Đặc tả đến Mã nguồn hoàn thiện (7 chặng khép kín). |
+| **`/wf-autopilot [epic-id]`** | **`po-pm`** | Điều phối toàn trình tự động một Epic từ Đặc tả đến Mã nguồn hoàn thiện (7 chặng khép kín có QA Shadow). |
 | **`/wf-delta [cr-id]`** | **`sa` + `ba`** | Xử lý yêu cầu thay đổi (CR) theo nguyên tắc: Tài liệu đi trước, Code theo sau. |
 | **`/wf-uiux [epic-id]`** | **`dev`** | Chuẩn hóa giao diện 5 trạng thái UX và tự động chụp ảnh Playwright Visual QA. |
-| **`/wf-audit`** | **`sa`** | Kiểm toán toàn diện: Clean Architecture, Traceability khép kín, và dọn rác thư mục. |
+| **`/wf-audit`** | **`qa` + `sa`** | Kiểm toán toàn diện: Clean Architecture, Traceability khép kín, Zero-Mock, và dọn rác thư mục. |
 | **`/chot`** | **`sa`** | Sau khi chốt một quyết định kỹ thuật: Ghi nhận ADR trong `docs/decisions/` và cập nhật `open-questions.md`. |
 | **`/xong [epic-id]`** | **`po-pm`** | Kiểm tra Definition of Done -> Cập nhật Living Docs `docs/system/` -> Chuyển Shipped. |
