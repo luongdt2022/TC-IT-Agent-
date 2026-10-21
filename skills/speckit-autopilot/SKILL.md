@@ -1,10 +1,10 @@
 ---
 name: "speckit-autopilot"
-description: "Trục cao tốc tự động hóa toàn trình Epic (Specify -> Plan -> Tasks -> Implement -> SA Review Gate 3 -> QC Verify Gate 4 -> QA Shadow Audit -> PO Gate 5 DoD) theo chuẩn Enterprise Multi-Agent Stage-Gate."
+description: "Điều phối và thực thi tự động toàn diện một Epic qua các bước Spec Kit từ Specify đến Converge cho hệ sinh thái Enterprise TC IT."
 metadata:
-  author: "TC IT Agent Architecture Team"
-  source: "enterprise/speckit-autopilot"
-  version: "2.4.0"
+  author: "TC IT Architecture Team"
+  source: "custom/speckit-autopilot-tc"
+  version: "2.2.0"
 ---
 
 ## User Input
@@ -13,224 +13,262 @@ metadata:
 $ARGUMENTS
 ```
 
-Tham số đầu vào là mã Epic hoặc tên tính năng (Ví dụ: `EPIC-01`, `TASK-01`, hoặc tên phân hệ nghiệp vụ).  
-Nếu chưa cung cấp, hãy tra cứu `specs/ROADMAP.md` (hoặc `backlog/ROADMAP.md`) và hỏi người dùng muốn thực thi Epic nào.
+Tham số đầu vào là mã Task hoặc tên Epic (Ví dụ: `TASK-00`, `TASK-04_HO_SO_CHAO_BAN_SELLER_VA_BO_LOC`, `TASK-06`, hoặc một yêu cầu nghiệp vụ cụ thể).
+Nếu người dùng chưa cung cấp tham số, hãy tra cứu [`specs/ROADMAP.md`](specs/ROADMAP.md Drive/Enterprise TC ITProject/SourceCode/specs/ROADMAP.md) và hỏi người dùng muốn thực thi Epic nào trong danh mục từ `TASK-00` đến `TASK-07`.
 
 ---
 
-## Mục Tiêu & Triết Lý Vận Hành (Enterprise Autopilot Philosophy)
+## Mục Tiêu & Triết Lý Vận Hành (Philosophy)
 
-Skill **`speckit-autopilot`** giải quyết bài toán: **"Kích hoạt 1 lệnh — Hoàn thành khép kín cả Epic"**.  
-Tự động điều phối toàn bộ chu trình phát triển phần mềm doanh nghiệp qua 7 giai đoạn có chốt chặn kiểm soát nghiêm ngặt:
+Skill **`speckit-autopilot`** giải quyết bài toán: **"Gọi 1 lần — Hoàn thành cả Epic"**. 
+Thay vì người dùng phải gõ thủ công 7 câu lệnh nối tiếp nhau, skill này tự động điều phối toàn bộ chu trình phát triển phần mềm theo chuẩn Spec Kit của dự án Enterprise TC IT:
 
-1. **Tự Động Hóa Liền Mạch (Seamless Automation)**: Chuyển giao mượt mà giữa các tác tử (`po-pm`, `ba`, `techlead-sa`, `dev`, `ec`, `qa`).
-2. **Kỷ Luật Cách Ly Context (Subagent Context Isolation)**: 
-   - Dev, SA Review, và QC Verification bắt buộc chạy trong **Subagent độc lập** với Context mới tinh để tránh suy thoái trí nhớ và context pollution.
-   - QC nhận **Zero-Code Context**: Chỉ nhận Spec, Wireframe, và Live URL — tuyệt đối không mớm code của Dev cho QC.
-3. **5 Cổng Kiểm Soát Chất Lượng (Strict 5-Stage Gate Governance)**:
-   - **Gate 1 (DoR)**: BA soạn thảo SRS 7 mục, làm rõ điểm nghẽn (`ba-clarify`).
-   - **Gate 2 (Architecture & Plan)**: SA lập `plan.md`, chốt DTOs/Contract-First, chốt ADR.
-   - **Gate 3 (Dev DoD & Adversarial Review)**: SA thẩm định 6 trục kiểm soát, `guard-rails.sh`, độ phủ trường form $\ge 80\%$.
-   - **Gate 4 (QC Verification)**: QC kiểm thử Pure Black-Box, Zero-Mock, Deep DB State Verification.
-   - **Shadow QA Audit**: QA giám sát vi sai Git, săn mock ngầm, đo Token Context (60% - 80%).
-   - **Gate 5 (Release DoD)**: PO nghiệm thu cuối cùng theo Definition of Done (`xong`), xuất xưởng sang `[SHIPPED]`.
+1. **Tự Động Hóa Liền Mạch (Seamless Automation)**: Tự động chuyển giao kết quả từ bước này sang bước tiếp theo mà không làm gián đoạn tiến độ.
+2. **Điểm Dừng Tương Tác Có Trọng Tâm (Interactive Checkpoints)**: Chỉ dừng lại khi và chỉ khi:
+   - Phát hiện điểm mơ hồ, mâu thuẫn hoặc chưa rõ ràng trong yêu cầu nghiệp vụ (**Checkpoint 1.1**).
+   - Cần chốt quyết định kiến trúc quan trọng có nhiều phương án đánh đổi (**Checkpoint 2**).
+   - Gặp lỗi blocking bên ngoài cần chỉ đạo của người dùng (**Checkpoint 4**).
+   - Nghiệm thu tính năng khi hoàn tất 100% (**Checkpoint 5**).
+3. **Tuân Thủ Hiến Pháp Dự Án (`.specify/memory/constitution.md`)**:
+   - **Ánh xạ 1:1 với Thiết Kế Cơ Sở**: Mọi Task nghiệp vụ phải có nguồn gốc từ `Specification/02_BASIC_DESIGN/TASK-XX` và Master Excel SSOT.
+   - **Kiến trúc Modular Monolith & Clean Architecture**: Tách biệt rõ ràng tầng Domain, Application, Infrastructure và Presentation trong `SourceCode/backend/`.
+   - **Bảo mật & Phân quyền Đa tầng (3D Scoped RBAC)**: 10 vai trò hạt nhân (`PlatformRoles`), 4 cấp phạm vi (`ScopeTypes`: Global, Province, Sector, OrgUnit), kiểm soát quyền truy cập chặt chẽ (PDPD NĐ 13/2023/NĐ-CP).
+   - **Chuẩn Hóa Ngành & Thang Đo TRL**: Tuân thủ 18 ngành kinh tế TT17, 109 cặp quan hệ Lĩnh vực - Công nghệ và thang đo mức độ sẵn sàng công nghệ TRL 1–9.
+   - **Contract-First & Result Pattern**: Chốt DTOs và lỗi chuẩn RFC 7807 ProblemDetails trước khi code; mọi UseCase trả về `Result<T>`.
+   - **Cô Lập Submodules (Submodule Isolation)**: Code BE commit vào `NacenTwin.git`, code FE commit vào `NacenTwinFE.git`, chỉ lưu con trỏ và Spec tại Umbrella repo `Specification.git`.
 
 ---
 
-## Chu Trình Thực Thi 7 Giai Đoạn Chi Tiết
+## Quy Trình 7 Giai Đoạn Chi Tiết
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        TC IT AGENT ENTERPRISE AUTOPILOT PIPELINE                       │
+│                        TC IT AGENT SPECKIT AUTOPILOT PIPELINE                            │
 └────────────────────────────────────────────────────────────────────────────────────────┘
-  [1] speckit-specify   ──> Đọc Basic Design, sinh specs/[epic-id]/spec.md (SRS 7 mục)
+  [1] speckit-specify   ──> Đọc Basic Design (TASK-XX/README.md), sinh specs/TASK-XX/spec.md
            │
            ▼
-  [1.1] speckit-clarify ──> 🛑 CHECKPOINT 1: DỪNG LẠI nếu mơ hồ; Tự động đi tiếp nếu rõ ràng
+  [1.1] speckit-clarify ──> 🛑 CHECKPOINT 1: DỪNG LẠI nếu mơ hồ quy tắc/nghiệp vụ; Tự động nếu rõ
            │
            ▼
-  [2] speckit-plan      ──> 🏛️ GATE 2 (SA Review): Thiết kế Clean Architecture, DB schema, RBAC;
+  [2] speckit-plan      ──> 🏛️ GATE 2 (SA Review): Thiết kế Clean Architecture, DB schema, 3D Scoped RBAC;
            │                ⭐ CONTRACT-FIRST: Chốt DTOs/OpenAPI trước cho cả BE và FE
-           │                🛑 CHECKPOINT 2: SA thẩm định & Phê duyệt quyết định kiến trúc lớn (ADR)
+           │                🛑 CHECKPOINT 2: SA thẩm định & Phê duyệt quyết định kiến trúc lớn (Trade-offs)
            │
            ▼
   [2.1] speckit-uiux    ──> (Nếu Task có UI) Wireframe HTML mapping, chuẩn hóa 5 UX States (<Async>)
            │
            ▼
-  [3] speckit-tasks     ──> Phân rã tasks.md: Đủ 5 Entity Lifecycle ([FE-LIST], [DETAIL], [CREATE], [EDIT], [STATUS])
+  [3] speckit-tasks     ──> Phân rã tasks.md gắn tag [CONTRACT], [BE], [FE], [INT]
            │
            ▼
   [3.1] speckit-analyze ──> 🏛️ GATE 2 (SA Consistency): Rà soát chéo Coverage Matrix (100% REQ-*, BR-*)
            │
            ▼
-  [4] speckit-implement ──> ⚡ SUBAGENT ISOLATION (Dev): Lập trình tuần tự 1:1, Clean Arch, TDD
+  [4] speckit-implement ──> Thi công song song: BE (SourceCode/backend/) & FE (SourceCode/frontend/)
            │                🛑 CHECKPOINT 3: DỪNG LẠI nếu gặp blocker môi trường/DB/SDK
            │
            ▼
-  [4.1] sa-gate3-review ──> 🛑 GATE 3 BẮT BUỘC (SA Adversarial Review Subagent):
+  [4.1] sa-gate3-review ──> 🛑 GATE 3 BẮT BUỘC (SA Adversarial Review & DoD Gate):
            │                - SA chạy pr-review-guard & guard-rails.sh rà soát 6 trục kiểm soát
-           │                - Chạy audit_wireframe_fields.py (Controls coverage >= 80%)
            │                - SA phản hồi PO & Dev; Dev fix triệt để mọi lỗi Critical trước khi sang QC
            ▼
-  [5] speckit-converge  ──> 🛡️ GATE 4 (QC Subagent Black-box Verification):
-           │                - Pure Black-Box: Real Data, Real Login, Zero-Mock (Cấm page.route, cấm mock token)
-           │                - Deep DB Assertion: Query CSDL thật xác minh bản ghi INSERT/UPDATE
-           ▼
-  [5.1] qa-shadow-audit ──> 👻 SHADOW QA AUDIT (Independent Process):
-           │                - Đo Token Context (60% - 80%), quét Git diff bắt mock ngầm
-           │                - Thẩm định 5 Stage-Gate, xuất bản Release Readiness Scorecard
-           ▼
-  [5.2] po-signoff-gate5──> 🏆 GATE 5 (PO Acceptance):
-                            Nghiệm thu Definition of Done (xong), cập nhật Living Docs & ROADMAP -> [SHIPPED]
+  [5] speckit-converge  ──> 🛡️ GATE 4 (QC Verification) & GATE 5 (PO Sign-off):
+                            Chạy Unit Test BR-*, DB Integration, Playwright E2E, nghiệm thu DoD & ROADMAP
 ```
 
 ---
 
+### Cổng 0: Kiểm tra lan truyền quyết định (Cross-Surface Preflight)
+
+Trước Giai đoạn 1, Autopilot phải tìm các Decision Record mới hoặc quy tắc bị thay thế trong Basic Design/spec hiện hữu. Với mỗi quyết định có thể chạm nhiều kênh, lập Cross-Surface Impact Matrix gồm: Basic Design/wireframe, Detail Spec, API/DTO, domain validation, DB/migration, Web, Zalo/Mobile, public/owner/admin và test. Nêu rõ bề mặt nào không tồn tại hoặc ngoài scope.
+
+Nếu matrix phát hiện mâu thuẫn, chưa rõ phạm vi, hoặc có PII mà chưa rõ vòng đời (lưu, nhập, hiển thị, quyền đọc, mục đích), dừng ở Checkpoint 1 để hỏi PO; không tự triển khai ở một kênh rồi suy diễn cho phần còn lại.
+
 ### Giai Đoạn 1: Khởi Tạo Yêu Cầu Từ Basic Design (`speckit-specify`)
 
 1. **Xác định Feature Scope & Nguồn Dữ Liệu**:
-   - Đọc tài liệu nguồn tại `docs/01-basic-design/` hoặc biểu mẫu Wireframe HTML mô phỏng.
-2. **Khởi tạo Feature Directory**:
-   - Tạo thư mục: `specs/[epic-id]/`.
+   - Phân tích mã Task từ `$ARGUMENTS` (ví dụ `TASK-04_HO_SO_CHAO_BAN_SELLER_VA_BO_LOC` hoặc `TASK-00`).
+   - Nếu là Task nghiệp vụ (`TASK-01` $\rightarrow$ `TASK-07`): Tự động đọc tài liệu nguồn tại [`../../Specification/02_BASIC_DESIGN/TASK-XX/README.md`](specs/ROADMAP.md Drive/Enterprise TC ITProject/Specification/02_BASIC_DESIGN), các biểu mẫu HTML mô phỏng và Sheet Excel tương ứng trong `DỮ_LIỆU_GỐC_MASTER/`.
+   - Nếu là Task kỹ thuật (`TASK-00`): Đọc yêu cầu hạ tầng Clean Architecture, Docker PostgreSQL, Shared Kernel.
+2. **Khởi tạo Feature Directory Khớp 1:1**:
+   - Tạo thư mục: `specs/TASK-XX_<TEN_GIONG_BASIC_DESIGN>/` (Khớp 100% với tên thư mục Basic Design).
+   - Cập nhật `.specify/feature.json`:
+     ```json
+     {
+       "feature_directory": "specs/TASK-XX_<TEN_GIONG_BASIC_DESIGN>"
+     }
+     ```
 3. **Sinh tài liệu `spec.md` chuẩn hóa**:
-   - User Stories theo thứ tự ưu tiên (P1, P2...). Mỗi User Story có Acceptance Scenarios (Given-When-Then).
-   - Functional Requirements (`REQ-*`) và Business Rules (`BR-*`).
-4. **Cập nhật Roadmap**:
-   - Đánh dấu trạng thái Epic trong `specs/ROADMAP.md` sang `🔵 Đang thi công`.
+   - Xây dựng User Stories phân theo thứ tự ưu tiên (P1, P2...). Mỗi User Story phải có:
+     - **Why this priority** (Giá trị nghiệp vụ).
+     - **Independent Test** (Kịch bản kiểm thử độc lập).
+     - **Acceptance Scenarios** (Chuẩn Given-When-Then).
+   - Functional Requirements (`REQ-XX-###`) đánh số tuần tự.
+   - Business Rules (`BR-XX-###`): Bóc tách toàn bộ quy tắc nghiệp vụ (ví dụ: quy tắc lọc 18 ngành, điều kiện TRL 1-9 khi chuyển giao, quy tắc định danh MST).
+   - Success Criteria (`SC-###`): Tiêu chí định lượng đo lường được.
+4. **Đồng bộ Master Roadmap (`specs/ROADMAP.md`)**:
+   - Cập nhật trạng thái của Task trong Bảng Master Registry sang `🔵 Đang thi công`.
 
 ---
 
 ### Giai Đoạn 1.1: Làm Rõ Nghiệp Vụ (`speckit-clarify`) — 🛑 CHECKPOINT 1
 
-1. **Rà soát điểm mơ hồ**:
-   - Có logic rẽ nhánh mập mờ hoặc thiếu điều kiện bảo mật?
-   - Nếu có: **DỪNG LẠI NGAY (STOP)**, đặt tối đa 3 câu hỏi trắc nghiệm A/B/C có phân tích tác động kỹ thuật cho người dùng.
-   - Khi có xác nhận: ghi vào `spec.md` và tự động chuyển sang Giai đoạn 2.
-   - Nếu đã rõ ràng 100%: Tự động tiếp tục sang Giai đoạn 2.
+1. **Phân tích độ hoàn thiện của `spec.md`**:
+   - Rà soát các quy tắc nghiệp vụ: Có logic nào bị mập mờ, thiếu điều kiện rẽ nhánh hoặc xung đột giữa các Sheet dữ liệu?
+   - Rà soát tích hợp và quyền hạn: 3D Scoped RBAC (ai được duyệt, ở phạm vi tỉnh hay toàn quốc), quy chuẩn file đính kèm.
+2. **Ra quyết định rẽ nhánh**:
+   - **TRƯỜNG HỢP CÓ ĐIỂM MƠ HỒ (Ambiguous / Underspecified)**:
+     - **DỪNG LẠI NGAY LẬP TỨC (STOP)**.
+     - Trình bày tối đa 3 câu hỏi trọng tâm dạng bảng trắc nghiệm A/B/C kèm phân tích tác động kỹ thuật.
+     - Đợi phản hồi trực tiếp từ người dùng.
+     - Khi người dùng trả lời: Ghi nhận câu trả lời vào mục `Clarifications & Key Technical Decisions` trong `spec.md`, sau đó tự động chuyển sang **Giai đoạn 2**.
+   - **TRƯỜNG HỢP YÊU CẦU ĐÃ ĐỦ RÕ RÀNG (100% Clarity)**:
+     - Xuất thông báo: *"Yêu cầu nghiệp vụ của Task đã rõ ràng 100% từ tài liệu Basic Design. Tự động chuyển tiếp sang Giai đoạn 2: Lập kế hoạch kỹ thuật."*
+     - Tự động tiếp tục sang **Giai đoạn 2**.
 
 ---
 
 ### Giai Đoạn 2: Lập Kế Hoạch Kỹ Thuật (`speckit-plan`) — 🏛️ GATE 2 (SA CHECKPOINT)
 
-1. **Contract-First Design**:
-   - Định nghĩa DTOs, API Endpoints, ErrorCodes chuẩn trước khi viết code.
-2. **Architecture Plan**:
-   - Phân rã tầng Clean Architecture (`Domain`, `Application`, `Infrastructure`, `Presentation`, `WebApp`).
-   - Thiết kế CSDL, quan hệ khóa ngoại, Optimistic locking, index.
-   - Ghi nhận quyết định kiến trúc lớn thành ADR tại `docs/decisions/`.
-3. **🏛️ SA Thẩm định Gate 2**:
-   - SA rà soát schema, CQRS, phân quyền và xác nhận đạt chuẩn trước khi sang bước tiếp theo.
+1. **Thiết Kế Contract-First (Bản Hợp Đồng Giao Tiếp Bắt Buộc)**:
+   - Sinh file `plan.md` trong thư mục Task.
+   - Định nghĩa trước toàn bộ:
+     - Request / Response DTOs.
+     - API Endpoints (`API-XX-###`).
+     - Mã lỗi chuẩn RFC 7807 ProblemDetails (`ErrorCodes`).
+   - *Lợi ích*: Cung cấp ngay bản hợp đồng để Frontend và Backend có thể thi công song song.
+2. **Backend Architecture Plan (`backend/`)**:
+   - Xác định module thụ hưởng trong `backend/modules/<module-name>/`.
+   - Thiết kế Entity Framework Core Schema, Data Annotations, Foreign Keys tới Master Data (Ngành, Lĩnh vực).
+   - Tích hợp **3D Scoped RBAC**: Gán `ScopeType` và `ScopeId` vào bảng dữ liệu tương ứng.
+   - Thiết lập UseCase Handler (MediatR/FastEndpoints) áp dụng `Result<T>` và `AuditableEntity`.
+3. **Frontend Architecture Plan (`frontend/`)**:
+   - Cấu trúc trang/views, routing, state management.
+4. **Quy tắc Kiểm tra Hiến pháp (Constitution Check Gate)**:
+   - Nghiêm cấm dùng raw SQL không an toàn; bắt buộc dùng EF Core / LINQ parameterized queries.
+   - Bắt buộc kiểm tra quyền qua `ICurrentActor` (không hardcode role chuỗi trần).
+   - Bắt buộc dùng PostgreSQL container thật trong môi trường phát triển (không mock database cốt lõi).
+5. **🏛️ MẶC ĐỊNH GỌI SA (`nacen-techlead-sa`) KIỂM TRA KIẾN TRÚC (GATE 2)**:
+   - SA thẩm định toàn diện: (1) Schema EF Core, khóa ngoại, chỉ mục, concurrency token; (2) Phân quyền 3D Scoped RBAC; (3) Ranh giới Clean Architecture (cấm DbContext lên API Controller); (4) Tính phi phá hủy của Migration.
+   - **SA phản hồi trực tiếp cho PO & Dev**: Nếu phát hiện khiếm khuyết kiến trúc hoặc có phương án đánh đổi (Trade-offs lớn), SA đưa ra khuyến nghị. Dev/PO điều chỉnh và hoàn thiện `plan.md` trước khi sang Giai đoạn 3.
 
 ---
 
 ### Giai Đoạn 2.1: Thiết Kế UI/UX & Wireframe Mapping (`speckit-uiux`)
-*(Bỏ qua nếu Epic thuần Backend / Infrastructure)*
-1. **Wireframe HTML Mapping**:
-   - Đọc trực tiếp các file HTML Wireframe trong `docs/01-basic-design/`.
-2. **Chuẩn hóa 5 Trạng Thái UX qua `<Async>`**:
-   - `Loading` (Skeleton loader) · `Empty` · `Error` (nút Retry) · `Success` · `Partial` (phân trang).
+
+1. **Kiểm tra loại Task**:
+   - Nếu Task thuần backend (như `TASK-00`, Cron worker, Migration): Tự động bỏ qua và chuyển sang **Giai đoạn 3**.
+   - Nếu Task có giao diện người dùng (ví dụ: `TASK-01` Portal, `TASK-02` Form DN, `TASK-04` Bộ Lọc):
+2. **Khảo sát Wireframe từ Basic Design**:
+   - Đọc trực tiếp các file HTML review (ví dụ `bo_loc_cban_view.html`, `form_dn_dmst.html`).
+   - Quy hoạch layout Desktop (Dashboard/Grid lọc nâng cao) và Mobile (Responsive filter modal).
+3. **Chuẩn hóa 5 Trạng Thái UX Bắt Buộc (`<Async>`)**:
+   - `Loading`: Hiển thị Skeleton loaders tương ứng với form/bảng.
+   - `Empty`: Trạng thái rỗng kèm hướng dẫn và nút thêm mới/tra cứu lại.
+   - `Error`: Thông báo lỗi thân thiện kèm nút Thử lại (Retry).
+   - `Success`: Hiển thị dữ liệu chuẩn xác.
+   - `Partial`: Tải dữ liệu từng phần (Infinite scroll / phân trang PagedList).
+4. **Ghi nhận vào `plan.md`**: Bổ sung mục `UI/UX Component & Layout Specification` vào `plan.md`.
 
 ---
 
-### Giai Đoạn 3 & 3.1: Phân Rã Task & Rà Soát Nhất Quán (`speckit-tasks` & `speckit-analyze`)
+### Giai Đoạn 3 & 3.1: Phân Rã Task & Rà Soát Ma Trận Phủ (`speckit-tasks` & `speckit-analyze`)
 
-1. **Sinh `tasks.md` tuân thủ Kỷ luật 5 Hành vi Entity Lifecycle**:
-   - `[FE-LIST]`: Danh sách hiển thị, bộ lọc, phân trang kèm 5 UX states.
-   - `[FE-DETAIL]`: Màn hình xem chi tiết bản ghi (Read-only, masking dữ liệu nhạy cảm).
-   - `[FE-CREATE]`: Form tạo mới đầy đủ 100% trường dữ liệu theo Wireframe HTML gốc.
-   - `[FE-EDIT]`: Form chỉnh sửa bản nháp có kiểm tra quyền Owner và Optimistic Locking.
-   - `[FE-STATUS]`: Luồng chuyển đổi trạng thái (Gửi duyệt, Thu hồi, Hủy bỏ).
-2. **SA Rà Soát Tính Nhất Quán Chéo (`sa-analyze`)**:
-   - 100% User Stories và Business Rules `BR-*` đã có task thực thi tương ứng.
-   - Pass Gate 2 mới cho phép chuyển sang Giai đoạn 4.
+1. **Sinh file `tasks.md` đa chiều có gắn Tag Submodule**:
+   ```markdown
+   ### Phase 1: API Contract & Mocking [CONTRACT]
+   - [ ] T-XX.1 [CONTRACT] Định nghĩa DTOs và API Schema giao tiếp giữa BE và FE
+
+   ### Phase 2: Triển Khai Backend [BE] (Thực thi tại `SourceCode/backend/`)
+   - [ ] T-XX.2 [BE] Tạo EF Core Migration và Entity mapping có 3D Scoped RBAC
+   - [ ] T-XX.3 [BE] Cài đặt Domain Logic và Business Rules `BR-XX-*`
+   - [ ] T-XX.4 [BE] Viết Unit Tests bao phủ 100% các Business Rules
+
+   ### Phase 3: Triển Khai Frontend [FE] (Thực thi tại `SourceCode/frontend/`)
+   - [ ] T-XX.5 [FE] Xây dựng UI Screen theo wireframe Basic Design
+   - [ ] T-XX.6 [FE] Tích hợp gọi API client với 5 UX states
+
+   ### Phase 4: Tích Hợp & Nghiệm Thu [INT]
+   - [ ] T-XX.7 [INT] Chạy kiểm thử tích hợp E2E kết nối UI -> API -> DB
+   ```
+2. **🏛️ SA Rà Soát Ma Trận Phủ & Nhất Quán 3 Chiều (`speckit-analyze`)**:
+   - 100% User Stories đã có ít nhất một task thực thi.
+   - 100% Business Rules (`BR-XX-*`) có Unit Test tương ứng.
+   - Cross-Surface Impact Matrix đã được chuyển thành task `[BE]`, `[FE]`, `[TEST]` tương ứng.
+   - SA xác nhận không có mã mồ côi hoặc thiếu sót trước khi cho phép Dev bắt đầu viết code.
 
 ---
 
-### Giai Đoạn 4: Lập Trình Thực Thi Cô Lập Context (`speckit-implement`) — 🛑 CHECKPOINT 3
+### Giai Đoạn 4: Thi Công Thực Tế Song Song (`speckit-implement`) — 🛑 CHECKPOINT 3
 
-> [!CAUTION]
-> **KỶ LUẬT CÔ LẬP CONTEXT CỦA DEV (SUBAGENT CONTEXT ISOLATION)**:
-> Agent điều phối **BẮT BUỘC DÙNG TOOL `invoke_subagent`** để kích hoạt Agent `dev` với Context riêng độc lập và Model tốc độ cao (`flash`):
-> ```json
-> invoke_subagent(
->   TypeName: "dev",
->   Role: "Senior Full-Stack Developer",
->   Model: "flash",
->   Prompt: "Thực thi toàn bộ các task trong specs/[epic-id]/tasks.md theo spec.md và plan.md. Đảm bảo form đủ 100% trường theo Wireframe, chạy test trong context của bạn. Khi xong, chỉ gửi báo cáo tóm tắt hoàn thành về cho Orchestrator."
-> )
-> ```
-
-1. **Thực thi tuần tự nguyên tử 1 task/chu kỳ**:
-   - Pre-flight grounding (đọc UI catalog & DB schema).
-   - TDD: Viết Unit Test cho `BR-*` trước, viết mã nguồn nghiệp vụ sau.
-   - Cập nhật tick `[x]` sau khi kiểm chứng thành công.
-2. **Giải phóng Context**:
-   - Toàn bộ build logs, test logs nằm trong subagent của Dev; context chính luôn siêu nhẹ.
+1. **Thi công đúng ngữ cảnh Submodule**:
+   - Khi làm task `[BE]`: AI tự động thao tác trong thư mục `SourceCode/backend/`, sinh mã nguồn .NET Clean Architecture, chạy kiểm thử:
+     ```bash
+     dotnet build Enterprise TC IT.slnx
+     dotnet test tests/Enterprise TC IT.UnitTests/
+     ```
+   - Khi làm task `[FE]`: Thao tác trong thư mục `SourceCode/frontend/`, dựng component, test các trạng thái UX.
+2. **Cập nhật tiến độ**: Tự động đánh dấu `[x]` vào từng task hoàn thành trong `tasks.md`.
+3. **Xử lý tình huống Blocker**:
+   - Nếu gặp lỗi biên dịch không thể tự sửa, thiếu biến môi trường hoặc connection string CSDL -> **DỪNG LẠI BÁO CÁO NGƯỜI DÙNG** kèm phương án xử lý ngay lập tức.
 
 ---
 
 ### Giai Đoạn 4.1: Kiểm Toán Đối Kháng SA & Gác Cổng DoD (Gate 3 Bắt Buộc) — 🛑 CHECKPOINT 3.5
 
-> [!CAUTION]
-> **KỶ LUẬT CÔ LẬP CONTEXT CỦA SA REVIEW (SUBAGENT ISOLATION FOR SA GATE 3)**:
-> Agent điều phối kích hoạt **`techlead-sa`** qua `invoke_subagent`:
-> ```json
-> invoke_subagent(
->   TypeName: "techlead-sa",
->   Role: "Gate 3 Adversarial Reviewer",
->   Model: "flash",
->   Prompt: "Thực hiện Gate 3 Adversarial Review cho mã nguồn vừa thi công của [epic-id]. Chạy ./scripts/guard-rails.sh và audit_wireframe_fields.py trong context của bạn. Thẩm định 6 trục kiểm soát. Chỉ khi 0 lỗi Critical mới ký duyệt GATE 3 APPROVED."
-> )
-> ```
+> [!IMPORTANT]
+> **QUY ĐỊNH BẮT BUỘC TRƯỚC KHI BÀN GIAO SANG QC**:
+> Mặc định khi Dev hoàn thành lập trình, workflow **BẮT BUỘC KÉO SA (`nacen-techlead-sa`) VÀO KIỂM TRA**. Tuyệt đối CẤM chuyển thẳng sang QC (`nacen-qc`) khi chưa có kết luận thẩm định Gate 3 của SA!
 
 1. **SA Kích hoạt Chốt chặn Tĩnh & Review Mã Nguồn**:
-   - Chạy `./scripts/guard-rails.sh`: 0 lỗi compilation, 0 TypeScript warning.
-   - Chạy `./scripts/audit_wireframe_fields.py`: Tỷ lệ controls trên giao diện $\ge 80\%$.
-   - Quét sạch 100% mock routes, mock token, dummy array trong `catch`.
-   - Rà soát 6 trục kiểm soát qua `pr-review-guard`.
-2. **Dev khắc phục triệt để lỗi CRITICAL**:
-   - Chỉ khi SA ký duyệt **"GATE 3 APPROVED"**, task mới được chuyển sang Giai đoạn 5 bàn giao cho QC!
+   - Chạy `./Agent/scripts/guard-rails.sh` kiểm tra: 0 compiler error/warning, 0 lỗi TypeScript, kiểm tra AST Clean Architecture.
+   - Kích hoạt `/pr-review-guard` rà soát theo **6 trục kiểm soát**:
+     - **Trục 1 (Clean Architecture)**: Không tiêm `DbContext` lên API Controller, Domain không phụ thuộc Infra, dùng MediatR CQRS.
+     - **Trục 2 (CSDL & EF Core)**: Migration phi phá hủy, không có N+1 query, Optimistic locking đầy đủ.
+     - **Trục 3 (3D Scoped RBAC)**: Phân quyền chặt chẽ theo ScopeType/ScopeId, chặn rò rỉ IDOR/Cross-tenant.
+     - **Trục 4 (Concurrency & Idempotency)**: Đảm bảo luồng ghi nhạy cảm có IdempotencyRecord.
+     - **Trục 5 (Frontend 5 UX States)**: Component bọc `<Async>`, có nút Retry khi lỗi, disabled khi submit.
+     - **Trục 6 (Unit Test BR-*)**: Đảm bảo 100% `BR-*` có Unit Test và pass 100%.
+2. **SA Phản hồi và Chỉ đạo Sửa chữa (Feedback Loop)**:
+   - SA lập bảng đánh giá phân loại:
+     - `🔴 CRITICAL`: Vi phạm kiến trúc, rò rỉ CSDL, thiếu test BR-*, lỗi build $\rightarrow$ **Chặn xuất xưởng**.
+     - `🟡 WARNING`: Tối ưu hóa hiệu năng, đặt tên, tài liệu.
+   - **SA phản hồi trực tiếp cho PO và Dev**: Chỉ rõ từng file, dòng code và cách sửa.
+   - **Dev BẮT BUỘC fix triệt để 100% lỗi `CRITICAL`**.
+   - SA thực hiện Re-check. **CHỈ KHI SA KÝ DUYỆT "GATE 3 APPROVED"**, task mới được chuyển sang Giai đoạn 5 để bàn giao cho QC!
 
 ---
 
-### Giai Đoạn 5: Đánh Giá Hội Tụ & Nghiệm Thu QC (`speckit-converge`) — 🛡️ GATE 4
+### Giai Đoạn 5: Đánh Giá Hội Tụ & Nghiệm Thu QC/PO (`speckit-converge`) — 🛡️ GATE 4 & GATE 5
 
-> [!CAUTION]
-> **KỶ LUẬT CÔ LẬP SUBAGENT QC (ZERO-CODE CONTEXT ISOLATION)**:
-> Agent điều phối kích hoạt Agent `ec` qua `invoke_subagent` với **Zero-Code Payload**:
-> ```json
-> invoke_subagent(
->   TypeName: "ec",
->   Role: "Independent Black-Box QC",
->   Model: "flash",
->   Prompt: "Kiểm thử Pure Black-box cho [epic-id]. Tài liệu đối soát: docs/01-basic-design/ và specs/[epic-id]/spec.md (chỉ đọc User Stories và BR-*). TUYỆT ĐỐI KHÔNG ĐỌC SOURCE CODE CỦA DEV. Bắt buộc test tài khoản thật, cấm mock token, đối soát CSDL thật."
-> )
-> ```
-
-1. **Kiểm thử Black-Box Đa Tầng**:
-   - Tầng 1: Unit & Invariants Test.
-   - Tầng 2: Contract Test (API DTO compatibility).
-   - Tầng 3: Database Integration Test (đối soát CSDL thật: dữ liệu được INSERT/UPDATE chính xác, không rỗng ruột).
-   - Tầng 4: Playwright E2E Pure Black-Box (tài khoản thật, controls thật, không dùng `page.route()`).
-2. **Ký duyệt Gate 4**: Đạt 100% Green $\rightarrow$ QC ký xác nhận Pass Gate 4.
-
----
-
-### Giai Đoạn 5.1: Kiểm Toán Độc Lập Shadow QA (`qa-shadow-sentinel` & `qa-gate-audit`)
-
-1. **Kích hoạt QA Agent**:
-   - Chạy `./scripts/qa-shadow-sentinel.sh`.
-   - Đo lường Token Context (cảnh báo vùng vàng 60%, báo động đỏ 80%).
-   - Quét vi sai Git diff bắt mock ngầm.
-   - Xuất bản Release Readiness Scorecard, cấp thẻ **[GO]** cho PO.
-
----
-
-### Giai Đoạn 5.2: Nghiệm Thu Cuối Cùng & Xuất Xưởng (Gate 5 Sign-off - PO DoD)
-
-1. **Nghiệm thu DoD qua `xong`**:
-   - PO/PM (`po-pm`) đối soát Acceptance Criteria và Definition of Done.
-   - Cập nhật Living Docs tại `docs/system/`.
-   - Cập nhật Master Roadmap tại `specs/ROADMAP.md` sang trạng thái `✅ [SHIPPED]`.
-2. **Báo Cáo Nghiệm Thu Trọn Vẹn**:
-   - Xuất báo cáo tổng kết tiến độ hoàn thành cho người dùng.
+1. **Bàn giao QC Chuyên Trách (Gate 4 Verification)**:
+   - QC (`nacen-qc`) tiếp nhận mã nguồn đã được SA phê duyệt ở Gate 3.
+   - Thực thi kiểm thử 3 tầng / 4 tầng độc lập:
+     - Tầng 1: Unit & Invariants Test.
+     - Tầng 2: Contract Test (API DTO compatibility).
+     - Tầng 3: Database Integration Test trên PostgreSQL container thật.
+     - Tầng 4: Playwright E2E Visual QA & Scoped RBAC Fuzzing.
+   - Đạt 100% Green $\rightarrow$ QC ký xác nhận Pass Gate 4.
+2. **Nghiệm thu Cuối cùng (Gate 5 Sign-off - PO DoD)**:
+   - PO/PM (`nacen-po-pm`) đối soát Acceptance Criteria và Definition of Done (`xong`).
+   - CSDL: Migration chạy thành công trên PostgreSQL container thật.
+   - Ma trận truy vết: Đối soát khép kín trong [`specs/TRACEABILITY.md`](specs/ROADMAP.md Drive/Enterprise TC ITProject/SourceCode/specs/TRACEABILITY.md).
+   - Cross-Surface Impact Matrix: không còn bề mặt chưa rà soát.
+3. **Đồng bộ Master Roadmap (`specs/ROADMAP.md`)**:
+   - Cập nhật trạng thái của Task sang `✅ Hoàn thành`.
+   - Cập nhật số task thực tế, kết quả test và ghi nhận vào Lịch sử thay đổi (Mục 4 của Roadmap).
+4. **Hướng dẫn Commit Đa Tầng Submodules**:
+   - Xuất lệnh git gợi ý để người dùng commit và push mã nguồn của từng repo:
+     ```bash
+     # 1. Commit Backend (nếu có sửa code BE):
+     cd backend && git add . && git commit -m "feat(module): implement TASK-XX" && git push origin main && cd ..
+     # 2. Commit Frontend (nếu có sửa code FE):
+     cd frontend && git add . && git commit -m "feat(ui): implement TASK-XX screens" && git push origin main && cd ..
+     # 3. Commit Umbrella Repo (lưu spec và con trỏ submodules):
+     git add . && git commit -m "feat(spec): converge and complete TASK-XX" && git push origin main
+     ```
+5. **Báo Cáo Nghiệm Thu Trọn Vẹn**:
+   - Tổng kết các tính năng đã hoàn thiện.
+   - Báo cáo số lượng Unit/Integration test pass.
+   - Sẵn sàng kích hoạt Task tiếp theo theo lộ trình Master Roadmap.

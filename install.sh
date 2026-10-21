@@ -211,6 +211,10 @@ if [[ "$IS_UPDATE" == true ]]; then
         cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
         chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
     fi
+    if [[ -d "${SCRIPT_DIR}/dashboard" ]]; then
+        mkdir -p "${TARGET_DIR}/dashboard"
+        cp -Rf "${SCRIPT_DIR}/dashboard/"* "${TARGET_DIR}/dashboard/"
+    fi
 
     # 6. Cập nhật các Adapters cấu hình IDE (Không ghi đè constitution hay dữ liệu dự án)
     echo -e "${CYAN}[6/6] Cập nhật các Platform Adapters...${NC}"
@@ -307,6 +311,10 @@ fi
 if [[ -f "${SCRIPT_DIR}/loop" ]]; then
     cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
     chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
+fi
+if [[ -d "${SCRIPT_DIR}/dashboard" ]]; then
+    mkdir -p "${TARGET_DIR}/dashboard"
+    cp -Rf "${SCRIPT_DIR}/dashboard/"* "${TARGET_DIR}/dashboard/"
 fi
 
 echo -e "${GREEN}✓ Đã tạo thành công cây thư mục phân tầng chuẩn Clean Architecture, Docs & Loop Engine!${NC}"

@@ -1,28 +1,27 @@
 ---
-name: "speckit-uiux"
+name: speckit-uiux
 description: "Senior Product Designer & Visual QA Specialist: Thiết kế layout theo HTML Wireframe Basic Design, chuẩn hóa 5 trạng thái UX qua <Async>, phân quyền 3D Scoped RBAC UI và tự động chụp ảnh Visual QA bằng Playwright."
-compatibility: "Requires Frontend Submodule (SourceCode/frontend/ or frontend/) with Playwright"
+compatibility: "Requires Frontend Submodule (SourceCode/frontend/) with Playwright"
 metadata:
-  author: "Enterprise Architecture Team"
-  source: "custom/speckit-uiux"
-  version: "2.4.0"
+  author: "TC IT Architecture Team"
+  source: "custom/speckit-uiux-tc"
+  version: "2.1.0"
 ---
-
-# Kỹ Năng Thiết Kế Giao Diện & Kiểm Thử Trực Quan Enterprise (`speckit-uiux`)
+# Kỹ Năng Thiết Kế Giao Diện & Kiểm Thử Trực Quan Nacentwin (`speckit-uiux`)
 
 ## 1. Mục Đích & Vai Trò
-Khi dự án bước vào giai đoạn thiết kế và thi công giao diện Frontend tại `SourceCode/frontend/` (hoặc `frontend/`), skill này đóng vai trò là **Senior Product Designer & Visual QA Specialist**:
+Khi dự án bước vào giai đoạn thiết kế và thi công giao diện Frontend tại [`SourceCode/frontend/`](file:///Users/luongdt/Library/CloudStorage/GoogleDrive-luongdt.wi@gmail.com/My Drive/Enterprise TC ITProject/SourceCode/frontend), skill này đóng vai trò là **Senior Product Designer & Visual QA Specialist**:
 1. **Bảo toàn 100% nghiệp vụ từ Basic Design**:
-   - Đối soát trực tiếp với các file HTML Wireframe mô phỏng trong tài liệu Basic Design (`Specification/02_BASIC_DESIGN/` hoặc `docs/design/`).
-   - Đối chiếu danh mục trường thông tin và controls tương tác; tỷ lệ bao phủ controls wireframe phải đạt tối thiểu $\ge 80\%$.
-2. **Quy chuẩn Enterprise Design System**:
-   - **Bảng màu chủ đạo**: Primary Blue/Navy (`#1e40af`), Accent Cyan (`#06b6d4`), Success Emerald (`#10b981`), Neutral Slate (`#0f172a`).
+   - Đối soát trực tiếp với các file HTML Wireframe mô phỏng tại `Specification/02_BASIC_DESIGN/TASK-XX/`.
+   - Giữ trọn vẹn các cấu trúc nghiệp vụ đặc thù: Form 225 trường DN ĐMST, Bộ lọc 1,479 quy tắc cho 18 ngành, Thang đo TRL 1-9, Cây đơn vị 63 Sở KH&CN Tỉnh.
+2. **Quy chuẩn Design System Nacentwin**:
+   - **Bảng màu chủ đạo**: Tech Navy Blue (`#1e40af`), Vibrant Cyan (`#06b6d4`), Innovation Emerald (`#10b981`), Neutral Dark (`#0f172a`).
    - Hỗ trợ mượt mà **Light / Dark Mode**.
    - Typography: Font chữ hiện đại `Plus Jakarta Sans` hoặc `Inter` cho text tiếng Việt chuẩn UTF-8, `JetBrains Mono` cho mã định danh.
 3. **Chuẩn hóa trải nghiệm người dùng vi mô (Micro-UX)**:
    - Bắt buộc mọi View/Screen đều có đủ 5 trạng thái tương tác bọc trong component `<Async>`.
 4. **Phân quyền giao diện theo ngữ cảnh (3D Scoped RBAC UI)**:
-   - Kiểm soát trường thông tin và nút bấm theo PlatformRoles và ScopeTypes (Global, Tenant, Department, User).
+   - Kiểm soát trường thông tin và nút bấm theo 10 PlatformRoles và 4 ScopeTypes.
 5. **Nghiệm thu trực quan thực tế (Visual QA)**:
    - Tự động dùng Playwright chụp ảnh màn hình ở 2 độ phân giải Desktop (1440×900) và Mobile (390×844).
 
@@ -31,13 +30,18 @@ Khi dự án bước vào giai đoạn thiết kế và thi công giao diện Fr
 ## 2. Quy Trình Thiết Kế UI/UX 5 Bước Chi Tiết
 
 ### Bước 1: Khảo Sát Wireframe Từ Basic Design
-Tra cứu chính xác file HTML mockup tương ứng với Task/Epic đang thực hiện:
-- Đọc file wireframe mẫu tương ứng, lập danh mục toàn bộ inputs, buttons, tables, filters, modals.
-- Chạy script kiểm toán đối soát nếu có: `python scripts/audit_wireframe_fields.py`.
+Tra cứu chính xác file HTML mockup tương ứng với Task đang thực hiện trong `Specification/02_BASIC_DESIGN/`:
+- `TASK-01`: Đọc `TASK-01_TONG_QUAN_VA_KIEN_TRUC_HOME/wireframe_home.html` (Landing, Sitemap, Menu, Chatbot AI).
+- `TASK-02`: Đọc `TASK-02_HO_SO_DOANH_NGHIEP_DMST/form_dn_dmst.html` (Form 10 nhóm trường 225 fields, MST).
+- `TASK-03`: Đọc `TASK-03_HO_SO_TIM_MUA_BUYER/survey_buyer.html` (Khảo sát nhu cầu công nghệ DNNVV, Triển lãm Cung VHLĐ).
+- `TASK-04`: Đọc `TASK-04_HO_SO_CHAO_BAN_SELLER_VA_BO_LOC/bo_loc_cban_view.html` (Bộ lọc 1,479 rules cho 18 ngành, widget 3 điều kiện, TRL 1-9).
+- `TASK-05`: Đọc `TASK-05_HO_SO_CHUYEN_GIA_KHCN/cv_scanner_flow.html` (LLKH chuẩn Bộ KH&CN, luồng AI OCR bóc tách file CV).
+- `TASK-06`: Đọc `TASK-06_HE_THONG_DANH_MUC_NGANH_MA_TRAN/matrix_lv_cn.html` (Ma trận 109 cặp quan hệ LV-CN).
+- `TASK-07`: Đọc `TASK-07_PHAN_QUYEN_QUAN_TRI_ADMIN/admin_approval.html` (Bảng điều khiển 5 quyền hạt nhân Admin).
 
 ### Bước 2: Bố Cục Giao Diện (Layout Specification)
 - **Desktop (>= 1280px)**:
-  - Header: Logo dự án, Menu điều hướng, thanh tìm kiếm thông minh, Avatar và Scope Badge.
+  - Header: Logo Nacentwin, Menu điều hướng, thanh tìm kiếm thông minh, Avatar và Scope Badge (ví dụ: *[Sở KH&CN Hà Nội]*).
   - Main Layout: Thường chia 2 cột: Cột trái (25-30%) là Bộ lọc đa tầng hoặc Menu quản trị; Cột phải (70-75%) là Bảng dữ liệu / Form nhập liệu.
 - **Mobile (< 768px)**:
   - Tự động co về 1 cột dọc (Single column responsive).
@@ -48,7 +52,9 @@ Tra cứu chính xác file HTML mockup tương ứng với Task/Epic đang thự
 Không viết style ad-hoc, bắt buộc dùng các components dùng chung trong `frontend/src/components/`:
 - `<FormField>`: Tự động render Label, cờ bắt buộc `*`, tooltip giải thích, thông báo lỗi inline đỏ khi vi phạm rule.
 - `<LoadingButton>`: Chống click đúp, tự động xoay Spinner và disabled khi đang gọi API.
-- `<StatusBadge>`: Component hiển thị huy hiệu trạng thái với màu sắc trực quan tương ứng (Draft, Pending, Active, Rejected, Inactive).
+- `<TRLBadge value={1..9}>`: Component hiển thị huy hiệu thang đo mức độ sẵn sàng công nghệ với màu sắc trực quan (TRL 1-3 Đỏ, 4-6 Vàng, 7-9 Xanh lá).
+- `<SectorTag>`: Hiển thị 18 ngành TT17 kèm icon chuyên ngành.
+- `<AIUploadDropzone>`: Khu vực kéo thả file CV/LLKH hỗ trợ xem trước và tiến trình scan AI.
 - `<Toast>`: Thông báo nổi góc trên/dưới xác nhận lưu thành công hoặc cảnh báo.
 
 ### Bước 4: Chuẩn Hóa 5 Trạng Thái UX Bắt Buộc (`<Async>`)
@@ -59,7 +65,7 @@ Mọi màn hình gọi dữ liệu từ API Backend bắt buộc phải bọc tr
     <TableSkeleton rows={5} />
   </Async.Loading>
   <Async.Empty 
-    message="Không tìm thấy bản ghi nào phù hợp với bộ lọc." 
+    message="Không tìm thấy công nghệ nào phù hợp với bộ lọc." 
     actionLabel="Đặt lại bộ lọc" 
     onAction={resetFilter} 
   />
@@ -68,10 +74,10 @@ Mọi màn hình gọi dữ liệu từ API Backend bắt buộc phải bọc tr
     onRetry={refetch} 
   />
   <Async.Success>
-    {(data) => <RecordList items={data.items} />}
+    {(data) => <TechnologyList items={data.items} />}
   </Async.Success>
   <Async.Partial>
-    {(data) => <RecordList items={data.items} isLoadingMore={true} />}
+    {(data) => <TechnologyList items={data.items} isLoadingMore={true} />}
   </Async.Partial>
 </Async>
 ```
@@ -83,14 +89,13 @@ Mọi màn hình gọi dữ liệu từ API Backend bắt buộc phải bọc tr
      + **Mobile**: 390 × 844 (iPhone)
    - Lưu ảnh vào: `SourceCode/frontend/tests/visual-qa/screenshots/<task-id>/<screen-name>-desktop.png` và `-mobile.png`.
 2. **Đối soát & Báo cáo**:
-   - So sánh ảnh chụp thực tế với wireframe HTML nguồn trong Basic Design để đảm bảo độ chuẩn xác.
+   - So sánh ảnh chụp thực tế với wireframe HTML nguồn trong Basic Design để đảm bảo độ chuẩn xác 100%.
 
 ---
 
 ## 3. Tiêu Chí Nghiệm Thu UI/UX (Definition of Done)
-- [ ] Khớp $\ge 80\%$ các trường dữ liệu và controls tương tác từ file HTML Wireframe Basic Design.
-- [ ] Tuân thủ bảng màu chuẩn của Design System và hoạt động mượt mà ở cả Light/Dark Mode.
+- [ ] Khớp 100% các trường dữ liệu và luồng tương tác từ file HTML Wireframe Basic Design.
+- [ ] Tuân thủ bảng màu công nghệ Enterprise TC IT và hoạt động mượt mà ở cả Light/Dark Mode.
 - [ ] 100% các màn hình có đủ 5 trạng thái UX xử lý qua `<Async>`.
 - [ ] Giao diện tự động thích ứng hoàn hảo giữa Desktop (1440px) và Mobile (390px).
 - [ ] Đã chạy Playwright chụp ảnh Visual QA đầy đủ và lưu vào thư mục screenshots.
-- [ ] Không có nút chết, không có dummy array giả lập trong khối `catch` (Tuân thủ Zero-Mock).

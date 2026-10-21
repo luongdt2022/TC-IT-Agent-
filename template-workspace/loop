@@ -25,7 +25,18 @@ if [ -n "$2" ]; then
     SPEC_PARAM="--spec $2"
 fi
 
-if [ "$1" == "dash" ] || [ "$1" == "dashboard" ] || [ "$1" == "status" ]; then
+if [ "$1" == "ui" ] || [ "$1" == "web" ] || [ "$1" == "gui" ]; then
+    echo -e "${C_CYAN}🚀 Khởi chạy TC IT Agent Web Dashboard tại http://127.0.0.1:8420 ...${C_RESET}"
+    $PYTHON_EXEC "$SCRIPT_DIR/dashboard/api/server.py" &
+    SERVER_PID=$!
+    sleep 1
+    if command -v open &> /dev/null; then
+        open "http://127.0.0.1:8420"
+    fi
+    echo -e "${C_GREEN}✓ Server đang chạy ngầm (PID: $SERVER_PID). Nhấn Ctrl+C để dừng.${C_RESET}"
+    wait $SERVER_PID
+    exit 0
+elif [ "$1" == "dash" ] || [ "$1" == "dashboard" ] || [ "$1" == "status" ]; then
     $PYTHON_EXEC "$ENGINE_SCRIPT" dashboard $SPEC_PARAM
     exit 0
 elif [ "$1" == "pipeline" ] || [ "$1" == "auto" ]; then
@@ -87,7 +98,8 @@ else:
     echo -e "  ${C_BOLD}[9]${C_RESET} ${C_GREEN}Thêm ý tưởng / CR mới vào Backlog${C_RESET}"
     echo ""
     echo -e "  ${C_YELLOW}${C_BOLD}─── THỰC THI CHO 1 EPIC ĐANG CHỌN ─────────────────────────────────────${C_RESET}"
-    echo -e "  ${C_BOLD}[1]${C_RESET} ${C_GREEN}Xem tiến độ công việc${C_RESET} (Dashboard trực quan)"
+    echo -e "  ${C_BOLD}[w]${C_RESET} ${C_CYAN}${C_BOLD}Mở Web Dashboard tương tác${C_RESET} (DAG, 3 Human Gates, Realtime Live Telemetry)"
+    echo -e "  ${C_BOLD}[1]${C_RESET} ${C_GREEN}Xem tiến độ công việc${C_RESET} (TUI Dashboard trực quan)" 
     echo -e "  ${C_BOLD}[2]${C_RESET} ${C_YELLOW}Bật AI chạy ngầm âm thầm${C_RESET} (Run in Background qua tmux)"
     echo -e "  ${C_BOLD}[3]${C_RESET} ${C_CYAN}Xem trực tiếp AI đang làm gì${C_RESET} (Attach Live Screen)"
     echo -e "  ${C_BOLD}[4]${C_RESET} ${C_RED}Dừng AI chạy ngầm${C_RESET} (Stop Background Process)"
@@ -120,6 +132,18 @@ else:
             fi
             echo ""
             read -p "Nhấn Enter để quay lại menu..." dummy
+            ;;
+        w|W|ui|web)
+            echo ""
+            echo -e "${C_CYAN}🚀 Khởi chạy Web Dashboard tại http://127.0.0.1:8420 ...${C_RESET}"
+            $PYTHON_EXEC "$SCRIPT_DIR/dashboard/api/server.py" &
+            SERVER_PID=$!
+            sleep 1
+            if command -v open &> /dev/null; then
+                open "http://127.0.0.1:8420"
+            fi
+            echo -e "${C_GREEN}✓ Server đang chạy ngầm (PID: $SERVER_PID). Nhấn Ctrl+C để đóng.${C_RESET}"
+            wait $SERVER_PID
             ;;
         1)
             echo ""

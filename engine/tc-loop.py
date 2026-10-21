@@ -558,6 +558,7 @@ QUY CHUẨN KỸ THUẬT BẮT BUỘC:
 
             state["active_task_id"] = task.task_id
             state["status"] = "IN_PROGRESS"
+            self.record_telemetry(task.task_id, stage="START", status="IN_PROGRESS")
             state["attempts"] = 0
             self.save_state(state)
 

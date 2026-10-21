@@ -1,7 +1,7 @@
-# TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v2.4)
+# TC IT Agent Framework — Khung Vận Hành Đa Tác Tử Doanh Nghiệp (Multi-Agent Enterprise v3.0 (Web Dashboard & Full Spec-Kit Suite))
 
 > **TC IT Agent** là bộ khung điều phối AI Agent toàn diện dành cho phát triển phần mềm doanh nghiệp, được đúc kết từ tinh hoa của hai phương pháp luận hàng đầu: **GitHub Spec Kit** (Đặc tả chính xác) và **BMad Method** (Tranh biện đối kháng đa tác tử & kiểm thử đa tầng).  
-> **Phiên bản 2.4 Enterprise**: Bổ sung **Software Quality Assurance Lead & Shadow QA Inspector (`qa.md`)**, cơ chế **Bóng ma giám sát độc lập (Shadow QA Sentinel & Real-time Audit)**, giám sát trí nhớ **Context Telemetry (ngưỡng 60% – 80% Safe Context Evacuation)**, chốt chặn cơ học **Độ phủ trường biểu mẫu Wireframe (`audit_wireframe_fields.py` $\ge 80\%$)**, triệt tiêu Mock ngầm trên Client (**Zero-Mock Discipline**), đối soát CSDL thật (**Deep DB State Verification**), chuẩn hóa **5 Hành vi Entity Lifecycle trên Frontend**, và kịch bản điều phối báo cáo tiến độ PO/PM hàng ngày (`send_po_report.py`).
+> **Phiên bản 3.0 Enterprise**: Bổ sung **Software Quality Assurance Lead & Shadow QA Inspector (`qa.md`)**, cơ chế **Bóng ma giám sát độc lập (Shadow QA Sentinel & Real-time Audit)**, giám sát trí nhớ **Context Telemetry (ngưỡng 60% – 80% Safe Context Evacuation)**, chốt chặn cơ học **Độ phủ trường biểu mẫu Wireframe (`audit_wireframe_fields.py` $\ge 80\%$)**, triệt tiêu Mock ngầm trên Client (**Zero-Mock Discipline**), đối soát CSDL thật (**Deep DB State Verification**), chuẩn hóa **5 Hành vi Entity Lifecycle trên Frontend**, và kịch bản điều phối báo cáo tiến độ PO/PM hàng ngày (`send_po_report.py`).
 
 ---
 
@@ -9,7 +9,12 @@
 
 ```text
 TC IT Agent/
-├── loop                          # Bảng điều khiển 1 chạm TUI & Shortcut CLI điều khiển vòng lặp AI
+├── loop                          # Bảng điều khiển 1 chạm TUI & Shortcut CLI điều khiển vòng lặp AI (Hỗ trợ ./loop ui mở Web Dashboard)
+├── dashboard/                    # [MỚI V3.0] Live Realtime Agent Orchestrator Web Dashboard (http://127.0.0.1:8420)
+│   ├── api/server.py             # FastAPI & SSE Streaming Server cho DAG, Human Gates & Model Config
+│   ├── core/dag_engine.py        # Động cơ DAG đồ thị phụ thuộc, Topological Sort Wave & Critical Path
+│   ├── core/live_runner.py       # Cầu nối thực thi trực tiếp Stage-Gate, Telemetry & QA Sentinel
+│   └── static/index.html         # Giao diện Web hiện đại, Stepper 6 giai đoạn, Live Logs & Model Matrix
 ├── engine/                       # Bộ máy thực thi Vòng lặp Tự trị & E2E Macro Pipeline
 │   ├── tc-loop.py                # Động cơ tự trị độc lập (Native Tmux, Fresh Context, Deterministic Gates)
 │   └── policy.toml               # Cấu hình chính sách vận hành dự án (timeout, blast radius, verify commands)

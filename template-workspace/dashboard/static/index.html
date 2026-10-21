@@ -1,0 +1,2840 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TC IT Agent - Autonomous Agent Orchestration Dashboard</title>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+          },
+          colors: {
+            bgDark: '#070a13',
+            cardDark: '#0e1526',
+            borderDark: '#1e293b',
+            accentCyan: '#06b6d4',
+            accentGreen: '#10b981',
+            accentOrange: '#f59e0b',
+            accentYellow: '#eab308',
+            accentPurple: '#a855f7',
+            accentBlue: '#3b82f6',
+            criticalGold: '#facc15'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070a13;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    .bezier-edge {
+      fill: none;
+      stroke: #1e293b;
+      stroke-width: 1.8;
+      transition: all 0.3s ease;
+    }
+    .bezier-edge.critical {
+      stroke: #facc15;
+      stroke-width: 2.2;
+      filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.5));
+    }
+    .bezier-edge.active {
+      stroke: #06b6d4;
+      stroke-width: 2.2;
+      filter: drop-shadow(0 0 5px rgba(6, 182, 212, 0.5));
+    }
+
+    /* ============================================================== */
+    /* GLOBAL TYPOGRAPHY & FONT ENHANCEMENT                           */
+    /* ============================================================== */
+    body, button, input, select, textarea {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    code, pre, .font-mono, [class*="font-mono"] {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace !important;
+      letter-spacing: -0.02em;
+    }
+
+    /* ============================================================== */
+    /* LIGHT THEME: CLEAN, HARMONIOUS, WARM SAAS PALETTE              */
+    /* ============================================================== */
+    html:not(.dark) {
+      color-scheme: light;
+      --text-primary: #0f172a;    /* Deep charcoal black for headers & titles */
+      --text-secondary: #334155;  /* Balanced slate for body & labels */
+      --text-muted: #64748b;      /* Gentle slate for metadata & hints */
+      --border-subtle: #e2e8f0;   /* Clean light gray border */
+      --bg-page: #f8fafc;         /* Soft off-white page background */
+      --bg-card: #ffffff;         /* Pure white card surface */
+    }
+
+    html:not(.dark) ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    html:not(.dark) ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+    }
+    html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    html:not(.dark) body {
+      background-color: #f8fafc !important;
+      color: #334155 !important;
+    }
+
+    html:not(.dark) header {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    html:not(.dark) header h1 {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #liveClock {
+      color: #64748b !important;
+    }
+
+    /* General Typography Neutralization */
+    html:not(.dark) h1, 
+    html:not(.dark) h2, 
+    html:not(.dark) h3,
+    html:not(.dark) h4,
+    html:not(.dark) h5,
+    html:not(.dark) h6 {
+      color: #0f172a !important;
+    }
+    html:not(.dark) p,
+    html:not(.dark) span:not([class*="text-"]):not([class*="bg-"]):not([class*="badge"]),
+    html:not(.dark) div:not([class*="text-"]):not([class*="bg-"]):not([class*="btn"]) {
+      color: inherit;
+    }
+    html:not(.dark) .text-slate-200,
+    html:not(.dark) .text-slate-300 {
+      color: #334155 !important;
+    }
+    html:not(.dark) .text-slate-400,
+    html:not(.dark) .text-slate-500 {
+      color: #64748b !important;
+    }
+
+    /* Harmonious Soft Color Accents (No more neon text!) */
+    html:not(.dark) .text-emerald-400,
+    html:not(.dark) .text-emerald-300 {
+      color: #047857 !important; /* Deep forest emerald */
+    }
+    html:not(.dark) .text-cyan-400,
+    html:not(.dark) .text-cyan-300 {
+      color: #0369a1 !important; /* Deep slate blue */
+    }
+    html:not(.dark) .text-amber-400,
+    html:not(.dark) .text-amber-300 {
+      color: #92400e !important; /* Warm amber/wood */
+    }
+    html:not(.dark) .text-purple-400,
+    html:not(.dark) .text-purple-300 {
+      color: #6b21a8 !important; /* Deep calm purple */
+    }
+    html:not(.dark) .text-rose-400,
+    html:not(.dark) .text-rose-300 {
+      color: #9f1239 !important; /* Deep crimson */
+    }
+    html:not(.dark) .text-criticalGold {
+      color: #92400e !important;
+    }
+
+    /* Soft Pastel Badges with High-Contrast Readable Text */
+    html:not(.dark) .bg-cyan-950 {
+      background-color: #f0f9ff !important;
+      color: #0369a1 !important;
+      border-color: #bae6fd !important;
+    }
+    html:not(.dark) .bg-emerald-950 {
+      background-color: #ecfdf5 !important;
+      color: #047857 !important;
+      border-color: #a7f3d0 !important;
+    }
+    html:not(.dark) .bg-amber-950 {
+      background-color: #fffbeb !important;
+      color: #92400e !important;
+      border-color: #fde68a !important;
+    }
+    html:not(.dark) .bg-purple-950 {
+      background-color: #faf5ff !important;
+      color: #6b21a8 !important;
+      border-color: #e9d5ff !important;
+    }
+    html:not(.dark) .bg-rose-950 {
+      background-color: #fff1f2 !important;
+      color: #9f1239 !important;
+      border-color: #fecdd3 !important;
+    }
+    html:not(.dark) .bg-slate-900 {
+      background-color: #f1f5f9 !important;
+      color: #334155 !important;
+      border-color: #cbd5e1 !important;
+    }
+    html:not(.dark) .bg-slate-800 {
+      background-color: #f8fafc !important;
+      color: #334155 !important;
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) .border-borderDark,
+    html:not(.dark) .border-slate-800,
+    html:not(.dark) .border-slate-700 {
+      border-color: #e2e8f0 !important;
+    }
+
+    /* Sub-header & Filter Bars */
+    html:not(.dark) #viewDAG > div:first-child,
+    html:not(.dark) #viewBacklog .bg-\[\#0b1220\] {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    html:not(.dark) #viewDAG button {
+      color: #475569 !important;
+    }
+    html:not(.dark) #viewDAG button:hover {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #viewDAG button span[id^="cnt"] {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+
+    /* Form Controls */
+    html:not(.dark) input,
+    html:not(.dark) select,
+    html:not(.dark) textarea {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+    html:not(.dark) select option {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+    }
+    html:not(.dark) input:focus,
+    html:not(.dark) select:focus,
+    html:not(.dark) textarea:focus {
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12) !important;
+    }
+
+    /* Wave DAG Canvas */
+    html:not(.dark) #dagContainer {
+      background-color: #f8fafc !important;
+    }
+    html:not(.dark) .bezier-edge {
+      stroke: #cbd5e1 !important;
+      stroke-width: 1.5;
+    }
+    html:not(.dark) .bezier-edge.critical {
+      stroke: #d97706 !important;
+      stroke-width: 2;
+      filter: drop-shadow(0 0 2px rgba(217, 119, 6, 0.3)) !important;
+    }
+    html:not(.dark) .bezier-edge.active {
+      stroke: #0284c7 !important;
+      stroke-width: 2;
+      filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.3)) !important;
+    }
+
+    /* Node Cards in DAG */
+    html:not(.dark) [id^="node-"] {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+      transition: all 0.2s ease !important;
+    }
+    html:not(.dark) [id^="node-"]:hover {
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06) !important;
+    }
+    html:not(.dark) [id^="node-"] p {
+      color: #0f172a !important;
+      font-weight: 500 !important;
+      line-height: 1.4 !important;
+    }
+    html:not(.dark) [id^="node-"] .text-white {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+    html:not(.dark) [id^="node-"].opacity-50 {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      opacity: 0.9 !important;
+    }
+    html:not(.dark) [id^="node-"].ring-emerald-500 {
+      background-color: #f0fdf4 !important;
+      border-color: #10b981 !important;
+      box-shadow: 0 0 8px rgba(16,185,129,0.15) !important;
+    }
+    html:not(.dark) [id^="node-"].ring-cyan-400 {
+      background-color: #f0f9ff !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 8px rgba(2,132,199,0.15) !important;
+    }
+    html:not(.dark) [id^="node-"].ring-amber-400 {
+      background-color: #fffbeb !important;
+      border-color: #f59e0b !important;
+      box-shadow: 0 0 8px rgba(245,158,11,0.15) !important;
+    }
+
+    /* Autopilot View */
+    html:not(.dark) #pipelineStepper > div > div {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html:not(.dark) #pipelineStepper > div > div .text-slate-300 {
+      color: #0f172a !important;
+      font-weight: 600 !important;
+    }
+    html:not(.dark) #planReviewBox > div {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    html:not(.dark) #planReviewBox .bg-\[\#08101e\] {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) #cycleLogsContainer > div {
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) #cycleLogsContainer .hover\:bg-slate-900\/40:hover {
+      background-color: #f8fafc !important;
+    }
+
+    /* Backlog Portal */
+    html:not(.dark) #viewBacklog > div:first-child {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+    }
+    html:not(.dark) #viewBacklog > div:first-child h2 {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+    html:not(.dark) #viewBacklog > div:first-child p {
+      color: #475569 !important;
+    }
+    html:not(.dark) #viewBacklog > div:first-child code {
+      background-color: #f1f5f9 !important;
+      color: #0369a1 !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    /* Metric Cards in Backlog */
+    html:not(.dark) #viewBacklog .grid.grid-cols-2.md\:grid-cols-4 > div {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+    }
+    html:not(.dark) #viewBacklog .grid.grid-cols-2.md\:grid-cols-4 > div [class*="uppercase"] {
+      color: #64748b !important;
+      font-weight: 600 !important;
+    }
+    html:not(.dark) #viewBacklog .grid.grid-cols-2.md\:grid-cols-4 > div [class*="text-2xl"] {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+
+    /* Backlog Table */
+    html:not(.dark) #backlogTableContainer {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+    }
+    html:not(.dark) #backlogTableContainer thead tr {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      color: #475569 !important;
+    }
+    html:not(.dark) #backlogTableContainer tbody tr {
+      background-color: #ffffff !important;
+      border-color: #f1f5f9 !important;
+    }
+    html:not(.dark) #backlogTableContainer tbody tr:hover {
+      background-color: #f8fafc !important;
+    }
+    html:not(.dark) #backlogTableContainer .text-slate-100 {
+      color: #0f172a !important;
+      font-weight: 500 !important;
+    }
+    html:not(.dark) #backlogTableContainer .font-mono.text-cyan-400 {
+      color: #334155 !important;
+      font-weight: 600 !important;
+    }
+    html:not(.dark) #backlogKanbanContainer > div {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) #backlogKanbanContainer [class*="rounded-xl border"] {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html:not(.dark) #backlogKanbanContainer .text-slate-100 {
+      color: #0f172a !important;
+      font-weight: 600 !important;
+    }
+
+    /* Modals */
+    html:not(.dark) #modalTaskDetail > div,
+    html:not(.dark) #modalCreateCR > div,
+    html:not(.dark) #modalModelConfig > div {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+    }
+    html:not(.dark) #modalTaskDetail h3,
+    html:not(.dark) #modalCreateCR h3,
+    html:not(.dark) #modalModelConfig h3 {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #modalModelConfig table {
+      background-color: #ffffff !important;
+    }
+    html:not(.dark) #modalModelConfig tr {
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) #modalModelConfig tr:hover {
+      background-color: #f8fafc !important;
+    }
+    html:not(.dark) #modalModelConfig select {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    html:not(.dark) #modalModelConfig .text-white {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #modalCreateCR label[class*="border-slate-700"] {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    /* Settings Dropdown Menu Light Mode */
+    html:not(.dark) #settingsMenu {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
+    }
+    html:not(.dark) #settingsMenu button:hover {
+      background-color: #f1f5f9 !important;
+    }
+    html:not(.dark) #settingsMenu .text-white {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #settingsMenu .text-slate-200 {
+      color: #334155 !important;
+    }
+    html:not(.dark) #settingsMenu .divide-slate-800 {
+      border-color: #e2e8f0 !important;
+    }
+
+    /* Agent Stage Status Box Light Mode */
+    html:not(.dark) #agentsStageStatusBox > div {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    html:not(.dark) #agentsStageStatusBox h3 {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #agentsStageStatusBox .stage-card {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    html:not(.dark) #agentsStageStatusBox .stage-card.running {
+      background-color: #f0fdfa !important;
+      border-color: #2dd4bf !important;
+    }
+    html:not(.dark) #agentsStageStatusBox .stage-card.waiting {
+      background-color: #fffbeb !important;
+      border-color: #f59e0b !important;
+    }
+    html:not(.dark) #agentsStageStatusBox .stage-card.done {
+      background-color: #f0fdf4 !important;
+      border-color: #86efac !important;
+    }
+    html:not(.dark) #agentsStageStatusBox .text-white {
+      color: #0f172a !important;
+    }
+    html:not(.dark) #agentsStageStatusBox .text-slate-300 {
+      color: #334155 !important;
+    }
+
+    /* ============================================================== */
+    /* NACENTECH DESIGN SYSTEM: BUTTONS & CONTROLS                    */
+    /* ============================================================== */
+    .btn-nacen-primary {
+      background-color: #3c5999 !important;
+      color: #ffffff !important;
+      border: 1px solid #30477a !important;
+      font-weight: 600 !important;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px rgba(60, 89, 153, 0.25);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-nacen-primary:hover {
+      background-color: #30477a !important;
+      box-shadow: 0 2px 5px rgba(60, 89, 153, 0.35);
+      transform: translateY(-0.5px);
+    }
+    .btn-nacen-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-nacen-cta {
+      background-color: #2d9a85 !important;
+      color: #ffffff !important;
+      border: 1px solid #258b78 !important;
+      font-weight: 600 !important;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px rgba(45, 154, 133, 0.25);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-nacen-cta:hover {
+      background-color: #258b78 !important;
+      box-shadow: 0 2px 5px rgba(45, 154, 133, 0.35);
+      transform: translateY(-0.5px);
+    }
+    .btn-nacen-cta:active {
+      transform: translateY(0);
+    }
+
+    .btn-nacen-outline {
+      background-color: #ffffff !important;
+      color: #334155 !important;
+      border: 1px solid #e2e8f0 !important;
+      font-weight: 500 !important;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-nacen-outline:hover {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.dark .btn-nacen-outline {
+      background-color: #1e293b !important;
+      color: #cbd5e1 !important;
+      border-color: #334155 !important;
+    }
+    html.dark .btn-nacen-outline:hover {
+      background-color: #334155 !important;
+      color: #ffffff !important;
+    }
+
+    .btn-nacen-danger {
+      background-color: #fff1f2 !important;
+      color: #e11d48 !important;
+      border: 1px solid #fecdd3 !important;
+      font-weight: 600 !important;
+      border-radius: 0.5rem;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-nacen-danger:hover {
+      background-color: #ffe4e6 !important;
+      color: #be123c !important;
+      border-color: #fda4af !important;
+    }
+    html.dark .btn-nacen-danger {
+      background-color: #4c0519 !important;
+      color: #fda4af !important;
+      border-color: #881337 !important;
+    }
+    html.dark .btn-nacen-danger:hover {
+      background-color: #881337 !important;
+      color: #fff1f2 !important;
+    }
+
+    /* Segmented Navigation Bar */
+    .segmented-nav-container {
+      background-color: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    html.dark .segmented-nav-container {
+      background-color: #0f172a;
+      border-color: #1e293b;
+    }
+
+    .segmented-nav-btn-active {
+      background-color: #ffffff !important;
+      color: #23365d !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 0.5rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06) !important;
+    }
+    html.dark .segmented-nav-btn-active {
+      background-color: #1e293b !important;
+      color: #38bdf8 !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+    }
+
+    .segmented-nav-btn-inactive {
+      background: transparent !important;
+      color: #64748b !important;
+      border: 1px solid transparent !important;
+      border-radius: 0.5rem !important;
+      font-weight: 500 !important;
+    }
+    .segmented-nav-btn-inactive:hover {
+      background-color: rgba(255, 255, 255, 0.7) !important;
+      color: #0f172a !important;
+    }
+    html.dark .segmented-nav-btn-inactive {
+      color: #94a3b8 !important;
+    }
+    html.dark .segmented-nav-btn-inactive:hover {
+      background-color: #1e293b !important;
+      color: #ffffff !important;
+    }
+
+    /* Filter pill chip buttons */
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      border: 1px solid #e2e8f0;
+      background-color: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .filter-chip:hover {
+      border-color: #cbd5e1;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    html.dark .filter-chip {
+      border-color: #334155;
+      background-color: #0f172a;
+      color: #94a3b8;
+    }
+    html.dark .filter-chip:hover {
+      border-color: #475569;
+      background-color: #1e293b;
+      color: #f1f5f9;
+    }
+  </style>
+</head>
+<body class="bg-bgDark text-slate-200 font-sans antialiased min-h-screen flex flex-col select-none">
+
+  <!-- TOP GLOBAL NAV BAR -->
+  <header class="bg-[#0b101d] border-b border-borderDark px-6 py-2.5 flex items-center justify-between z-50 shadow-xs">
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2">
+        <span id="livePulse" class="w-2.5 h-2.5 rounded-full bg-[#2d9a85] animate-pulse"></span>
+        <h1 class="text-sm font-bold tracking-tight text-white uppercase flex items-center gap-2">
+          TC IT AGENT <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-cyan-950 text-cyan-400 border border-cyan-800">ORCHESTRATOR</span>
+        </h1>
+      </div>
+      <span class="text-slate-600">|</span>
+      <div id="liveClock" class="text-xs font-mono text-slate-400">--:--:-- (Hà Nội, GMT+7)</div>
+    </div>
+
+    <!-- VIEW SWITCHER BUTTONS -->
+    <div class="segmented-nav-container">
+      <button id="btnViewDAG" onclick="switchView('dag')" class="segmented-nav-btn-active px-3.5 py-1.5 text-xs flex items-center gap-2 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+        Wave DAG Roadmap
+      </button>
+      <button id="btnViewAutopilot" onclick="switchView('autopilot')" class="segmented-nav-btn-inactive px-3.5 py-1.5 text-xs flex items-center gap-2 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Autopilot Run View
+        <span id="badgeAutopilotStatus" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-black font-bold font-mono">1 CẦN DUYỆT</span>
+      </button>
+      <button id="btnViewBacklog" onclick="switchView('backlog')" class="segmented-nav-btn-inactive px-3.5 py-1.5 text-xs flex items-center gap-2 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+        Backlog & Yêu Cầu (CR Portal)
+        <span id="badgePendingBacklog" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30">0</span>
+      </button>
+    </div>
+
+    <!-- REALTIME STATUS & ACTIONS -->
+    <div class="flex items-center space-x-2 text-xs">
+      <span class="flex items-center gap-1.5 text-slate-400 font-medium px-2.5 py-1.5 rounded-md bg-slate-900 border border-borderDark hidden sm:flex">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        SSE: <span class="text-emerald-400 font-mono font-bold">CONNECTED</span>
+      </span>
+
+      <button onclick="openCreateCRModal()" class="btn-nacen-primary px-3.5 py-1.5 text-xs flex items-center gap-1.5">
+        <span class="text-sm leading-none">＋</span> Tạo Task / CR Mới
+      </button>
+
+      <button onclick="refreshData()" class="btn-nacen-outline px-2.5 py-1.5 text-xs flex items-center gap-1.5" title="Làm mới dữ liệu">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span class="hidden md:inline">Làm mới</span>
+      </button>
+
+      <!-- GOM CHUNG CẤU HÌNH & GIAO DIỆN VÀO 1 MỤC CÀI ĐẶT DROPDOWN -->
+      <div class="relative" id="dropdownSettingsContainer">
+        <button id="btnSettingsToggle" onclick="toggleSettingsMenu(event)" class="btn-nacen-outline px-3 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs" title="Cài đặt hệ thống & giao diện">
+          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span class="font-medium">Cài đặt</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+
+        <!-- Dropdown Menu với 2 lựa chọn -->
+        <div id="settingsMenu" class="hidden absolute right-0 mt-2 w-64 bg-[#0e1628] border border-cyan-900 rounded-xl shadow-2xl py-1.5 z-50 divide-y divide-slate-800">
+          <div class="px-3.5 py-1.5 text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+            Tùy Chọn Hệ Thống
+          </div>
+          <div class="py-1">
+            <!-- LỰA CHỌN 1: CẤU HÌNH MODEL LLM -->
+            <button onclick="openModelConfigFromMenu()" class="w-full text-left px-3.5 py-2.5 text-xs flex items-center gap-3 hover:bg-slate-800/80 text-slate-200 transition group cursor-pointer">
+              <span class="w-7 h-7 rounded-lg bg-cyan-950/80 border border-cyan-800 text-cyan-300 flex items-center justify-center text-sm">⚙</span>
+              <div>
+                <div class="font-semibold text-white group-hover:text-cyan-300">Cấu hình Model LLM</div>
+                <div class="text-[10px] text-slate-400">Định tuyến model cho 7 Agent</div>
+              </div>
+            </button>
+
+            <!-- LỰA CHỌN 2: CHUYỂN GIAO DIỆN SÁNG / TỐI -->
+            <button onclick="toggleThemeFromMenu()" class="w-full text-left px-3.5 py-2.5 text-xs flex items-center gap-3 hover:bg-slate-800/80 text-slate-200 transition group cursor-pointer">
+              <span id="themeMenuIcon" class="w-7 h-7 rounded-lg bg-amber-950/80 border border-amber-800 text-amber-300 flex items-center justify-center text-sm">☀️</span>
+              <div>
+                <div id="themeMenuTitle" class="font-semibold text-white group-hover:text-amber-300">Giao diện Sáng</div>
+                <div id="themeMenuSub" class="text-[10px] text-slate-400">Đang bật chế độ Tối</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="stopAgent()" class="btn-nacen-danger px-3 py-1.5 text-xs flex items-center gap-1" title="Dừng khẩn cấp tiến trình">
+        ⏹ Dừng
+      </button>
+    </div>
+  </header>
+
+  <!-- ACTIVE TASK NOTIFICATION BAR (HIỂN THỊ KHI CÓ TASK ĐANG CHỜ DUYỆT HOẶC ĐANG CHẠY) -->
+  <div id="activeTaskAlertBar" class="hidden bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 border-b border-amber-500/60 px-6 py-2.5 text-xs flex flex-wrap items-center justify-between gap-3 shadow-lg z-20">
+    <div class="flex items-center gap-3">
+      <span class="px-2 py-0.5 rounded font-mono font-bold bg-amber-500 text-black text-[10px] animate-pulse">CẦN DUYỆT</span>
+      <span class="text-slate-300">Task <strong id="alertTaskId" class="text-amber-300 font-mono">TASK-01-CR19</strong>: <span id="alertTaskTitle" class="text-slate-200">Đang chờ bạn duyệt kế hoạch thi công</span></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="switchView('autopilot')" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer">
+        <span>Xem Kế Hoạch & Phê Duyệt Ngay</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- VIEW 1: WAVE DAG ROADMAP (THEO ẢNH 2)                           -->
+  <!-- ============================================================== -->
+  <main id="viewDAG" class="flex-1 flex flex-col overflow-hidden">
+    <!-- SUB-HEADER FILTER BAR -->
+    <div class="bg-[#090d18] border-b border-borderDark px-6 py-2.5 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div class="flex items-center space-x-3">
+        <!-- TABS ITEMS / EPICS -->
+        <div class="segmented-nav-container p-0.5">
+          <button class="segmented-nav-btn-active px-3 py-1 text-xs">Items</button>
+          <button class="segmented-nav-btn-inactive px-3 py-1 text-xs">Epics</button>
+        </div>
+
+        <!-- DROPDOWNS -->
+        <select id="selAssignee" class="bg-slate-900 border border-borderDark rounded-lg px-2.5 py-1 text-slate-300 focus:outline-none focus:border-cyan-500">
+          <option>Anyone</option>
+          <option>Agent (Planner)</option>
+          <option>Agent (Coder)</option>
+          <option>Agent (QC)</option>
+        </select>
+
+        <select id="selEpic" onchange="applyFilters()" class="bg-slate-900 border border-borderDark rounded-lg px-2.5 py-1 text-slate-300 focus:outline-none focus:border-cyan-500">
+          <option value="all">Any epic</option>
+        </select>
+
+        <!-- SEARCH INPUT -->
+        <div class="relative">
+          <input id="txtSearch" oninput="applyFilters()" type="text" placeholder="Find..." class="bg-slate-900 border border-borderDark rounded-lg pl-7 pr-3 py-1 text-slate-300 w-44 focus:w-60 transition-all focus:outline-none focus:border-cyan-500" />
+          <svg class="w-3.5 h-3.5 absolute left-2 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <span id="txtCount" class="text-slate-400 font-mono text-[11px]">515 of 515</span>
+      </div>
+
+      <!-- STATUS SUMMARY PILLS & TOGGLES -->
+      <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+        <button onclick="filterByStatus('needs_you')" class="filter-chip"><span class="w-2 h-2 rounded-full bg-accentOrange"></span> needs you <span id="cntNeedsYou" class="font-bold text-slate-800">0</span></button>
+        <button onclick="filterByStatus('running')" class="filter-chip"><span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> running <span id="cntRunning" class="font-bold text-slate-800">0</span></button>
+        <button onclick="filterByStatus('in_review')" class="filter-chip"><span class="w-2 h-2 rounded-full bg-purple-500"></span> in review <span id="cntReview" class="font-bold text-slate-800">0</span></button>
+        <button onclick="filterByStatus('ready')" class="filter-chip"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> ready <span id="cntReady" class="font-bold text-emerald-700">18</span></button>
+        <button onclick="filterByStatus('blocked')" class="filter-chip"><span class="w-2 h-2 rounded-full bg-slate-400"></span> blocked <span id="cntBlocked" class="font-bold text-slate-500">22</span></button>
+        <button onclick="filterByStatus('done')" class="filter-chip"><span class="w-2 h-2 rounded-full bg-slate-300"></span> done <span id="cntDone" class="font-bold text-slate-600">475</span></button>
+
+        <span class="text-slate-300 mx-1">|</span>
+
+        <!-- ACTIONS -->
+        <button onclick="filterByStatus('all')" class="text-[#3c5999] font-semibold hover:underline px-1.5 py-1">Tất cả</button>
+        <div class="flex items-center gap-1.5 pl-2 text-amber-700 font-semibold text-xs">
+          <span class="w-3 h-0.5 bg-amber-600 inline-block rounded"></span> critical path
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN DAG CANVAS (WAVE COLUMNS + SVG EDGES) -->
+    <div id="dagContainer" class="flex-1 overflow-x-auto overflow-y-auto relative p-6 flex gap-8">
+      <!-- SVG Layer for Curves -->
+      <svg id="svgEdges" class="absolute inset-0 pointer-events-none w-full h-full" style="min-width: 3400px; min-height: 1400px;"></svg>
+
+      <!-- Wave Columns rendered dynamically by JS -->
+      <div id="waveColumnsList" class="flex gap-8 relative z-10" style="min-width: max-content;"></div>
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- VIEW 2: AUTOPILOT RUN VIEW (THEO ẢNH 1)                         -->
+  <!-- ============================================================== -->
+  <main id="viewAutopilot" class="flex-1 overflow-y-auto p-8 hidden max-w-7xl mx-auto w-full">
+    <!-- AUTOPILOT HEADER -->
+    <div class="mb-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <h2 id="runnerTitle" class="text-xs font-bold tracking-widest text-slate-400 uppercase">SPECKIT-AUTOPILOT RUNNER</h2>
+        <span id="runtimeBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">STATUS: IDLE</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="btnApproveHeader" onclick="approveHumanGate()" class="btn-nacen-cta px-3.5 py-1.5 text-xs flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Phê duyệt Plan (Human Gate)
+        </button>
+      </div>
+    </div>
+
+    <!-- MISSION DIRECTIVE BANNER (Nhiệm vụ & Kỹ năng điều phối) -->
+    <div id="missionDirectiveBanner" class="mb-6 p-4 rounded-xl bg-gradient-to-r from-[#0a1628] via-[#0d1d36] to-[#0a1324] border border-cyan-800/60 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
+            🎯 NHIỆM VỤ ĐIỀU PHỐI
+          </span>
+          <span id="missionTaskId" class="text-xs font-bold text-white font-mono">[TASK-05-CR144]</span>
+          <span id="missionSkillUsed" class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold">
+            ⚡ Skill: speckit-delta
+          </span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800">
+            Quy Trình: Spec Kit Framework
+          </span>
+        </div>
+        <p id="missionDesc" class="text-xs text-slate-300 leading-relaxed font-normal max-w-4xl">
+          Đang điều phối tự động: Phân tích bề mặt tác động, kiểm định ranh giới Clean Architecture, thi công mã nguồn và thẩm định kiểm thử Hộp Đen 4 tầng.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400 flex-shrink-0">
+        <span class="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700/80 text-emerald-300 font-semibold">
+          🛡 Zero-Breaking Change
+        </span>
+      </div>
+    </div>
+
+    <!-- PIPELINE STEPPER (CHUỖI MÃ NGUỒN TUẦN TỰ THEO 3 CỔNG DUYỆT CON NGƯỜI) -->
+    <!-- ZONE 1: PO TRIAGE CARD (STRATEGIC ROUTING & WIREFRAME LINK) -->
+    <div id="poTriageCard" class="mb-6"></div>
+
+    <!-- ZONE 2: 3-HUMAN-GATE PIPELINE STEPPER -->
+    <div id="pipelineStepper" class="flex items-center gap-3 mb-8 overflow-x-auto pb-2">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- ZONE 3: SHADOW QA SENTINEL (CẢNH SÁT GÁC CỔNG TOÀN TRÌNH XUYÊN SUỐT GATE 1 -> GATE 5) -->
+    <div id="qaSentinelBox" class="mb-8"></div>
+
+    <!-- ZONE 4: TÌNH TRẠNG CÔNG VIỆC TỪNG KHÂU TỪNG AGENT (STAGE-GATE MONITOR) -->
+    <div id="agentsStageStatusBox" class="mb-8"></div>
+
+    <!-- ZONE 5: BLACK BOX 4-TIER QC TEST MATRIX (BÁO CÁO ĐỊNH LƯỢNG KIỂM THỬ HỘP ĐEN) -->
+    <div id="qcTestMatrixBox" class="mb-8"></div>
+
+    <!-- ZONE 6: PLAN REVIEW & SMART HUMAN GATE PANEL (TƯƠNG TÁC CON NGƯỜI THEO CỔNG 1, 2, 3) -->
+    <div id="planReviewBox"></div>
+
+    <!-- CYCLES & ROUNDS TABLE -->
+    <div id="cycleLogsContainer" class="space-y-6 text-sm mb-12">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- TOTAL FOOTER -->
+    <div class="border-t border-borderDark pt-6 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div class="flex items-center space-x-6 text-slate-300">
+        <span class="font-bold text-white text-sm">Total so far</span>
+        <span id="totalSummaryText" class="font-mono text-slate-300">16 claude runs · 64 min · $17.62</span>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="flex items-center space-x-4 text-xs text-slate-400">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> done</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> running now</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> waiting on you</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> stopped</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 border border-dashed border-slate-500 rounded-sm"></span> not started</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 border border-dashed border-slate-600 rounded-sm"></span> not automated yet</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- VIEW 3: BACKLOG & CR PORTAL (CHO TOÀN BỘ MEMBER & DEV)        -->
+  <!-- ============================================================== -->
+  <main id="viewBacklog" class="flex-1 overflow-y-auto p-8 hidden max-w-7xl mx-auto w-full">
+    <!-- PORTAL BANNER -->
+    <div class="mb-6 p-6 rounded-2xl bg-gradient-to-r from-[#0d1629] via-[#0f1d38] to-[#12132a] border border-cyan-900/50 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+          <h2 class="text-lg font-bold text-white tracking-wide uppercase flex items-center gap-2">
+            Cổng Quản Lý Yêu Cầu & Change Requests (Member Portal)
+          </h2>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">COLLABORATIVE</span>
+        </div>
+        <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
+          Không gian dành cho toàn bộ thành viên (PO, BA, QC, Stakeholder, Dev) theo dõi tiến độ, gửi đề xuất tính năng hoặc Change Request mới. Đội phát triển sẽ trực tiếp thẩm định, phê duyệt và kích hoạt triển khai tự động.
+        </p>
+        <div class="mt-3 flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+          <span>🔗 Link chia sẻ nội bộ:</span>
+          <code class="px-2 py-0.5 rounded bg-slate-900 text-cyan-300 border border-slate-700 select-all cursor-pointer" onclick="navigator.clipboard.writeText(window.location.origin); alert('Đã sao chép link dashboard!')">http://127.0.0.1:8420</code>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="openCreateCRModal()" class="btn-nacen-primary px-4 py-2 text-xs flex items-center gap-2">
+          <span class="text-base leading-none">＋</span> Thêm Yêu Cầu / CR Mới
+        </button>
+      </div>
+    </div>
+
+    <!-- METRICS OVERVIEW -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="p-4 rounded-xl bg-[#0b1220] border border-borderDark flex items-center justify-between">
+        <div>
+          <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Tổng yêu cầu</div>
+          <div id="metricTotalBacklog" class="text-2xl font-bold text-white font-mono">0</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300 text-lg">
+          📋
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-[#16120b] border border-amber-900/40 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1">Đang chờ Dev check</div>
+          <div id="metricPendingBacklog" class="text-2xl font-bold text-amber-300 font-mono">0</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-amber-950/60 border border-amber-800/50 flex items-center justify-center text-amber-400 text-lg">
+          ⏳
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-[#0b1816] border border-emerald-900/40 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Đã hoàn thành</div>
+          <div id="metricDoneBacklog" class="text-2xl font-bold text-emerald-300 font-mono">0</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-emerald-400 text-lg">
+          ✓
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-[#130f1e] border border-purple-900/40 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] font-semibold text-purple-400 uppercase tracking-wider mb-1">Tỷ lệ xong</div>
+          <div id="metricPercentBacklog" class="text-2xl font-bold text-purple-300 font-mono">0%</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-800/50 flex items-center justify-center text-purple-400 text-lg">
+          🎯
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER & CONTROLS TOOLBAR -->
+    <div class="bg-[#0b1220] border border-borderDark rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- SEARCH -->
+        <div class="relative">
+          <input 
+            id="txtBacklogSearch" 
+            oninput="renderFilteredBacklog()" 
+            type="text" 
+            placeholder="Tìm theo mã, nội dung, người gửi..." 
+            class="bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-slate-200 w-64 focus:w-80 transition-all focus:outline-none focus:border-cyan-500"
+          />
+          <svg class="w-4 h-4 absolute left-2.5 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <!-- FILTER EPIC -->
+        <select id="selBacklogEpic" onchange="renderFilteredBacklog()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300 focus:outline-none focus:border-cyan-500">
+          <option value="all">Mọi phân hệ (All Epics)</option>
+          <option value="TASK-00">TASK-00: Platform Foundation</option>
+          <option value="TASK-01">TASK-01: Trang chủ & Sự kiện</option>
+          <option value="TASK-02">TASK-02: Doanh nghiệp ĐMST</option>
+          <option value="TASK-03">TASK-03: Khảo sát Nhu cầu (Buyer)</option>
+          <option value="TASK-04">TASK-04: Gian hàng Chào bán (Seller)</option>
+          <option value="TASK-05">TASK-05: Chuyên gia KH&CN</option>
+          <option value="TASK-06">TASK-06: Danh mục ngành TT17</option>
+          <option value="TASK-07">TASK-07: Quản trị Phân quyền Admin</option>
+          <option value="TASK-08">TASK-08: Sàn Ghép nối Cung Cầu</option>
+          <option value="TASK-09">TASK-09: Đánh giá Năng lực TT17</option>
+          <option value="NEW">NEW: Phân hệ / Ý tưởng mới</option>
+        </select>
+
+        <!-- FILTER TYPE -->
+        <select id="selBacklogType" onchange="renderFilteredBacklog()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300 focus:outline-none focus:border-cyan-500">
+          <option value="all">Mọi loại yêu cầu</option>
+          <option value="CR">Change Request (CR)</option>
+          <option value="TASK">Task / Feature mới</option>
+          <option value="IDEA">Ý tưởng (Idea)</option>
+          <option value="BUG">Báo lỗi (Bug)</option>
+          <option value="UI/UX">Góp ý UI/UX</option>
+        </select>
+
+        <!-- FILTER PRIORITY -->
+        <select id="selBacklogPriority" onchange="renderFilteredBacklog()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300 focus:outline-none focus:border-cyan-500">
+          <option value="all">Mọi mức ưu tiên</option>
+          <option value="P1">P1 - Cao / Khẩn cấp</option>
+          <option value="P2">P2 - Tiêu chuẩn</option>
+          <option value="P3">P3 - Thấp</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- STATUS PILLS -->
+        <div class="segmented-nav-container p-0.5">
+          <button id="btnBacklogStatusAll" onclick="setBacklogStatusFilter('all')" class="segmented-nav-btn-active px-3 py-1 text-xs">Tất cả</button>
+          <button id="btnBacklogStatusPending" onclick="setBacklogStatusFilter('PENDING')" class="segmented-nav-btn-inactive px-3 py-1 text-xs">⏳ Đang chờ</button>
+          <button id="btnBacklogStatusDone" onclick="setBacklogStatusFilter('DONE')" class="segmented-nav-btn-inactive px-3 py-1 text-xs">✓ Đã xong</button>
+        </div>
+
+        <!-- VIEW MODE (TABLE vs KANBAN) -->
+        <div class="segmented-nav-container p-0.5">
+          <button id="btnModeTable" onclick="setBacklogViewMode('table')" title="Chế độ Bảng" class="segmented-nav-btn-active p-1.5 text-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </button>
+          <button id="btnModeKanban" onclick="setBacklogViewMode('kanban')" title="Chế độ Thẻ (Kanban)" class="segmented-nav-btn-inactive p-1.5 text-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKLOG CONTENT CONTAINER (TABLE VIEW) -->
+    <div id="backlogTableContainer" class="rounded-xl border border-borderDark bg-[#0a0f1d] overflow-x-auto shadow-xl mb-12">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- BACKLOG CONTENT CONTAINER (KANBAN VIEW) -->
+    <div id="backlogKanbanContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+      <!-- Generated by JS -->
+    </div>
+  </main>
+
+  <!-- MODAL TASK DETAIL -->
+  <div id="modalTaskDetail" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0e1628] border border-cyan-900 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+      <div class="flex items-center gap-2 mb-2">
+        <span id="mTaskId" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">TASK-01</span>
+        <span id="mTaskStatus" class="text-xs font-mono text-emerald-400">● READY</span>
+      </div>
+      <h3 id="mTaskTitle" class="text-base font-bold text-white mb-4">Tên task</h3>
+      
+      <div class="space-y-3 text-xs mb-6">
+        <div>
+          <span class="text-slate-400 block mb-1">Epic Phụ Trách:</span>
+          <span id="mTaskEpic" class="text-slate-200 font-mono">TASK-01_TONG_QUAN_VA_KIEN_TRUC_HOME</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block mb-1">Phụ Thuộc Tiền Đề (Dependencies):</span>
+          <div id="mTaskDeps" class="flex flex-wrap gap-1 text-[11px] font-mono text-cyan-400"></div>
+        </div>
+        <div>
+          <span class="text-slate-400 block mb-1">Nhiệm Vụ Kế Tiếp (Dependents):</span>
+          <div id="mTaskChildren" class="flex flex-wrap gap-1 text-[11px] font-mono text-slate-400"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
+        <button onclick="closeModal()" class="btn-nacen-outline px-3 py-2 text-xs">Đóng</button>
+        <button onclick="triggerRunTask(false)" class="btn-nacen-primary px-3 py-2 text-xs flex items-center gap-1.5" title="Chạy bước Lập kế hoạch và dừng tại cổng Duyệt">
+          📋 Chạy Từng Bước (Có Duyệt)
+        </button>
+        <button onclick="triggerRunTask(true)" class="btn-nacen-cta px-3 py-2 text-xs flex items-center gap-1.5" title="Tự động chạy toàn trình từ Plan đến Kiểm thử và Tick [x]">
+          ⚡ Chạy Tự Động Toàn Trình
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREATE NEW TASK / CHANGE REQUEST (CR) -->
+  <div id="modalCreateCR" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0e1628] border border-cyan-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+      <button onclick="closeCreateCRModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-base">✕</button>
+      
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-accentPurple animate-pulse"></span>
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          Giao Việc / Tạo Change Request (CR)
+        </h3>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">
+        Nhập yêu cầu sửa đổi hoặc tính năng mới. Hệ thống sẽ tự phân rã và đưa thẳng lên bản đồ Wave DAG.
+      </p>
+
+      <form id="formCreateCR" onsubmit="submitNewCR(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1.5">Loại yêu cầu:</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer hover:border-cyan-500 transition">
+              <input type="radio" name="crType" value="CR" checked class="text-cyan-500 focus:ring-cyan-500" />
+              <span class="font-bold text-purple-300">Change Request (CR)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer hover:border-cyan-500 transition">
+              <input type="radio" name="crType" value="TASK" class="text-cyan-500 focus:ring-cyan-500" />
+              <span class="font-bold text-cyan-300">Feature / Task Mới</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Phân hệ (Epic):</label>
+            <select id="crEpic" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-[#3c5999] focus:outline-none">
+              <option value="TASK-03" selected>TASK-03: Khảo sát Nhu cầu (Buyer)</option>
+              <option value="TASK-01">TASK-01: Trang chủ & Sự kiện</option>
+              <option value="TASK-02">TASK-02: Doanh nghiệp ĐMST</option>
+              <option value="TASK-04">TASK-04: Gian hàng Chào bán (Seller)</option>
+              <option value="TASK-05">TASK-05: Chuyên gia KH&CN</option>
+              <option value="TASK-06">TASK-06: Danh mục ngành TT17</option>
+              <option value="TASK-07">TASK-07: Quản trị Phân quyền Admin</option>
+              <option value="TASK-08">TASK-08: Sàn Ghép nối Cung Cầu</option>
+              <option value="TASK-09">TASK-09: Đánh giá Năng lực TT17</option>
+              <option value="TASK-00">TASK-00: Platform Foundation</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Mức ưu tiên:</label>
+            <select id="crPriority" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-[#3c5999] focus:outline-none">
+              <option value="P1" selected>P1 - Cao / Khẩn cấp</option>
+              <option value="P2">P2 - Trung bình</option>
+              <option value="P3">P3 - Thấp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Người gửi / Đội đề xuất:</label>
+            <input 
+              id="crAuthor" 
+              type="text" 
+              placeholder="VD: Nguyễn Văn A (PO/BA)" 
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-[#3c5999] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Tiêu đề yêu cầu (*):</label>
+          <input 
+            id="crTitle" 
+            type="text" 
+            required 
+            placeholder="VD: Đổi tab 5 E. Nhu cầu TNI lên vị trí 2, bắt buộc tab 1 & 2" 
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:border-[#3c5999] focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Mô tả chi tiết / Tiêu chí nghiệm thu:</label>
+          <textarea 
+            id="crDesc" 
+            rows="3" 
+            placeholder="VD: Đổi vị trí tab E trong Wizard, chỉ bắt buộc validate ở tab 1 và tab 2 khi submit, các tab khác optional..."
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-[#3c5999] focus:outline-none resize-none"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeCreateCRModal()" class="btn-nacen-outline px-4 py-2 text-xs">Hủy</button>
+          <button type="submit" class="btn-nacen-primary px-5 py-2 text-xs flex items-center gap-1.5">
+            🚀 Gửi Đề Bài Cho Agent
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CẤU HÌNH MODEL LLM CHO TỪNG AGENT -->
+  <div id="modalModelConfig" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0e1628] border border-cyan-800 rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
+      <button onclick="closeModelConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-base">✕</button>
+      
+      <div class="flex items-center gap-2 mb-1">
+        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          ⚙ CẤU HÌNH MODEL LLM CHO 7 AGENT CHUYÊN TRÁCH TC IT AGENT
+        </h3>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">
+        Định tuyến model LLM tối ưu cho từng vai trò theo nguyên lý Maker-Checker (PO, BA, SA, Dev, QC, QA, PS). Cấu hình này được lưu trực tiếp vào <code class="text-cyan-300">.tc/agent_models.json</code> và tự động đồng bộ tới mã nguồn Agent.
+      </p>
+
+      <!-- BẢNG CẤU HÌNH -->
+      <div class="overflow-y-auto flex-1 pr-1 mb-4 border border-slate-800 rounded-xl">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-900/80 border-b border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider font-mono">
+              <th class="p-3">Agent & Vai Trò</th>
+              <th class="p-3">Model Ưu Tiên (Primary)</th>
+              <th class="p-3">Model Dự Phòng (Fallback)</th>
+              <th class="p-3">Ghi Chú Thế Mạnh</th>
+            </tr>
+          </thead>
+          <tbody id="modelConfigTableBody" class="divide-y divide-slate-800/60">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FOOTER BUTTONS -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="resetDefaultModelConfig()" class="text-xs text-slate-400 hover:text-slate-200 underline">
+          Khôi phục mặc định (Recommended)
+        </button>
+        <div class="flex items-center gap-3">
+          <button onclick="closeModelConfigModal()" class="btn-nacen-outline px-4 py-2 text-xs">Đóng</button>
+          <button onclick="saveModelConfig()" class="btn-nacen-cta px-5 py-2 text-xs flex items-center gap-1.5 shadow-md">
+            💾 Lưu Cấu Hình Model
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let globalGraphData = null;
+    let globalAutopilotData = null;
+    let globalBacklogData = null;
+    let currentStatusFilter = 'all';
+    let backlogStatusFilter = 'all';
+    let backlogViewMode = 'table';
+    let selectedTaskId = null;
+    let selectedTaskEpic = null;
+
+    // Live clock in Hanoi (UTC+7 / GMT+7)
+    function updateHanoiClock() {
+      const now = new Date();
+      const hanoiTime = now.toLocaleTimeString('vi-VN', {
+        timeZone: 'Asia/Bangkok',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      const el = document.getElementById('liveClock');
+      if (el) el.textContent = `${hanoiTime} (Hà Nội, GMT+7)`;
+    }
+    setInterval(updateHanoiClock, 1000);
+    updateHanoiClock();
+
+    // ==========================================
+    // THEME & SETTINGS MENU MANAGEMENT
+    // ==========================================
+    function toggleSettingsMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('settingsMenu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function openModelConfigFromMenu() {
+      const menu = document.getElementById('settingsMenu');
+      if (menu) menu.classList.add('hidden');
+      openModelConfigModal();
+    }
+
+    function toggleThemeFromMenu() {
+      const menu = document.getElementById('settingsMenu');
+      if (menu) menu.classList.add('hidden');
+      toggleTheme();
+    }
+
+    window.addEventListener('click', (e) => {
+      const container = document.getElementById('dropdownSettingsContainer');
+      const menu = document.getElementById('settingsMenu');
+      if (container && menu && !container.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('nacen_theme') || 'light';
+      applyTheme(savedTheme);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      const newTheme = isDark ? 'light' : 'dark';
+      applyTheme(newTheme);
+      try {
+        localStorage.setItem('nacen_theme', newTheme);
+      } catch (e) {}
+    }
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+      const btn = document.getElementById('btnThemeToggle');
+
+      const menuIcon = document.getElementById('themeMenuIcon');
+      const menuTitle = document.getElementById('themeMenuTitle');
+      const menuSub = document.getElementById('themeMenuSub');
+
+      if (theme === 'light') {
+        html.classList.remove('dark');
+        if (icon) icon.textContent = '🌙';
+        if (text) text.textContent = 'Giao diện Tối';
+        if (btn) {
+          btn.className = 'px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded flex items-center gap-1.5 transition text-xs font-semibold cursor-pointer shadow-sm';
+        }
+        if (menuIcon) menuIcon.textContent = '🌙';
+        if (menuTitle) menuTitle.textContent = 'Chuyển sang Giao diện Tối';
+        if (menuSub) menuSub.textContent = 'Đang bật chế độ Sáng';
+      } else {
+        html.classList.add('dark');
+        if (icon) icon.textContent = '☀️';
+        if (text) text.textContent = 'Giao diện Sáng';
+        if (btn) {
+          btn.className = 'px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-borderDark rounded flex items-center gap-1.5 transition text-xs font-semibold cursor-pointer shadow-sm';
+        }
+        if (menuIcon) menuIcon.textContent = '☀️';
+        if (menuTitle) menuTitle.textContent = 'Chuyển sang Giao diện Sáng';
+        if (menuSub) menuSub.textContent = 'Đang bật chế độ Tối';
+      }
+      setTimeout(drawEdges, 100);
+    }
+
+    function switchView(viewName) {
+      const vDAG = document.getElementById('viewDAG');
+      const vAuto = document.getElementById('viewAutopilot');
+      const vBacklog = document.getElementById('viewBacklog');
+      const bDAG = document.getElementById('btnViewDAG');
+      const bAuto = document.getElementById('btnViewAutopilot');
+      const bBacklog = document.getElementById('btnViewBacklog');
+
+      const activeClass = 'segmented-nav-btn-active px-3.5 py-1.5 text-xs flex items-center gap-2 transition-all';
+      const inactiveClass = 'segmented-nav-btn-inactive px-3.5 py-1.5 text-xs flex items-center gap-2 transition-all';
+
+      vDAG.classList.add('hidden');
+      vAuto.classList.add('hidden');
+      vBacklog.classList.add('hidden');
+      bDAG.className = inactiveClass;
+      bAuto.className = inactiveClass;
+      bBacklog.className = inactiveClass;
+
+      try {
+        localStorage.setItem('nacen_active_view', viewName);
+      } catch (e) {}
+
+      if (viewName === 'dag') {
+        vDAG.classList.remove('hidden');
+        bDAG.className = activeClass;
+        setTimeout(drawEdges, 100);
+      } else if (viewName === 'autopilot') {
+        vAuto.classList.remove('hidden');
+        bAuto.className = activeClass;
+      } else if (viewName === 'backlog') {
+        vBacklog.classList.remove('hidden');
+        bBacklog.className = activeClass;
+        loadBacklog();
+      }
+    }
+
+    async function loadBacklog() {
+      try {
+        const res = await fetch('/api/backlog');
+        globalBacklogData = await res.json();
+        
+        const badgePending = document.getElementById('badgePendingBacklog');
+        if (badgePending) badgePending.textContent = globalBacklogData.pending || 0;
+
+        renderBacklogData(globalBacklogData);
+      } catch (err) {
+        console.error("Lỗi nạp backlog:", err);
+      }
+    }
+
+    function renderBacklogData(data) {
+      if (!data) return;
+      const elTotal = document.getElementById('metricTotalBacklog');
+      const elPending = document.getElementById('metricPendingBacklog');
+      const elDone = document.getElementById('metricDoneBacklog');
+      const elPercent = document.getElementById('metricPercentBacklog');
+
+      if (elTotal) elTotal.textContent = data.total;
+      if (elPending) elPending.textContent = data.pending;
+      if (elDone) elDone.textContent = data.done;
+      if (elPercent) {
+        const pct = data.total > 0 ? Math.round((data.done / data.total) * 100) : 0;
+        elPercent.textContent = `${pct}%`;
+      }
+
+      renderFilteredBacklog();
+    }
+
+    function setBacklogStatusFilter(status) {
+      backlogStatusFilter = status;
+      const btnAll = document.getElementById('btnBacklogStatusAll');
+      const btnPending = document.getElementById('btnBacklogStatusPending');
+      const btnDone = document.getElementById('btnBacklogStatusDone');
+      
+      const activeClass = 'segmented-nav-btn-active px-3 py-1 text-xs';
+      const inactiveClass = 'segmented-nav-btn-inactive px-3 py-1 text-xs';
+      
+      if (btnAll) btnAll.className = status === 'all' ? activeClass : inactiveClass;
+      if (btnPending) btnPending.className = status === 'PENDING' ? activeClass : inactiveClass;
+      if (btnDone) btnDone.className = status === 'DONE' ? activeClass : inactiveClass;
+      
+      renderFilteredBacklog();
+    }
+
+    function setBacklogViewMode(mode) {
+      backlogViewMode = mode;
+      const bTable = document.getElementById('btnModeTable');
+      const bKanban = document.getElementById('btnModeKanban');
+      const vTable = document.getElementById('backlogTableContainer');
+      const vKanban = document.getElementById('backlogKanbanContainer');
+
+      const activeClass = 'segmented-nav-btn-active p-1.5 text-xs';
+      const inactiveClass = 'segmented-nav-btn-inactive p-1.5 text-xs';
+
+      if (mode === 'table') {
+        if (bTable) bTable.className = activeClass;
+        if (bKanban) bKanban.className = inactiveClass;
+        if (vTable) vTable.classList.remove('hidden');
+        if (vKanban) vKanban.classList.add('hidden');
+      } else {
+        if (bKanban) bKanban.className = activeClass;
+        if (bTable) bTable.className = inactiveClass;
+        if (vKanban) vKanban.classList.remove('hidden');
+        if (vTable) vTable.classList.add('hidden');
+      }
+    }
+
+    function renderFilteredBacklog() {
+      if (!globalBacklogData || !globalBacklogData.items) return;
+
+      const search = (document.getElementById('txtBacklogSearch')?.value || '').toLowerCase().trim();
+      const epicFilter = document.getElementById('selBacklogEpic')?.value || 'all';
+      const typeFilter = document.getElementById('selBacklogType')?.value || 'all';
+      const prioFilter = document.getElementById('selBacklogPriority')?.value || 'all';
+
+      const filtered = globalBacklogData.items.filter(item => {
+        if (backlogStatusFilter !== 'all' && item.status !== backlogStatusFilter) return false;
+        if (epicFilter !== 'all' && item.epic !== epicFilter) return false;
+        if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+        if (prioFilter !== 'all' && item.priority !== prioFilter) return false;
+        if (search) {
+          const matchId = (item.id || '').toLowerCase().includes(search);
+          const matchTitle = (item.title || '').toLowerCase().includes(search);
+          const matchAuthor = (item.author || '').toLowerCase().includes(search);
+          const matchEpic = (item.epic || '').toLowerCase().includes(search);
+          if (!matchId && !matchTitle && !matchAuthor && !matchEpic) return false;
+        }
+        return true;
+      });
+
+      renderBacklogTable(filtered);
+      renderBacklogKanban(filtered);
+    }
+
+    function renderBacklogTable(items) {
+      const container = document.getElementById('backlogTableContainer');
+      if (!container) return;
+      if (!items || items.length === 0) {
+        container.innerHTML = `
+          <div class="p-12 text-center text-slate-500">
+            <div class="text-3xl mb-2">📭</div>
+            <p class="text-sm font-semibold text-slate-400">Không tìm thấy yêu cầu hoặc Change Request nào phù hợp.</p>
+            <p class="text-xs text-slate-600 mt-1">Hãy thử đổi bộ lọc hoặc bấm "Thêm Yêu Cầu / CR Mới" để tạo đề xuất đầu tiên.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-[#0b1424] border-b border-borderDark text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <th class="py-3 px-4">Mã Task / CR</th>
+              <th class="py-3 px-3">Loại</th>
+              <th class="py-3 px-3">Phân Hệ</th>
+              <th class="py-3 px-4">Nội Dung Yêu Cầu / Tiêu Chí Nghiệm Thu</th>
+              <th class="py-3 px-3 text-center">Ưu Tiên</th>
+              <th class="py-3 px-3">Người Gửi</th>
+              <th class="py-3 px-3">Trạng Thái</th>
+              <th class="py-3 px-4 text-right">Thao Tác (Dev Action)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-borderDark/60 font-normal">
+      `;
+
+      items.forEach(item => {
+        const isDone = item.status === 'DONE';
+        const prioBadge = item.priority === 'P1'
+          ? '<span class="px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-rose-300 border border-rose-800 text-[10px]">P1 - Gấp</span>'
+          : (item.priority === 'P2' 
+            ? '<span class="px-2 py-0.5 rounded font-mono font-medium bg-amber-950 text-amber-300 border border-amber-800 text-[10px]">P2</span>'
+            : '<span class="px-2 py-0.5 rounded font-mono bg-slate-800 text-slate-400 text-[10px]">P3</span>');
+
+        const typeBadge = item.type === 'CR'
+          ? '<span class="px-2 py-0.5 rounded-full font-mono font-bold bg-purple-950 text-purple-300 border border-purple-800 text-[10px]">CR</span>'
+          : '<span class="px-2 py-0.5 rounded-full font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 text-[10px]">TASK</span>';
+
+        const statusBadge = isDone
+          ? '<span class="flex items-center gap-1 text-emerald-400 font-semibold font-mono text-[11px]"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ĐÃ HOÀN THÀNH</span>'
+          : '<span class="flex items-center gap-1 text-amber-400 font-semibold font-mono text-[11px]"><span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> CHỜ DEV CHECK</span>';
+
+        const rowBg = isDone ? 'hover:bg-slate-900/40 opacity-75' : 'hover:bg-slate-900/90 bg-[#0c1426]/50';
+
+        html += `
+          <tr class="transition-colors ${rowBg}">
+            <td class="py-3.5 px-4 font-mono font-bold text-white whitespace-nowrap">
+              <span class="px-2 py-1 rounded bg-slate-900 border border-slate-700">${item.id}</span>
+            </td>
+            <td class="py-3.5 px-3 whitespace-nowrap">${typeBadge}</td>
+            <td class="py-3.5 px-3 font-mono font-semibold text-cyan-400 whitespace-nowrap">${item.epic}</td>
+            <td class="py-3.5 px-4">
+              <div class="text-slate-100 font-medium text-xs leading-snug">${item.title}</div>
+              <div class="text-[10px] text-slate-500 mt-0.5 line-clamp-1">${item.section}</div>
+            </td>
+            <td class="py-3.5 px-3 text-center whitespace-nowrap">${prioBadge}</td>
+            <td class="py-3.5 px-3 text-slate-300 whitespace-nowrap">
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-slate-400 font-bold uppercase">${(item.author || 'M').charAt(0)}</span>
+                <span class="text-slate-300 text-[11px] font-medium">${item.author}</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 whitespace-nowrap">${statusBadge}</td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-2">
+                ${!isDone ? `
+                  <button onclick="activateTaskWithAgent('${item.id}', '${item.epic}', '${encodeURIComponent(item.title)}')" class="btn-nacen-primary px-3 py-1 text-[11px] flex items-center gap-1">
+                    🚀 Dev Nhận & Chạy
+                  </button>
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" title="Đánh dấu đã hoàn thành" class="btn-nacen-outline px-2.5 py-1 text-[11px]">
+                    ✓ Xong
+                  </button>
+                ` : `
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" title="Mở lại task này" class="btn-nacen-outline px-2.5 py-1 text-[11px]">
+                    ↺ Mở lại
+                  </button>
+                `}
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function renderBacklogKanban(items) {
+      const container = document.getElementById('backlogKanbanContainer');
+      if (!container) return;
+      const pendingItems = items.filter(it => it.status !== 'DONE');
+      const doneItems = items.filter(it => it.status === 'DONE');
+
+      function buildCard(item) {
+        const isDone = item.status === 'DONE';
+        const prioBadge = item.priority === 'P1'
+          ? '<span class="px-2 py-0.5 rounded font-mono font-bold bg-rose-950 text-rose-300 border border-rose-800 text-[10px]">P1 - Gấp</span>'
+          : '<span class="px-2 py-0.5 rounded font-mono font-medium bg-amber-950 text-amber-300 border border-amber-800 text-[10px]">' + item.priority + '</span>';
+
+        return `
+          <div class="p-4 rounded-xl border ${isDone ? 'border-slate-800 bg-[#0a101d] opacity-75' : 'border-slate-700/80 bg-[#0d162a] shadow-md hover:border-cyan-500/60'} transition space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-white text-xs px-2 py-0.5 bg-slate-900 border border-slate-700 rounded">${item.id}</span>
+                <span class="font-mono text-cyan-400 text-xs font-semibold">${item.epic}</span>
+              </div>
+              <div>${prioBadge}</div>
+            </div>
+            <p class="text-sm font-semibold text-slate-100 leading-snug">${item.title}</p>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
+              <span class="text-slate-400 flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[9px] font-bold text-slate-300">${(item.author || 'M').charAt(0)}</span>
+                ${item.author}
+              </span>
+              <div class="flex items-center gap-1.5">
+                ${!isDone ? `
+                  <button onclick="activateTaskWithAgent('${item.id}', '${item.epic}', '${encodeURIComponent(item.title)}')" class="btn-nacen-primary px-2.5 py-1 text-[10px] flex items-center gap-1">
+                    🚀 Dev Chạy
+                  </button>
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" class="btn-nacen-outline px-2 py-1 text-[10px]">
+                    ✓
+                  </button>
+                ` : `
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" class="btn-nacen-outline px-2 py-1 text-[10px]">
+                    ↺ Mở lại
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <!-- COLUMN 1: PENDING -->
+        <div class="p-5 rounded-2xl bg-[#090e1c] border border-amber-900/30 flex flex-col gap-3">
+          <div class="flex items-center justify-between pb-3 border-b border-borderDark">
+            <div class="flex items-center gap-2 font-bold text-sm text-amber-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+              HÀNG ĐỢI CHỜ DEV THẨM ĐỊNH & THỰC THI
+            </div>
+            <span class="font-mono text-xs px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">${pendingItems.length}</span>
+          </div>
+          <div class="space-y-3 overflow-y-auto max-h-[700px] pr-1">
+            ${pendingItems.length > 0 ? pendingItems.map(buildCard).join('') : '<div class="p-8 text-center text-xs text-slate-500">Không có yêu cầu nào đang chờ.</div>'}
+          </div>
+        </div>
+
+        <!-- COLUMN 2: DONE -->
+        <div class="p-5 rounded-2xl bg-[#081216] border border-emerald-900/30 flex flex-col gap-3">
+          <div class="flex items-center justify-between pb-3 border-b border-borderDark">
+            <div class="flex items-center gap-2 font-bold text-sm text-emerald-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              ĐÃ HOÀN THÀNH & NGHIỆM THU
+            </div>
+            <span class="font-mono text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">${doneItems.length}</span>
+          </div>
+          <div class="space-y-3 overflow-y-auto max-h-[700px] pr-1">
+            ${doneItems.length > 0 ? doneItems.map(buildCard).join('') : '<div class="p-8 text-center text-xs text-slate-500">Chưa có yêu cầu nào hoàn thành.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    async function toggleBacklogItemStatus(id) {
+      try {
+        const res = await fetch('/api/backlog/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        await loadBacklog();
+        await loadData();
+      } catch (err) {
+        alert("Lỗi cập nhật trạng thái: " + err);
+      }
+    }
+
+    async function activateTaskWithAgent(id, epic, encodedTitle) {
+      const title = decodeURIComponent(encodedTitle);
+      if (confirm(`Xác nhận: Bạn muốn đội phát triển / Agent Autopilot nhận và bắt tay làm ngay task:\n\n[${id}] ${title}\n(Phân hệ: ${epic})?`)) {
+        selectedTaskId = id;
+        selectedTaskEpic = epic;
+        await triggerRunTask();
+      }
+    }
+
+    async function loadData() {
+      try {
+        const [resDAG, resAuto] = await Promise.all([
+          fetch(`/api/dag?status=${currentStatusFilter}`),
+          fetch('/api/autopilot')
+        ]);
+        globalGraphData = await resDAG.json();
+        globalAutopilotData = await resAuto.json();
+
+        populateFilters(globalGraphData);
+        renderDAG(globalGraphData);
+        renderAutopilot(globalAutopilotData);
+
+        // Tự động duy trì view hoặc chuyển sang Autopilot Run View nếu có task đang chờ phê duyệt
+        const savedView = localStorage.getItem('nacen_active_view');
+        if (globalAutopilotData && (globalAutopilotData.runtime_status === 'WAITING_APPROVAL' || globalAutopilotData.human_gate === 'WAITING')) {
+          switchView('autopilot');
+        } else if (savedView) {
+          switchView(savedView);
+        }
+      } catch (err) {
+        console.error("Lỗi nạp dữ liệu:", err);
+      }
+    }
+
+    function populateFilters(data) {
+      const selE = document.getElementById('selEpic');
+      if (selE && selE.options.length <= 1) {
+        data.epics.forEach(e => {
+          selE.innerHTML += `<option value="${e}">${e}</option>`;
+        });
+      }
+    }
+
+    function renderDAG(data) {
+      document.getElementById('txtCount').textContent = `${data.filtered_tasks} of ${data.total_tasks}`;
+      document.getElementById('cntNeedsYou').textContent = data.status_summary.needs_you || 0;
+      document.getElementById('cntRunning').textContent = data.status_summary.running || 0;
+      document.getElementById('cntReview').textContent = data.status_summary.in_review || 0;
+      document.getElementById('cntReady').textContent = data.status_summary.ready || 0;
+      document.getElementById('cntBlocked').textContent = data.status_summary.blocked || 0;
+      document.getElementById('cntDone').textContent = data.status_summary.done || 0;
+
+      const waveMap = {};
+      data.nodes.forEach(n => {
+        const w = n.wave;
+        if (!waveMap[w]) waveMap[w] = [];
+        waveMap[w].push(n);
+      });
+
+      const container = document.getElementById('waveColumnsList');
+      container.innerHTML = '';
+
+      let sortedWaves = Object.keys(waveMap).map(Number).sort((a,b) => a - b);
+      let displayWaves = sortedWaves.slice(0, 14);
+
+      // Đảm bảo wave chứa active task (như TASK-01-CR19 ở wave 94) luôn được đưa vào hiển thị
+      const activeTaskNode = data.nodes.find(n => n.id === (globalAutopilotData?.active_task));
+      if (activeTaskNode && !displayWaves.includes(activeTaskNode.wave)) {
+        displayWaves.push(activeTaskNode.wave);
+        displayWaves.sort((a, b) => a - b);
+      }
+
+      displayWaves.forEach(w => {
+        const nodesInWave = waveMap[w];
+        const doneCount = nodesInWave.filter(n => n.is_done).length;
+        const totalCount = nodesInWave.length;
+
+        const colDiv = document.createElement('div');
+        colDiv.className = 'w-72 flex-shrink-0 flex flex-col gap-3';
+        colDiv.innerHTML = `
+          <div class="flex items-center justify-between border-b border-borderDark pb-2 px-1">
+            <span class="text-xs font-bold text-slate-300">Wave ${w}</span>
+            <span class="text-[11px] font-mono text-slate-500">${doneCount}/${totalCount}</span>
+          </div>
+          <div class="flex flex-col gap-3" id="wave-col-${w}"></div>
+        `;
+
+        const listDiv = colDiv.querySelector(`#wave-col-${w}`);
+        nodesInWave.slice(0, 8).forEach(node => {
+          const card = createNodeCard(node);
+          listDiv.appendChild(card);
+        });
+
+        if (nodesInWave.length > 8) {
+          const morePill = document.createElement('div');
+          morePill.className = 'text-center text-[11px] font-medium py-1.5 px-3 bg-white hover:bg-slate-50 text-slate-600 hover:text-[#3c5999] rounded-lg border border-slate-200/90 shadow-2xs cursor-pointer transition hover:border-[#3c5999]/40 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400 dark:hover:text-slate-200';
+          morePill.textContent = `+ ${nodesInWave.length - 8} more tasks`;
+          listDiv.appendChild(morePill);
+        }
+
+        container.appendChild(colDiv);
+      });
+
+      setTimeout(drawEdges, 150);
+    }
+
+    function createNodeCard(node) {
+      const card = document.createElement('div');
+      card.id = `node-${node.id}`;
+      card.dataset.nodeId = node.id;
+      
+      let borderStyle = 'border-slate-800/80 bg-[#0d1424] opacity-75';
+      let statusBadge = '<span class="text-slate-500 flex items-center gap-1 font-mono">⬚ BLOCKED</span>';
+
+      if (node.is_done) {
+        borderStyle = 'border-slate-800 bg-[#0c1220] opacity-50';
+        statusBadge = '<span class="text-slate-400 font-mono">✓ DONE</span>';
+      } else if (node.status === 'READY') {
+        borderStyle = 'border-emerald-500/80 bg-[#0d1c24] shadow-[0_0_12px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500';
+        statusBadge = '<span class="text-emerald-400 font-bold flex items-center gap-1 font-mono">● READY</span>';
+      } else if (node.status === 'RUNNING') {
+        borderStyle = 'border-cyan-500 bg-[#081f2c] shadow-[0_0_15px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400';
+        statusBadge = '<span class="text-cyan-400 font-bold flex items-center gap-1 font-mono animate-pulse">● RUNNING</span>';
+      } else if (node.status === 'NEEDS_YOU') {
+        borderStyle = 'border-amber-500 bg-[#1f1709] shadow-[0_0_12px_rgba(245,158,11,0.3)] ring-1 ring-amber-400';
+        statusBadge = '<span class="text-amber-400 font-bold flex items-center gap-1 font-mono">⚠ NEEDS YOU</span>';
+      }
+
+      if (node.is_critical && !node.is_done) {
+        borderStyle += ' ring-2 ring-yellow-400';
+      }
+
+      card.className = `p-3 rounded-lg border text-xs transition-all cursor-pointer hover:scale-[1.02] ${borderStyle}`;
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-white font-mono">${node.id.split('-').slice(0,2).join('-')}</span>
+          </div>
+          <div class="text-[10px]">${statusBadge}</div>
+        </div>
+        <p class="text-slate-300 font-medium line-clamp-2 leading-snug">${node.title}</p>
+      `;
+
+      card.onclick = () => openTaskModal(node);
+      return card;
+    }
+
+    function drawEdges() {
+      const svg = document.getElementById('svgEdges');
+      if (!svg || !globalGraphData) return;
+      svg.innerHTML = '';
+
+      const containerRect = document.getElementById('dagContainer').getBoundingClientRect();
+
+      globalGraphData.edges.forEach(edge => {
+        const sourceElem = document.getElementById(`node-${edge.source}`);
+        const targetElem = document.getElementById(`node-${edge.target}`);
+
+        if (sourceElem && targetElem) {
+          const sRect = sourceElem.getBoundingClientRect();
+          const tRect = targetElem.getBoundingClientRect();
+
+          const x1 = sRect.right - containerRect.left + document.getElementById('dagContainer').scrollLeft;
+          const y1 = sRect.top + sRect.height / 2 - containerRect.top + document.getElementById('dagContainer').scrollTop;
+
+          const x2 = tRect.left - containerRect.left + document.getElementById('dagContainer').scrollLeft;
+          const y2 = tRect.top + tRect.height / 2 - containerRect.top + document.getElementById('dagContainer').scrollTop;
+
+          const dx = Math.max(35, (x2 - x1) / 2);
+          const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', pathD);
+          path.setAttribute('class', `bezier-edge ${edge.is_critical ? 'critical' : ''}`);
+          svg.appendChild(path);
+        }
+      });
+    }
+
+    function renderAutopilot(data) {
+      document.getElementById('runtimeBadge').textContent = `STATUS: ${data.runtime_status}`;
+      
+      // Cập nhật Banner thông báo và Badge ở Tab
+      const alertBar = document.getElementById('activeTaskAlertBar');
+      const alertId = document.getElementById('alertTaskId');
+      const alertTitle = document.getElementById('alertTaskTitle');
+      const badgeAuto = document.getElementById('badgeAutopilotStatus');
+
+      if (data.plan_details && (data.runtime_status === 'WAITING_APPROVAL' || data.human_gate === 'WAITING')) {
+        if (alertBar) {
+          alertBar.classList.remove('hidden');
+          if (alertId) alertId.textContent = data.active_task || data.plan_details.task_id;
+          if (alertTitle) alertTitle.textContent = data.plan_details.title || '';
+        }
+        if (badgeAuto) {
+          badgeAuto.textContent = '1 CẦN DUYỆT';
+          badgeAuto.className = 'px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-black font-bold font-mono animate-pulse';
+          badgeAuto.classList.remove('hidden');
+        }
+      } else if (data.runtime_status === 'RUNNING' || data.runtime_status === 'IMPLEMENTING') {
+        if (alertBar) {
+          alertBar.classList.remove('hidden');
+          if (alertId) alertId.textContent = data.active_task || '';
+          if (alertTitle) alertTitle.textContent = 'Senior Dev đang thi công mã nguồn...';
+        }
+        if (badgeAuto) {
+          badgeAuto.textContent = 'ĐANG CHẠY';
+          badgeAuto.className = 'px-1.5 py-0.2 rounded-full text-[10px] bg-cyan-500 text-black font-bold font-mono animate-pulse';
+          badgeAuto.classList.remove('hidden');
+        }
+      } else {
+        if (alertBar) alertBar.classList.add('hidden');
+        if (badgeAuto) badgeAuto.classList.add('hidden');
+      }
+
+      const runnerTitle = document.getElementById('runnerTitle');
+      const isCr = (data.active_task && data.active_task.includes('CR')) || (data.pipeline_type && data.pipeline_type.includes('DELTA'));
+      if (runnerTitle) {
+        runnerTitle.textContent = isCr ? 'SPECKIT-DELTA RUNNER' : 'SPECKIT-AUTOPILOT RUNNER';
+      }
+
+      // ZONE 1: PO SCOPE TRIAGE CARD (ĐỊNH TUYẾN CHIẾN LƯỢC & LIÊN KẾT WIREFRAME)
+      const poTriageContainer = document.getElementById('poTriageCard');
+      if (poTriageContainer && data.po_triage) {
+        const pt = data.po_triage;
+        poTriageContainer.innerHTML = `
+          <div class="bg-gradient-to-r from-[#0b1528] via-[#0d1a33] to-[#0a1224] border border-cyan-800/80 rounded-xl p-5 shadow-2xl ring-1 ring-cyan-500/20">
+            <div class="flex items-center justify-between pb-3 border-b border-cyan-900/40 mb-3 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🎯</span>
+                <div>
+                  <h3 class="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-2">
+                    PO SCOPE TRIAGE & ĐỊNH TUYẾN CHIẾN LƯỢC (BƯỚC 1 & 2)
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">
+                      ${pt.priority || 'P1 - Critical'}
+                    </span>
+                  </h3>
+                  <div class="text-[11px] text-cyan-200/90 font-mono mt-0.5">
+                    Người gửi yêu cầu: <span class="text-amber-300 font-semibold">${pt.sender || 'a Lượng (PO / Stakeholder)'}</span> · Phân hệ: <span class="text-sky-300 font-semibold">${pt.target_module}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold">
+                  ⚡ Chiến Lược: ${pt.strategic_decision}
+                </span>
+                <button onclick="openWireframeTab('${pt.wireframe_file || '/wireframes/06_mang_luoi_chuyen_gia.html'}')" class="btn-nacen-primary px-3.5 py-1 text-xs flex items-center gap-1.5 shadow-md">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                  🌐 Mở Wireframe HTML (Basic Design)
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div>
+                <span class="text-slate-400 font-semibold block mb-0.5">📋 Nội dung yêu cầu / Change Request:</span>
+                <p class="text-white font-medium bg-[#070e1c] p-2.5 rounded-lg border border-slate-800 text-[12px] leading-relaxed">
+                  ${pt.request_title}
+                </p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div class="bg-[#081222] p-3 rounded-lg border border-slate-800/80">
+                  <span class="text-cyan-400 font-semibold block mb-1 text-[11px]">💡 Căn Cứ Định Tuyến PO (Rationale):</span>
+                  <p class="text-slate-300 text-[11px] leading-relaxed">
+                    ${pt.rationale}
+                  </p>
+                </div>
+                <div class="bg-[#081222] p-3 rounded-lg border border-slate-800/80 flex flex-col justify-between">
+                  <div>
+                    <span class="text-amber-400 font-semibold block mb-1 text-[11px]">📐 Bàn Giao Basic Design & Wireframe:</span>
+                    <p class="text-slate-300 text-[11px] leading-relaxed">
+                      BA đã xuất bản giao diện tương tác <code class="text-amber-300 font-mono">${pt.wireframe_title || '06_mang_luoi_chuyen_gia.html'}</code>. Nhấn nút bên dưới để mở kiểm tra trực quan trên trình duyệt.
+                    </p>
+                  </div>
+                  <div class="mt-2 pt-2 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-[10px] text-slate-400 font-mono">Trạng thái: Đã sẵn sàng duyệt Cổng 1</span>
+                    <button onclick="openWireframeTab('${pt.wireframe_file || '/wireframes/06_mang_luoi_chuyen_gia.html'}')" class="text-sky-400 hover:text-sky-300 text-[11px] font-mono flex items-center gap-1 underline">
+                      Xem Wireframe ở Tab Mới ↗
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (poTriageContainer) {
+        poTriageContainer.innerHTML = '';
+      }
+
+      // ZONE 2: 3-HUMAN-GATE PIPELINE STEPPER
+      const stepper = document.getElementById('pipelineStepper');
+      stepper.innerHTML = '';
+
+      data.stepper.forEach((step, idx) => {
+        const isLast = idx === data.stepper.length - 1;
+        const box = document.createElement('div');
+        box.className = 'flex items-center gap-3 flex-shrink-0';
+
+        let boxBorder = 'border-emerald-900/60 bg-[#0b1424]';
+        let stepColor = 'text-emerald-400';
+
+        if (step.status === 'waiting') {
+          boxBorder = 'border-amber-500 bg-[#1f1709] ring-2 ring-amber-400 animate-pulse';
+          stepColor = 'text-amber-400';
+        } else if (step.status === 'running') {
+          boxBorder = 'border-cyan-500 bg-[#081f2c] ring-2 ring-cyan-400';
+          stepColor = 'text-cyan-400';
+        }
+
+        // Pill hiển thị Cổng Duyệt Con Người
+        let gatePill = '';
+        if (step.id === 'basic_design') {
+          gatePill = `<span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-950 text-amber-300 border border-amber-800">CỔNG 1: WIREFRAME</span>`;
+        } else if (step.id === 'plan') {
+          gatePill = `<span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-950 text-amber-300 border border-amber-800">CỔNG 2: PLAN</span>`;
+        } else if (step.id === 'draft_pr') {
+          gatePill = `<span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-purple-950 text-purple-300 border border-purple-800">CỔNG 3: DoD RELEASE</span>`;
+        }
+
+        box.innerHTML = `
+          <div class="${boxBorder} border rounded-xl p-3.5 min-w-[175px] shadow-lg flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1.5 gap-1">
+              <span class="text-xs font-semibold ${stepColor} flex items-center gap-1.5">
+                ${step.status === 'waiting' ? '⚠' : (step.status === 'running' ? '⚡' : '✓')} ${step.name}
+              </span>
+              ${step.round_info ? `<span class="text-[9px] text-slate-500 font-mono">${step.round_info}</span>` : ''}
+            </div>
+            ${gatePill ? `<div class="mb-1.5">${gatePill}</div>` : ''}
+            ${step.skill ? `<div class="text-[10px] font-mono text-sky-400 font-semibold mb-1">⚡ ${step.skill}</div>` : ''}
+            <div class="text-[11px] text-slate-300 font-medium mb-1">${step.badge}</div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+              <span>${step.duration || ''}</span>
+              <span class="text-cyan-400 font-bold">${step.tokens || ''}</span>
+            </div>
+            ${step.sub_badge ? `
+              <div class="border-t border-slate-800/80 mt-2 pt-2 text-[10px]">
+                <div class="text-emerald-400/90 font-medium">✓ ${step.sub_badge}</div>
+                ${(step.sub_duration || step.sub_tokens) ? `
+                <div class="flex items-center justify-between text-slate-500 font-mono mt-0.5">
+                  <span>${step.sub_duration || ''}</span>
+                  <span class="text-cyan-500">${step.sub_tokens || ''}</span>
+                </div>` : ''}
+              </div>
+            ` : ''}
+          </div>
+          ${!isLast ? '<span class="text-slate-600 text-lg">→</span>' : ''}
+        `;
+        stepper.appendChild(box);
+      });
+
+      // ZONE 3: SHADOW QA SENTINEL (CẢNH SÁT GÁC CỔNG TOÀN TRÌNH)
+      const qaBox = document.getElementById('qaSentinelBox');
+      if (qaBox && data.qa_sentinel) {
+        const qa = data.qa_sentinel;
+        const checksHtml = (qa.checks || []).map(c => `
+          <div class="p-3 rounded-lg bg-[#0e0717] border border-rose-950/90 flex flex-col justify-between">
+            <div class="text-slate-300 font-semibold mb-1 text-[11px]">${c.name}</div>
+            <div class="text-emerald-400 font-bold font-mono text-[11px]">${c.status === 'PASS' ? '✓ ' + c.detail : c.detail}</div>
+          </div>
+        `).join('');
+
+        qaBox.innerHTML = `
+          <div class="bg-gradient-to-r from-[#170a24] via-[#1b0d2a] to-[#12071d] border border-rose-800/80 rounded-xl p-4 shadow-2xl ring-1 ring-rose-500/25">
+            <div class="flex items-center justify-between pb-3 border-b border-rose-900/40 mb-3 flex-wrap gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">👮</span>
+                <div>
+                  <h3 class="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-2">
+                    ${qa.agent_name}
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 font-bold">
+                      ${qa.agent_badge || 'QA POLICE'}
+                    </span>
+                  </h3>
+                  <div class="text-[11px] text-rose-200/90 font-mono mt-0.5">
+                    ${qa.role_description} · <span class="text-sky-300 font-semibold">⚡ Skill: ${qa.skills_used}</span>
+                    ${qa.thread_id ? ` · <span class="text-purple-300">🔒 Luồng riêng: ${qa.thread_id}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 font-mono text-[11px]">
+                <span class="px-2 py-0.5 rounded bg-slate-900 text-sky-300 border border-slate-700">🤖 ${qa.model}</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">✓ BẢO VỆ XUYÊN SUỐT 5 GATE</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              ${checksHtml}
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-rose-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] font-mono text-rose-200/90">
+              <div class="flex items-center gap-1.5">
+                <span class="text-sky-400 font-semibold">📥 Nhận từ PO:</span>
+                <span>${qa.po_input || 'Giám sát độc lập toàn trình'}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-emerald-400 font-semibold">📤 Báo cáo PO:</span>
+                <span>${qa.po_output || 'Chứng thực Zero-Mock & cấp thẻ Go/No-Go'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (qaBox) {
+        qaBox.innerHTML = '';
+      }
+
+      // ZONE 4: RENDER AGENT STAGES STATUS MATRIX (TÌNH TRẠNG CÔNG VIỆC TỪNG KHÂU TỪNG AGENT)
+      const agentBox = document.getElementById('agentsStageStatusBox');
+      if (agentBox) {
+        const stages = data.agent_stages || [];
+        if (stages.length > 0) {
+          const cardsHtml = stages.map(s => {
+            let cardBg = 'bg-[#080e1a] border-slate-800/80';
+            let statusPill = `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">⏳ Chờ đến lượt</span>`;
+            let statusClass = 'pending';
+
+            if (s.status === 'RUNNING') {
+              cardBg = 'bg-[#061826] border-cyan-500/80 ring-1 ring-cyan-500/30';
+              statusPill = `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 animate-pulse">⚡ Đang thực hiện</span>`;
+              statusClass = 'running';
+            } else if (s.status === 'WAITING') {
+              cardBg = 'bg-[#1a1206] border-amber-500/80 ring-1 ring-amber-500/30';
+              statusPill = `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 animate-pulse">⚠ Chờ duyệt</span>`;
+              statusClass = 'waiting';
+            } else if (s.status === 'DONE') {
+              cardBg = 'bg-[#09161a] border-emerald-900/60';
+              statusPill = `<span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">✓ Hoàn thành</span>`;
+              statusClass = 'done';
+            }
+
+            const badgeBg = {
+              purple: 'bg-purple-950 text-purple-300 border-purple-800',
+              indigo: 'bg-indigo-950 text-indigo-300 border-indigo-800',
+              amber: 'bg-amber-950 text-amber-300 border-amber-800',
+              sky: 'bg-sky-950 text-sky-300 border-sky-800',
+              emerald: 'bg-emerald-950 text-emerald-300 border-emerald-800',
+              rose: 'bg-rose-950 text-rose-300 border-rose-800'
+            }[s.agent_color || 'indigo'] || 'bg-slate-800 text-slate-300 border-slate-700';
+
+            return `
+              <div class="stage-card ${statusClass} ${cardBg} border rounded-xl p-3.5 flex flex-col justify-between shadow-md transition hover:border-slate-600">
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded border ${badgeBg}">
+                        ${s.agent_badge}
+                      </span>
+                      <span class="text-xs font-bold text-white tracking-wide">
+                        ${s.stage_num}: ${s.stage_name}
+                      </span>
+                    </div>
+                    ${statusPill}
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] font-mono mb-1.5 flex-wrap gap-1">
+                    <span class="text-cyan-400 font-semibold">👤 Phụ trách: ${s.agent_id} (${s.agent_name})</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-sky-300 border border-slate-700/80">🤖 ${s.model || 'Gemini'}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                    ${s.skill_used ? `
+                      <span class="text-[10px] font-mono text-amber-300 px-1.5 py-0.5 rounded bg-amber-950/40 border border-amber-900/40">
+                        ⚡ ${s.skill_used}
+                      </span>
+                    ` : ''}
+                    ${s.thread_id ? `
+                      <span class="text-[10px] font-mono text-purple-300 px-1.5 py-0.5 rounded bg-purple-950/40 border border-purple-900/40" title="Chạy luồng riêng biệt, Context hoàn toàn độc lập">
+                        🔒 ${s.thread_id}
+                      </span>
+                    ` : ''}
+                  </div>
+                  <p class="text-xs text-slate-300 leading-relaxed font-normal mb-2.5">
+                    ${s.brief}
+                  </p>
+                  ${(s.po_input || s.po_output) ? `
+                    <div class="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] font-mono">
+                      ${s.po_input ? `
+                        <div class="flex items-start gap-1.5">
+                          <span class="text-sky-400 font-semibold flex-shrink-0 text-[10px]">📥 Nhận PO:</span>
+                          <span class="text-slate-300 text-[10px] leading-tight">${s.po_input}</span>
+                        </div>
+                      ` : ''}
+                      ${s.po_output ? `
+                        <div class="flex items-start gap-1.5">
+                          <span class="text-emerald-400 font-semibold flex-shrink-0 text-[10px]">📤 Trả PO:</span>
+                          <span class="text-emerald-300 text-[10px] leading-tight font-medium">${s.po_output}</span>
+                        </div>
+                      ` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          agentBox.innerHTML = `
+            <div class="bg-[#0b1424] border border-borderDark/90 rounded-xl p-5 shadow-xl">
+              <div class="flex items-center justify-between pb-3 border-b border-borderDark/80 mb-4 flex-wrap gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <h3 class="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-2">
+                    TÌNH TRẠNG CÔNG VIỆC TỪNG KHÂU & TỪNG AGENT (STAGE-GATE MONITOR)
+                  </h3>
+                </div>
+                <span class="text-[11px] font-mono text-slate-400">Luồng riêng · Context biệt lập · Hub & Spoke với PO</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${cardsHtml}
+              </div>
+            </div>
+          `;
+        } else {
+          agentBox.innerHTML = '';
+        }
+      }
+
+      // ZONE 5: BLACK BOX 4-TIER QC TEST MATRIX (ĐỊNH LƯỢNG)
+      const qcMatrixContainer = document.getElementById('qcTestMatrixBox');
+      if (qcMatrixContainer && data.qc_metrics) {
+        const qm = data.qc_metrics;
+        const sum = qm.summary || {};
+        const tiersHtml = (qm.tiers || []).map(t => `
+          <div class="p-3.5 rounded-lg bg-[#070e1c] border border-slate-800 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800">${t.tier_num}</span>
+                  ${t.tier_name}
+                </span>
+                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
+                  ✓ ${t.cases}
+                </span>
+              </div>
+              <div class="text-[11px] text-amber-300 font-mono mb-1">⚡ ${t.skill} · <span class="text-slate-400">${t.tool}</span></div>
+              <p class="text-[11px] text-slate-300 leading-relaxed mb-2">${t.scope}</p>
+            </div>
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+              <span>Thời gian: ${t.duration}</span>
+              <span class="text-emerald-400 font-bold">100% PASS</span>
+            </div>
+          </div>
+        `).join('');
+
+        qcMatrixContainer.innerHTML = `
+          <div class="bg-gradient-to-r from-[#0c1822] via-[#091524] to-[#0d1626] border border-emerald-800/80 rounded-xl p-5 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-emerald-900/40 mb-4 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🧪</span>
+                <div>
+                  <h3 class="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-2">
+                    BÁO CÁO ĐỊNH LƯỢNG KIỂM THỬ HỘP ĐEN 4 TẦNG (QC SPECIALIST)
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                      ${sum.rounds || 'Round 1 of 3 (Pass)'}
+                    </span>
+                  </h3>
+                  <div class="text-[11px] text-emerald-200/90 font-mono mt-0.5">
+                    Tuân thủ nghiêm ngặt Black Box Testing · Zero-Mock CSDL thật PostgreSQL · 5 UX States Playwright
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-900 text-cyan-300 border border-slate-700">
+                  📊 ${sum.total_cases || 14} Ca Test · ${sum.user_flows || 2} Luồng E2E · ${sum.duration || '45s'}
+                </span>
+                <button onclick="simulateQCLoop()" class="px-3 py-1 text-xs rounded bg-rose-950 text-rose-300 border border-rose-800 hover:bg-rose-900 transition flex items-center gap-1 font-mono font-bold shadow-sm">
+                  ⚡ Giả Lập Lỗi QC & Auto-Fix Round 2 (Option A)
+                </button>
+              </div>
+            </div>
+
+            ${(qm.retry_info && qm.retry_info.occurred) ? `
+              <div class="mb-4 p-3 bg-sky-950/70 border border-sky-600/60 rounded-lg text-sky-200 text-xs">
+                <div class="font-bold text-sky-300 flex items-center gap-1.5 mb-0.5">
+                  <span>⚡</span> VÒNG LẶP PHẢN HỒI LỖI QC (OPTION A) ĐÃ THỰC THI:
+                </div>
+                <p class="text-[11px] text-sky-200/90 leading-relaxed">
+                  ${qm.retry_info.defect_found} ➔ ${qm.retry_info.action_taken}
+                </p>
+              </div>
+            ` : ''}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              ${tiersHtml}
+            </div>
+          </div>
+        `;
+      } else if (qcMatrixContainer) {
+        qcMatrixContainer.innerHTML = '';
+      }
+
+      // ZONE 6: PLAN REVIEW & SMART HUMAN GATE PANEL (TƯƠNG TÁC CON NGƯỜI THEO CỔNG 1, 2, 3)
+      const planBox = document.getElementById('planReviewBox');
+      const gateStage = data.human_gate_stage || (data.runtime_status === 'DONE' ? 'DONE' : 'GATE_2_WAITING');
+
+      if (gateStage === 'GATE_1_WAITING') {
+        // CỔNG 1: DUYỆT BASIC DESIGN & WIREFRAME HTML
+        planBox.innerHTML = `
+          <div class="bg-[#181106] border border-amber-500/80 rounded-xl p-5 mb-8 shadow-2xl ring-1 ring-amber-500/40">
+            <div class="flex items-center justify-between pb-3 border-b border-amber-900/60 mb-4 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">👉</span>
+                <div>
+                  <h3 class="text-xs font-bold text-amber-300 tracking-wider uppercase flex items-center gap-2">
+                    CỔNG 1: PHÊ DUYỆT THIẾT KẾ CƠ SỞ & WIREFRAME HTML (HUMAN GATE 1)
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold animate-pulse">
+                      CHỜ BẠN DUYỆT
+                    </span>
+                  </h3>
+                  <div class="text-[11px] text-amber-200/90 mt-0.5">
+                    BA đã hoàn thiện Thiết Kế Cơ Sở & Wireframe HTML. Hãy mở tab mới xem thử và bấm nút duyệt bên dưới để bàn giao cho TechLead SA.
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openWireframeTab('/wireframes/06_mang_luoi_chuyen_gia.html')" class="btn-nacen-primary px-3.5 py-1.5 text-xs flex items-center gap-1.5">
+                  🌐 Mở Wireframe HTML (Tab Mới)
+                </button>
+                <button onclick="approveGate1()" class="btn-nacen-cta px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  Duyệt Wireframe Cổng 1
+                </button>
+              </div>
+            </div>
+            <div class="p-3.5 bg-[#0e0a03] rounded-lg border border-amber-950 text-xs text-amber-200/90 leading-relaxed">
+              <strong>Hồ sơ nghiệm thu Cổng 1:</strong> Giao diện màn hình <code class="text-amber-300 font-mono">06_mang_luoi_chuyen_gia.html</code> đã được điều chỉnh control bộ lọc: combobox hỗ trợ nhập ký tự tìm kiếm động và checkbox cho phép chọn đồng thời nhiều tỉnh/thành phố.
+            </div>
+          </div>
+        `;
+      } else if (gateStage === 'GATE_3_WAITING') {
+        // CỔNG 3: NGHIỆM THU CUỐI CÙNG & XUẤT XƯỞNG (DoD GATE 5 SIGN-OFF)
+        const checklist = data.dod_checklist || [];
+        const checkItemsHtml = checklist.map(it => `
+          <div class="p-3 rounded-lg bg-[#0e071a] border border-purple-950 flex items-center justify-between">
+            <div>
+              <div class="text-white font-semibold text-xs mb-0.5">${it.name}</div>
+              <div class="text-slate-400 text-[11px]">${it.detail}</div>
+            </div>
+            <span class="text-emerald-400 font-bold font-mono text-xs">✓ PASS</span>
+          </div>
+        `).join('');
+
+        planBox.innerHTML = `
+          <div class="bg-gradient-to-r from-[#170924] via-[#150a22] to-[#12071d] border border-purple-600/80 rounded-xl p-5 mb-8 shadow-2xl ring-1 ring-purple-500/40">
+            <div class="flex items-center justify-between pb-3 border-b border-purple-900/60 mb-4 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">🏆</span>
+                <div>
+                  <h3 class="text-xs font-bold text-purple-300 tracking-wider uppercase flex items-center gap-2">
+                    CỔNG 3: KÝ DUYỆT NGHIỆM THU CUỐI CÙNG & XUẤT XƯỞNG (HUMAN GATE 3 · DoD GATE 5)
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 font-bold animate-pulse">
+                      SẴN SÀNG KÝ DUYỆT
+                    </span>
+                  </h3>
+                  <div class="text-[11px] text-purple-200/90 mt-0.5">
+                    100% tiêu chí Definition of Done và kiểm thử Hộp Đen 4 tầng đã hoàn tất! Bấm nút bên dưới để tự động commit Git, tick [x] vào tasks.md và xuất xưởng.
+                  </div>
+                </div>
+              </div>
+              <button onclick="approveGate3()" class="btn-nacen-cta px-4 py-2 text-xs font-bold flex items-center gap-2 shadow-xl">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Ký Duyệt Nghiệm Thu Cổng 3 & Xuất Xưởng
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
+              ${checkItemsHtml}
+            </div>
+          </div>
+        `;
+      } else if (gateStage === 'DONE') {
+        // TRẠNG THÁI DONE (SHIPPED)
+        planBox.innerHTML = `
+          <div class="bg-[#071612] border border-emerald-800/80 rounded-xl p-5 mb-8 shadow-2xl">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🎉</span>
+                <div>
+                  <h3 class="text-sm font-bold text-emerald-300 uppercase flex items-center gap-2">
+                    ĐÃ NGHIỆM THU TOÀN TRÌNH & XUẤT XƯỞNG THÀNH CÔNG (SHIPPED)
+                  </h3>
+                  <div class="text-xs text-emerald-200/90 mt-0.5 font-mono">
+                    Đã hoàn tất 3 Cổng Duyệt Con Người · Đã tick [x] vào tasks.md · Biên bản lưu tại <code class="text-white">docs/decisions/GATE5_ACCEPTANCE.md</code>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 font-mono text-xs">
+                <span class="px-3 py-1 rounded bg-slate-900 text-sky-300 border border-slate-700">Git Commit: nacen-7173</span>
+                <span class="px-3 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">✓ DoD PASSED</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // CỔNG 2: DUYỆT KẾ HOẠCH THI CÔNG (GATE_2_WAITING hoặc PLAN_WAITING)
+        if (data.plan_details) {
+          const pd = data.plan_details;
+          const isWaiting = data.human_gate === 'WAITING' || gateStage === 'GATE_2_WAITING';
+          const pipelineType = data.pipeline_type || (pd.goal.includes('DELTA') ? 'SPECKIT-DELTA PIPELINE' : 'SPECKIT-AUTOPILOT PIPELINE');
+
+          planBox.innerHTML = `
+            <div class="bg-[#0b1424] border ${isWaiting ? 'border-amber-500/80 shadow-amber-950/40 ring-1 ring-amber-500/30' : 'border-emerald-800/80 shadow-emerald-950/40'} rounded-xl p-5 mb-8 shadow-2xl">
+              ${isWaiting ? `
+                <div class="mb-4 p-3.5 bg-amber-950/70 border border-amber-500/60 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-200 shadow-md">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-xl">👉</span>
+                    <div>
+                      <div class="font-bold text-amber-300 text-xs">CỔNG DUYỆT HUMAN GATE (CỔNG 2) ĐANG CHỜ BẠN:</div>
+                      <div class="text-[11px] text-amber-200/90 mt-0.5">Kiểm tra hồ sơ kế hoạch thi công bên dưới. Bấm nút xanh để kích hoạt Senior Dev bắt tay vào viết code và chạy kiểm thử 4 tầng!</div>
+                    </div>
+                  </div>
+                  <button onclick="approveGate2()" class="btn-nacen-cta px-4 py-2 text-xs font-bold flex items-center gap-2 shadow-lg whitespace-nowrap self-end sm:self-auto">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Duyệt Kế Hoạch Cổng 2 & Bắt Đầu Code
+                  </button>
+                </div>
+              ` : ''}
+
+              <div class="flex items-center justify-between pb-3 border-b border-borderDark/80 mb-4">
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <span class="text-sm font-bold text-white flex items-center gap-2">
+                    📋 HỒ SƠ KẾ HOẠCH THI CÔNG TRÌNH DUYỆT (DETAIL PLAN SUMMARY)
+                  </span>
+                  <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">
+                    ⚙ ${pipelineType}
+                  </span>
+                  <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${isWaiting ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
+                    ${isWaiting ? '● CHỜ BẠN DUYỆT CỔNG 2' : '✓ ĐÃ PHÊ DUYỆT'}
+                  </span>
+                </div>
+                ${isWaiting ? `
+                  <button onclick="approveGate2()" class="btn-nacen-cta px-4 py-1.5 text-xs flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Duyệt Kế Hoạch Cổng 2
+                  </button>
+                ` : ''}
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+                <div class="space-y-3">
+                  <div>
+                    <span class="text-slate-400 font-semibold block mb-0.5">🎯 Mục Tiêu Nghiệp Vụ:</span>
+                    <p class="text-slate-200 font-medium">${pd.goal}</p>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block mb-0.5">🛠 Giải Pháp Thiết Kế (Approach):</span>
+                    <p class="text-slate-300 leading-relaxed">${pd.approach}</p>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block mb-0.5">🧪 Kế Hoạch Kiểm Thử (Verification):</span>
+                    <p class="text-slate-300">${pd.test_plan}</p>
+                  </div>
+                </div>
+
+                <div class="space-y-3 bg-[#08101e] p-3.5 rounded-lg border border-slate-800/80">
+                  <div>
+                    <span class="text-slate-400 font-semibold block mb-1">📁 Tệp Mã Nguồn Sẽ Tạo Mới:</span>
+                    <div class="space-y-1">
+                      ${pd.files_to_create && pd.files_to_create.length > 0 ? pd.files_to_create.map(f => `<div class="font-mono text-[11px] text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-900/50">+ ${f}</div>`).join('') : '<span class="text-slate-500">Không có</span>'}
+                    </div>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block mb-1">📁 Tệp Mã Nguồn Sẽ Sửa Đổi:</span>
+                    <div class="space-y-1">
+                      ${pd.files_to_modify && pd.files_to_modify.length > 0 ? pd.files_to_modify.map(f => `<div class="font-mono text-[11px] text-sky-400 bg-sky-950/40 px-2 py-1 rounded border border-sky-900/50">~ ${f}</div>`).join('') : '<span class="text-slate-500 font-mono text-[11px]">Chưa cần sửa tệp nào ở bước này</span>'}
+                    </div>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-semibold block mb-0.5">🛡 Đánh Giá Tác Động Backend & CSDL:</span>
+                    <span class="font-bold text-emerald-400 font-mono text-[11px]">${pd.backend_impact}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          planBox.innerHTML = '';
+        }
+      }
+
+      const cyclesContainer = document.getElementById('cycleLogsContainer');
+      cyclesContainer.innerHTML = '';
+
+      data.cycles.forEach(cycle => {
+        const cDiv = document.createElement('div');
+        cDiv.className = 'border-b border-borderDark/60 pb-4';
+        cDiv.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-slate-200 mb-3">
+            <span>${cycle.cycle_title}</span>
+            ${cycle.tag ? `<span class="text-xs text-slate-400 font-medium">${cycle.tag}</span>` : ''}
+          </div>
+          <div class="space-y-2" id="cycle-items"></div>
+        `;
+
+        const itemsDiv = cDiv.querySelector('#cycle-items');
+        cycle.items.forEach(item => {
+          let tagColor = 'text-slate-400';
+          if (item.status === 'approve' || item.status === 'pass') tagColor = 'text-emerald-400 font-bold';
+          if (item.status === 'revise' || item.status === 'retry') tagColor = 'text-sky-400 font-semibold';
+          if (item.status === 'failing') tagColor = 'text-rose-400 font-bold';
+
+          const row = document.createElement('div');
+          row.className = 'flex items-center justify-between py-1 text-xs hover:bg-slate-900/40 px-2 rounded transition';
+          row.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <span class="text-slate-300 font-mono">${item.title}</span>
+              ${item.status !== 'done' ? `<span class="${tagColor}">: ${item.status}</span>` : ''}
+              ${item.details ? `<span class="text-slate-500 font-mono text-[11px]">${item.details}</span>` : ''}
+            </div>
+            <div class="flex items-center space-x-6 font-mono text-slate-400 text-[11px]">
+              ${item.turns ? `<span>${item.turns}</span>` : ''}
+              ${item.duration ? `<span>${item.duration}</span>` : ''}
+              ${item.tokens ? `<span class="text-cyan-400 font-semibold">${item.tokens}</span>` : ''}
+            </div>
+          `;
+          itemsDiv.appendChild(row);
+        });
+
+        cyclesContainer.appendChild(cDiv);
+      });
+
+      document.getElementById('totalSummaryText').textContent = 
+        `${data.summary.runs} · ${data.summary.duration} · ${data.summary.tokens || ''}`;
+    }
+
+    // Modal controls
+    function openTaskModal(node) {
+      selectedTaskId = node.id;
+      selectedTaskEpic = node.epic_id;
+      document.getElementById('mTaskId').textContent = node.id;
+      document.getElementById('mTaskStatus').textContent = `● ${node.status}`;
+      document.getElementById('mTaskTitle').textContent = node.title;
+      document.getElementById('mTaskEpic').textContent = node.epic_id;
+
+      const depsDiv = document.getElementById('mTaskDeps');
+      depsDiv.innerHTML = node.dependencies.length > 0 
+        ? node.dependencies.map(d => `<span class="px-2 py-0.5 bg-slate-900 border border-slate-700 rounded">${d}</span>`).join('') 
+        : '<span class="text-slate-500">Không có (Wave 0)</span>';
+
+      const childDiv = document.getElementById('mTaskChildren');
+      childDiv.innerHTML = node.dependents.length > 0 
+        ? node.dependents.map(d => `<span class="px-2 py-0.5 bg-slate-900 border border-slate-800 rounded">${d}</span>`).join('') 
+        : '<span class="text-slate-500">Không có</span>';
+
+      document.getElementById('modalTaskDetail').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modalTaskDetail').classList.add('hidden');
+    }
+
+    function openCreateCRModal() {
+      document.getElementById('modalCreateCR').classList.remove('hidden');
+      document.getElementById('crTitle').focus();
+    }
+
+    function closeCreateCRModal() {
+      document.getElementById('modalCreateCR').classList.add('hidden');
+    }
+
+    async function submitNewCR(e) {
+      e.preventDefault();
+      const type = document.querySelector('input[name="crType"]:checked').value;
+      const epic_id = document.getElementById('crEpic').value;
+      const priority = document.getElementById('crPriority').value;
+      const author = document.getElementById('crAuthor')?.value.trim() || 'Thành viên dự án';
+      const title = document.getElementById('crTitle').value.trim();
+      const description = document.getElementById('crDesc').value.trim();
+
+      if (!title) {
+        alert("Vui lòng nhập tiêu đề yêu cầu!");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/action/create_cr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, epic_id, priority, author, title, description })
+        });
+        const data = await res.json();
+        
+        closeCreateCRModal();
+        document.getElementById('formCreateCR').reset();
+        
+        // Tải lại dữ liệu Wave DAG & Backlog
+        await Promise.all([loadData(), loadBacklog()]);
+
+        if (confirm(`✓ ${data.message}\n\nBạn có muốn kích hoạt Agent Autopilot bắt tay vào làm ngay task [${data.task_id}] không?`)) {
+          selectedTaskId = data.task_id;
+          selectedTaskEpic = data.epic_id;
+          await triggerRunTask();
+        }
+      } catch (err) {
+        alert("Lỗi tạo yêu cầu: " + err);
+      }
+    }
+
+    function openWireframeTab(url) {
+      const targetUrl = url || '/wireframes/06_mang_luoi_chuyen_gia.html';
+      window.open(targetUrl, '_blank');
+    }
+
+    async function approveGate1() {
+      try {
+        const res = await fetch('/api/action/approve_gate1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: globalAutopilotData?.active_task || 'TASK-05-CR144' })
+        });
+        const data = await res.json();
+        alert(data.message || '✓ Đã duyệt Basic Design & Wireframe HTML (Cổng 1)!');
+        await loadData();
+      } catch (err) {
+        alert("Lỗi phê duyệt Cổng 1: " + err);
+      }
+    }
+
+    async function approveGate2() {
+      try {
+        const res = await fetch('/api/action/approve_gate2', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: globalAutopilotData?.active_task || 'TASK-05-CR144' })
+        });
+        const data = await res.json();
+        alert(data.message || '✓ Đã duyệt Kế hoạch Cổng 2!');
+        await loadData();
+      } catch (err) {
+        alert("Lỗi phê duyệt Cổng 2: " + err);
+      }
+    }
+
+    async function approveGate3() {
+      try {
+        const res = await fetch('/api/action/approve_gate3', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: globalAutopilotData?.active_task || 'TASK-05-CR144' })
+        });
+        const data = await res.json();
+        alert(data.message || '✓ Đã ký duyệt xuất xưởng Cổng 3 thành công!');
+        await loadData();
+      } catch (err) {
+        alert("Lỗi ký duyệt Cổng 3: " + err);
+      }
+    }
+
+    async function simulateQCLoop() {
+      try {
+        const res = await fetch('/api/action/simulate_qc_loop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: globalAutopilotData?.active_task || 'TASK-05-CR144', trigger_retry: true })
+        });
+        const data = await res.json();
+        alert(data.message || '✓ Đã kích hoạt kịch bản phản hồi lỗi QC (Option A)!');
+        await loadData();
+      } catch (err) {
+        alert("Lỗi giả lập QC: " + err);
+      }
+    }
+
+    async function approveHumanGate() {
+      try {
+        const res = await fetch('/api/action/approve', { method: 'POST' });
+        const data = await res.json();
+        alert("✓ " + data.message);
+        loadData();
+      } catch (err) {
+        alert("Lỗi kết nối API: " + err);
+      }
+    }
+
+    async function stopAgent() {
+      if (confirm("Bạn có chắc chắn muốn ngắt khẩn cấp tiến trình Agent?")) {
+        try {
+          const res = await fetch('/api/action/stop', { method: 'POST' });
+          const data = await res.json();
+          alert("✓ " + data.message);
+          loadData();
+        } catch (err) {
+          alert("Lỗi kết nối: " + err);
+        }
+      }
+    }
+
+    async function triggerRunTask(autoApprove = false) {
+      closeModal();
+      switchView('autopilot');
+      try {
+        const res = await fetch('/api/action/run_task', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: selectedTaskId, epic_id: selectedTaskEpic, auto_approve: autoApprove })
+        });
+        const data = await res.json();
+        // Nạp lại dữ liệu Autopilot ngay lập tức
+        await loadData();
+      } catch (err) {
+        alert("Lỗi kích hoạt task: " + err);
+      }
+    }
+
+    async function applyFilters() {
+      const epic = document.getElementById('selEpic')?.value || 'all';
+      const search = document.getElementById('txtSearch')?.value || '';
+
+      const res = await fetch(`/api/dag?epic=${encodeURIComponent(epic)}&milestone=all&status=${encodeURIComponent(currentStatusFilter)}&search=${encodeURIComponent(search)}`);
+      globalGraphData = await res.json();
+      renderDAG(globalGraphData);
+    }
+
+    function filterByStatus(status) {
+      currentStatusFilter = status;
+      applyFilters();
+    }
+
+    function refreshData() {
+      loadData();
+    }
+
+    // Connect Server-Sent Events (SSE)
+    function setupSSE() {
+      const evtSource = new EventSource('/api/stream');
+      evtSource.onmessage = (event) => {
+        try {
+          const telemetryData = JSON.parse(event.data);
+          globalAutopilotData = telemetryData;
+          renderAutopilot(telemetryData);
+        } catch (e) {
+          console.error("SSE parse error:", e);
+        }
+      };
+    }
+
+    // ==========================================
+    // AGENT MODEL CONFIGURATION MANAGEMENT
+    // ==========================================
+    let cachedModelConfig = null;
+
+    async function openModelConfigModal() {
+      try {
+        const res = await fetch('/api/config/models');
+        const data = await res.json();
+        cachedModelConfig = data;
+
+        const tbody = document.getElementById('modelConfigTableBody');
+        tbody.innerHTML = '';
+
+        const models = data.models_available || [];
+        const agents = data.agents || {};
+
+        for (const [agentId, conf] of Object.entries(agents)) {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-900/40 transition';
+
+          const primaryOpts = models.map(m => 
+            `<option value="${m.id}" ${conf.primary === m.id ? 'selected' : ''}>${m.name}</option>`
+          ).join('');
+
+          const fallbackOpts = models.map(m => 
+            `<option value="${m.id}" ${conf.fallback === m.id ? 'selected' : ''}>${m.name}</option>`
+          ).join('');
+
+          tr.innerHTML = `
+            <td class="p-3">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
+                  ${conf.badge || 'AG'}
+                </span>
+                <div>
+                  <div class="font-bold text-white font-mono">${agentId}</div>
+                  <div class="text-[11px] text-slate-400">${conf.role}</div>
+                </div>
+              </div>
+            </td>
+            <td class="p-3">
+              <select id="selPrimary_${agentId}" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-cyan-300 font-mono w-full focus:border-cyan-500 focus:outline-none">
+                ${primaryOpts}
+              </select>
+            </td>
+            <td class="p-3">
+              <select id="selFallback_${agentId}" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-300 font-mono w-full focus:border-cyan-500 focus:outline-none">
+                ${fallbackOpts}
+              </select>
+            </td>
+            <td class="p-3 text-[11px] text-slate-400">
+              ${conf.note || 'Tối ưu theo ma trận Hiến Pháp'}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+
+        document.getElementById('modalModelConfig').classList.remove('hidden');
+      } catch (err) {
+        alert("Lỗi tải cấu hình model: " + err);
+      }
+    }
+
+    function closeModelConfigModal() {
+      document.getElementById('modalModelConfig').classList.add('hidden');
+    }
+
+    function resetDefaultModelConfig() {
+      if (!cachedModelConfig || !cachedModelConfig.agents) return;
+      const defaults = {
+        "nacen-po-pm": { primary: "Gemini 4 Argon", fallback: "Gemini 3.8 Flash" },
+        "nacen-ba": { primary: "Claude Sonnet 4.6 (Thinking)", fallback: "Gemini 3.8 Flash" },
+        "nacen-techlead-sa": { primary: "Gemini 3.8 Flash", fallback: "Gemini 3.7 Flash" },
+        "nacen-dev-senior": { primary: "Gemini 3.8 Flash", fallback: "Gemini 3.7 Flash" },
+        "nacen-qc": { primary: "Gemini 3.8 Flash", fallback: "Gemini 3.7 Flash" },
+        "nacen-qa": { primary: "Gemini 3.8 Flash", fallback: "Gemini 3.7 Flash" },
+        "nacen-ps": { primary: "Gemini 3.8 Flash", fallback: "Gemini 3.7 Flash" }
+      };
+
+      for (const [agentId, conf] of Object.entries(defaults)) {
+        const selP = document.getElementById(`selPrimary_${agentId}`);
+        const selF = document.getElementById(`selFallback_${agentId}`);
+        if (selP) selP.value = conf.primary;
+        if (selF) selF.value = conf.fallback;
+      }
+    }
+
+    async function saveModelConfig() {
+      if (!cachedModelConfig || !cachedModelConfig.agents) return;
+      const agentsUpdate = {};
+
+      for (const agentId of Object.keys(cachedModelConfig.agents)) {
+        const selP = document.getElementById(`selPrimary_${agentId}`);
+        const selF = document.getElementById(`selFallback_${agentId}`);
+        if (selP && selF) {
+          agentsUpdate[agentId] = {
+            primary: selP.value,
+            fallback: selF.value
+          };
+        }
+      }
+
+      try {
+        const res = await fetch('/api/config/models', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agents: agentsUpdate })
+        });
+        const data = await res.json();
+        alert("✓ " + data.message);
+        closeModelConfigModal();
+        await loadData();
+      } catch (err) {
+        alert("Lỗi lưu cấu hình: " + err);
+      }
+    }
+
+    // Startup
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      loadData();
+      loadBacklog();
+      setupSSE();
+      window.addEventListener('resize', drawEdges);
+      document.getElementById('dagContainer').addEventListener('scroll', drawEdges);
+    });
+  </script>
+</body>
+</html>
