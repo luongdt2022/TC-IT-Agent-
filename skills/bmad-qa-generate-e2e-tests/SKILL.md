@@ -12,12 +12,16 @@ Skill chuyên trách dành cho **Agent QC** để tự động hóa kiểm thử
 ## 1. NGUYÊN TẮC THIẾT KẾ TEST SUITE E2E
 1. **Kiểm Thử Theo Luồng Giá Trị (User Journey Centric)**:
    - Không kiểm tra click nút đơn lẻ; kiểm tra trọn vẹn một kịch bản từ đầu đến cuối (ví dụ: Chuyên gia đăng ký qua Zalo Mini App $\rightarrow$ Hệ thống gửi thông báo $\rightarrow$ Admin duyệt trên Web Portal $\rightarrow$ Hồ sơ hiển thị trên Sàn).
-2. **Bao Phủ Trọn Vẹn 5 Trạng Thái UX**:
+2. **Bao Phủ Trọn Vẹn 5 Trạng Thái UX & Bộ Kiểm Thử Gián Đoạn (Cancel & Interrupt Suite)**:
    - `Empty State`: Khi chưa có dữ liệu $\rightarrow$ Kiểm tra có hiển thị hình minh họa và nút hành động kêu gọi không.
    - `Loading State`: Khi đang gọi API $\rightarrow$ Kiểm tra Skeleton Loader có hiển thị đúng vị trí không.
    - `Error State`: Khi ngắt mạng hoặc API trả 500 $\rightarrow$ Kiểm tra thông báo lỗi thân thiện và nút "Thử lại".
    - `Success State`: Khi tải dữ liệu thành công $\rightarrow$ Kiểm tra hiển thị đúng và đủ số bản ghi.
    - `Partial State`: Khi phân trang hoặc tải thêm $\rightarrow$ Kiểm tra infinite scroll / load more.
+   - **Kịch Bản Gián Đoạn Bắt Buộc (Interrupt Tests)**:
+     + *Abort midway*: Bấm Esc/Hủy khi API đang pending $\rightarrow$ Xác nhận không có Unhandled Promise Error trong browser console, loading spinner tắt ngay.
+     + *Dirty form navigation*: Sửa 1 trường rồi bấm link chuyển trang $\rightarrow$ Xác nhận xuất hiện hộp thoại xác nhận rời trang.
+     + *Double-click spam*: Click submit 3 lần liên tiếp trong 200ms $\rightarrow$ Xác nhận chỉ 1 request duy nhất được gửi tới Backend.
 
 ## 2. QUY TRÌNH TỰ ĐỘNG SINH CODE TEST
 1. **Đọc Spec SSOT**: Quét `SourceCode/specs/<epic>/spec.md` lấy danh sách User Stories & Acceptance Criteria (`AC-01`, `AC-02`...).

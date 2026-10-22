@@ -148,6 +148,15 @@ class DAGEngine:
                 
                 cat = match.group("cat") or "DEV"
                 title = match.group("title").strip(" `*:-")
+
+                # Làm sạch tags phân loại hoặc người gửi lọt vào title
+                m_cat = re.search(r"(\*\*|`)?\[(CR|TASK|FE|BE|TEST|DEV|DELTA|INFRA|CONTRACT|INT|KERNEL)\](\*\*|`)?", title, re.IGNORECASE)
+                if m_cat:
+                    cat = m_cat.group(2).upper()
+                    title = re.sub(r"^\s*(\*\*|`)?\[(CR|TASK|FE|BE|TEST|DEV|DELTA|INFRA|CONTRACT|INT|KERNEL)\](\*\*|`)?\s*", "", title, flags=re.IGNORECASE)
+                title = re.sub(r"^\s*\[P[0-9]\]\s*", "", title)
+                title = re.sub(r"^\s*\(Người gửi:\s*[^)]+\)\s*", "", title, flags=re.IGNORECASE)
+                title = title.strip(" `*:-—	")
                 
                 deps = list(prev_phase_last_tasks[:2]) if prev_phase_last_tasks else []
 

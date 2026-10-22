@@ -1,16 +1,17 @@
 ---
-name: speckit-uiux
+name: "speckit-uiux"
 description: "Senior Product Designer & Visual QA Specialist: Thiết kế layout theo HTML Wireframe Basic Design, chuẩn hóa 5 trạng thái UX qua <Async>, phân quyền 3D Scoped RBAC UI và tự động chụp ảnh Visual QA bằng Playwright."
 compatibility: "Requires Frontend Submodule (SourceCode/frontend/) with Playwright"
 metadata:
-  author: "TC IT Architecture Team"
-  source: "custom/speckit-uiux-tc"
+  author: "NacenTwin Architecture Team"
+  source: "custom/speckit-uiux-nacentech"
   version: "2.1.0"
 ---
+
 # Kỹ Năng Thiết Kế Giao Diện & Kiểm Thử Trực Quan Nacentwin (`speckit-uiux`)
 
 ## 1. Mục Đích & Vai Trò
-Khi dự án bước vào giai đoạn thiết kế và thi công giao diện Frontend tại [`SourceCode/frontend/`](file:///Users/luongdt/Library/CloudStorage/GoogleDrive-luongdt.wi@gmail.com/My Drive/Enterprise TC ITProject/SourceCode/frontend), skill này đóng vai trò là **Senior Product Designer & Visual QA Specialist**:
+Khi dự án bước vào giai đoạn thiết kế và thi công giao diện Frontend tại [`SourceCode/frontend/`](file:///Users/luongdt/Library/CloudStorage/GoogleDrive-luongdt.wi@gmail.com/My Drive/NacenTechProject/SourceCode/frontend), skill này đóng vai trò là **Senior Product Designer & Visual QA Specialist**:
 1. **Bảo toàn 100% nghiệp vụ từ Basic Design**:
    - Đối soát trực tiếp với các file HTML Wireframe mô phỏng tại `Specification/02_BASIC_DESIGN/TASK-XX/`.
    - Giữ trọn vẹn các cấu trúc nghiệp vụ đặc thù: Form 225 trường DN ĐMST, Bộ lọc 1,479 quy tắc cho 18 ngành, Thang đo TRL 1-9, Cây đơn vị 63 Sở KH&CN Tỉnh.
@@ -57,7 +58,7 @@ Không viết style ad-hoc, bắt buộc dùng các components dùng chung trong
 - `<AIUploadDropzone>`: Khu vực kéo thả file CV/LLKH hỗ trợ xem trước và tiến trình scan AI.
 - `<Toast>`: Thông báo nổi góc trên/dưới xác nhận lưu thành công hoặc cảnh báo.
 
-### Bước 4: Chuẩn Hóa 5 Trạng Thái UX Bắt Buộc (`<Async>`)
+### Bước 4: Chuẩn Hóa 5 Trạng Thái UX Bắt Buộc (`<Async>`) & Vòng Đời Tương Tác Gián Đoạn
 Mọi màn hình gọi dữ liệu từ API Backend bắt buộc phải bọc trong component cấu trúc:
 ```tsx
 <Async status={queryStatus}>
@@ -82,6 +83,25 @@ Mọi màn hình gọi dữ liệu từ API Backend bắt buộc phải bọc tr
 </Async>
 ```
 
+#### Bổ sung: Mô hình hóa 5 Pha Tương Tác & Ma Trận Gián Đoạn (5-Phase Lifecycle & 7-Family Interrupt Matrix)
+Đối với các Form nhập liệu lớn, Modal thao tác, Wizard đa bước hoặc Thao tác hàng loạt (Bulk Actions), Agent bắt buộc phải bổ sung vào tài liệu đặc tả UI:
+
+1. **5 Pha Tương Tác**:
+   - `Starting`: Bắt đầu kích hoạt (Click/Focus/Drag) -> Khởi tạo state, vô hiệu hóa submit đúp.
+   - `Ending at once`: Người dùng kết thúc ngay (nhấp chuột nhanh, Esc) -> Reset state sạch sẽ.
+   - `Extended`: Thao tác kéo dài (nhập dữ liệu form, kéo thả) -> Theo dõi dirty state (`isDirty = true`).
+   - `While extended`: Đang trong tiến trình tương tác -> Live validation, auto-save nháp (nếu có).
+   - `Finishing`: Xác nhận / Submit -> Kích hoạt AbortController, commit dữ liệu, dọn dẹp state.
+
+2. **Bảng Ma Trận 7 Kịch Bản Gián Đoạn (Interrupt Matrix)**:
+   - `[User Abort]`: Người dùng bấm Esc, nút "Hủy", click overlay -> Hủy gọi API qua `AbortController.abort()`, đóng modal, rollback form.
+   - `[Mid-way Navigation]`: Người dùng click menu/link chuyển trang khi đang điền dở -> Kích hoạt Route Leave Guard cảnh báo mất dữ liệu chưa lưu.
+   - `[Background Complete]`: Hành vi submit dở dang -> Khóa nút, tránh gửi trùng lặp (Idempotent request).
+   - `[Environment Failure]`: Rớt mạng, timeout API -> Giữ nguyên dữ liệu người dùng đã nhập, hiển thị thông báo lỗi thân thiện + nút Thử lại (không xóa trắng form).
+   - `[Page Reload / Tab Close]`: F5 hoặc tắt tab -> Bắt sự kiện `beforeunload` cảnh báo nếu form đang dirty.
+   - `[External Mutation]`: Dữ liệu bị người khác sửa cùng lúc -> Xử lý Optimistic Concurrency (`409 Conflict`), hiển thị thông báo đối soát và hỗ trợ nạp lại bản mới nhất.
+   - `[Input Channel Change]`: Chuyển giữa chuột/phím tắt, browser autofill -> Tự động re-validate schema Zod toàn diện.
+
 ### Bước 5: Kiểm Thử Trực Quan Visual QA Bằng Playwright
 1. **Kịch bản chụp ảnh tự động**:
    - Sử dụng Playwright headless mở trang ở 2 độ phân giải:
@@ -91,11 +111,26 @@ Mọi màn hình gọi dữ liệu từ API Backend bắt buộc phải bọc tr
 2. **Đối soát & Báo cáo**:
    - So sánh ảnh chụp thực tế với wireframe HTML nguồn trong Basic Design để đảm bảo độ chuẩn xác 100%.
 
+### Bước 6: Tổng hợp Wireframe Nguồn Bắt Buộc (Wireframe Source Library)
+
+Sau khi **tạo mới hoặc cập nhật** bất kỳ file HTML wireframe nào trong `Specification/02_BASIC_DESIGN/TASK-XX/`, Agent bắt buộc phải cập nhật thư viện tổng hợp:
+
+- **File tổng hợp chuẩn**: `Specification/02_BASIC_DESIGN/wireframe_tong_the_nacentwin.html`.
+- Thêm một tab/mục mới với: mã TASK, tên màn hình, mô tả ngắn, đường dẫn tương đối đến file HTML nguồn và icon Lucide phù hợp.
+- File tổng hợp phải hiển thị **trực tiếp wireframe HTML nguồn qua iframe**. Không được tự vẽ lại hoặc thay thế giao diện nguồn bằng mockup mới trong file tổng hợp.
+- Nếu TASK đã có đặc tả nhưng **chưa có file HTML wireframe nguồn**, phải hiển thị trạng thái `Chưa có wireframe HTML nguồn`, kèm đường dẫn thư mục TASK. Tuyệt đối không suy diễn để dựng màn hình thay thế.
+- Lớp bao của thư viện tổng hợp được chuẩn hóa theo Design System NacenTwin (logo, màu Navy/Cyan/Emerald, font Plus Jakarta Sans, icon Lucide, tab điều hướng, preview Desktop/Mobile); nội dung bên trong iframe phải giữ nguyên để phục vụ đối chiếu thiết kế.
+- Trước khi bàn giao, xác minh mọi đường dẫn được đăng ký trong thư viện tổng hợp đều tồn tại và tab mở đúng wireframe tương ứng.
+
+Mục đích là duy trì một **nguồn xem tổng thể duy nhất** của tất cả wireframe thực tế, làm đầu vào trực tiếp cho đội UI Design/Frontend mà không làm mất dấu vết nguồn.
+
 ---
 
 ## 3. Tiêu Chí Nghiệm Thu UI/UX (Definition of Done)
 - [ ] Khớp 100% các trường dữ liệu và luồng tương tác từ file HTML Wireframe Basic Design.
-- [ ] Tuân thủ bảng màu công nghệ Enterprise TC IT và hoạt động mượt mà ở cả Light/Dark Mode.
+- [ ] Tuân thủ bảng màu công nghệ NacenTech và hoạt động mượt mà ở cả Light/Dark Mode.
 - [ ] 100% các màn hình có đủ 5 trạng thái UX xử lý qua `<Async>`.
 - [ ] Giao diện tự động thích ứng hoàn hảo giữa Desktop (1440px) và Mobile (390px).
 - [ ] Đã chạy Playwright chụp ảnh Visual QA đầy đủ và lưu vào thư mục screenshots.
+- [ ] Mọi wireframe HTML mới/cập nhật đã được đăng ký và mở đúng trong `Specification/02_BASIC_DESIGN/wireframe_tong_the_nacentwin.html`.
+- [ ] Các TASK chưa có HTML nguồn được đánh dấu rõ trong thư viện tổng hợp, không có mockup suy diễn thay thế.

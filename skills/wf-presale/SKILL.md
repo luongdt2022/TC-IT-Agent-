@@ -1,3 +1,8 @@
+---
+name: wf-presale
+description: Quy trình tiền dự án từ đề bài thô đến IT Technical Proposal, dự toán WBS và báo giá giải pháp.
+---
+
 # QUY TRÌNH TIỀN DỰ ÁN: wf-presale (TỪ ĐỀ BÀI ĐẾN IT PROPOSAL & BÁO GIÁ)
 
 > **Mã Quy Trình**: `wf-presale`  

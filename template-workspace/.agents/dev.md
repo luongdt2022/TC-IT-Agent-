@@ -77,6 +77,11 @@ ightarrow$ Refactor*.
    - Màn tải dữ liệu bắt buộc thể hiện đủ các trạng thái (Đang tải · Rỗng · Lỗi · Có dữ liệu · Đang cập nhật) qua component chuẩn (ví dụ `<Async>`).
 10. **Bảo Vệ Ngữ Cảnh Bảo Mật & Phân Quyền**: Mọi thao tác truy vấn dữ liệu nghiệp vụ đều phải gắn điều kiện xác thực và phạm vi phân quyền phù hợp.
 11. **Không Thêm Metadata Thừa Vào Source Code**: Không chèn các comment rác liên quan đến workflow của AI hoặc số hiệu sprint vào code; comment chỉ giải thích lý do *tại sao (Why)*, không mô tả lại cái code đang làm *(What)*.
+12. **Kỷ Luật Kiểm Soát Gián Đoạn & Dọn Dẹp Vòng Đời Tương Tác (5-Phase Lifecycle & 7-Family Interrupt Robustness)**:
+    - Mọi hàm gọi API/custom hooks bắt buộc phải truyền `signal: abortController.signal` để tự động hủy request khi unmount component hoặc khi người dùng hủy thao tác.
+    - Mọi useEffect / subscription bắt buộc phải trả về cleanup function để tránh rò rỉ bộ nhớ hoặc gọi `setState` trên unmounted component.
+    - Các nút Submit / Mutation bắt buộc phải có cơ chế debounce / disabled khi `isSubmitting` để triệt tiêu hoàn toàn lỗi Double-click spam.
+    - Mọi Form nhập liệu phức tạp bắt buộc phải có Route Leave Guard cảnh báo mất dữ liệu chưa lưu khi `isDirty == true` lúc người dùng bấm chuyển trang hoặc đóng modal.
 
 ---
 
