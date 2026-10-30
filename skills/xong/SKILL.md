@@ -59,9 +59,11 @@ Checklist nghiệm thu xuất xưởng (Definition of Done - Gate 5):
 | 1 | **Kiểm thử ranh giới / Phân quyền / Cô lập dữ liệu** | Grep test kiểm tra logic phân quyền (RBAC) và cô lập dữ liệu (Multi-tenant/User boundary) cho endpoint/hàm mới. Phải thấy assert cụ thể (401/403/404 hoặc exception). | **Chặn** |
 | 2 | **Kiểm thử quy tắc nghiệp vụ (BR-*)** | Kiểm tra toàn bộ mã kiểm thử Unit / Integration kiểm chứng các quy tắc nghiệp vụ `BR-*` đã pass 100%. | **Chặn** |
 | 3 | **Kiểm thử hợp đồng / Tương thích API** | Spec có thay đổi hợp đồng DTO giữa Frontend và Backend hoặc giữa các Microservices không? Nếu có, kiểm tra Contract Test tương ứng. | **Chặn** |
-| 4 | **Cập nhật Living Docs phản ánh hiện trạng** | Đọc living doc của các vùng bị chạm (`docs/system/<vùng>.md` hoặc `docs/`), so sánh với những gì code thực tế đã làm. Xem Bước 3. | **Chặn** |
-| 5 | **ADR cho quyết định một chiều** | Spec có chốt quyết định một chiều nào (công nghệ lõi, cấu trúc schema CSDL, giải pháp bảo mật)? Nếu có, kiểm tra `docs/decisions/` đã có ADR chưa. | **Chặn** |
-| 6 | **Cập nhật Status và Roadmap** | Cập nhật `Status: Shipped` và đánh dấu hoàn thành trên Roadmap. Xem Bước 4. | Tự làm |
+| 4 | **Đối soát Dev Checklist (Zero Bỏ Bước & Zero-Mock)** | Xác nhận Dev đã hoàn thành 100% `tasks.md`, đủ 3 tầng [BE/FE/Test], bọc `<Async>` 5 UX states, không chứa dữ liệu mock/hardcode trong code production. | **Chặn** |
+| 5 | **Thẩm tra QC 3 Điểm (Data Thật, Số Lượng Luồng & Báo Cáo Bug)** | Xác nhận QC: (1) Đã test data PostgreSQL thật, cấm mock/hardcode; (2) Định lượng đủ test cases và luồng hành trình; (3) **Bác bỏ báo cáo 0 bug suông** — QC phải xuất trình bằng chứng đã tìm ra bug biên/lỗi phá hoại và Dev đã fix. | **Chặn** |
+| 6 | **Cập nhật Living Docs phản ánh hiện trạng** | Đọc living doc của các vùng bị chạm (`docs/system/<vùng>.md` hoặc `docs/`), so sánh với những gì code thực tế đã làm. Xem Bước 3. | **Chặn** |
+| 7 | **ADR cho quyết định một chiều** | Spec có chốt quyết định một chiều nào (công nghệ lõi, cấu trúc schema CSDL, giải pháp bảo mật)? Nếu có, kiểm tra `docs/decisions/` đã có ADR chưa. | **Chặn** |
+| 8 | **Cập nhật Status và Roadmap** | Cập nhật `Status: Shipped` và đánh dấu hoàn thành trên Roadmap. Xem Bước 4. | Tự làm |
 
 Khi không tìm thấy test: **nói rõ đã grep cái gì mà không thấy**, để người dùng phân biệt được
 "thiếu test thật" với "test có nhưng đặt tên khác nên grep trượt".

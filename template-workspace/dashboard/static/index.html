@@ -4398,7 +4398,10 @@
       initTheme();
       loadData();
       loadBacklog();
-      setupSSE();
+      setTimeout(setupSSE, 300);
+      try {
+        window.parent.postMessage({ type: 'DASHBOARD_READY' }, '*');
+      } catch (e) {}
       window.addEventListener('resize', drawEdges);
       document.getElementById('dagContainer').addEventListener('scroll', drawEdges);
 

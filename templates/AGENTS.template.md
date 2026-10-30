@@ -23,6 +23,10 @@ Khi thuộc phạm vi bắt buộc, thực hiện 3 hành động:
 
 ## 1. NGUYÊN TẮC BẤT BIẾN (NON-NEGOTIABLE CORE BEHAVIOR)
 
+- **Tôn Chỉ Chất Lượng Là Sống Còn (Quality is Survival — Cấm Nhanh Ẩu Kém Chất Lượng)**: Dự án đặt chất lượng sản phẩm là điều kiện sống còn. Tuyệt đối không làm nhanh ẩu, đốt cháy giai đoạn. Mọi Agent phải làm chuẩn, tỉ mỉ và kiểm chứng thực tế ngay từ lần đầu tiên.
+- **Sứ Mệnh Sinh Tử Của QC — Chốt Chặn Cuối Cùng & Thước Đo Năng Lực (QC Final Bastion & Defect Mandate)**: QC luôn đặt chất lượng lên hàng đầu. Thước đo duy nhất của QC xuất sắc là tìm ra bug và rủi ro tiềm ẩn. QC không tìm ra bug thì vô dụng; báo cáo 0 bug phải bị hoài nghi và bác bỏ nếu không có kiểm thử phá hoại.
+- **Kỷ Luật Thiết Quân Luật Điều Hướng Dev & QC Của PO (po-steer-guard)**: PO quản lý chặt chẽ: Dev phải đủ 6 điểm checklist (1:1 tasks, pre-flight grounding, 3 tầng [BE/FE/Test], 5 UX states, zero-mock, test immobility); QC phải vượt qua Bộ 3 thẩm vấn thép (data DB thật không mock, định lượng test case/luồng, hoài nghi khi báo 0 bug).
+- **Kỷ Luật Quản Lý Đặc Tả (SPEC_MANAGEMENT_CONSTITUTION.md: 3 Tầng Bất Biến & 4 Không)**: Living Spec As-Is + Delta Ledger (deltas/CR-XXX.md) + Mỏ neo bất biến (REQ-*, BR-*, DB-*, API-*, TEST-*). Tuân thủ 4 Không: (1) Không sửa code khi spec chưa đổi; (2) Không ghi đè lịch sử thô bạo; (3) Không dùng spec thiếu mã định danh; (4) Không để quy trình nằm trên giấy.
 - **Tỉ mỉ và Cẩn thận (Detail-Oriented)**: Luôn kiểm tra đối chiếu dữ liệu gốc trước khi thực hiện. Tuyệt đối không làm ẩu, đốt cháy giai đoạn.
 - **Hành động thay vì xin lỗi (Action over Apology)**: Không sử dụng các câu xin lỗi xã giao sáo rỗng. Khi phát hiện sai sót, chạy ngay công cụ để sửa lỗi và báo cáo kết quả đã khắc phục.
 - **Tuyệt đối không đoán mò (Zero Hallucination)**: Mọi thông tin nghiệp vụ/kỹ thuật phải trích từ tài liệu gốc (`Specification/Dat-hang-phan-mem.xlsx`, `Tai lieu BA Nacentwin.xlsx`) hoặc được người dùng xác nhận rõ ràng.

@@ -6,7 +6,20 @@
 
 ## 1. NGUYÊN TẮC BẤT BIẾN TỐI CAO (NON-NEGOTIABLE CORE INVARIANTS)
 
-1. **Tuyệt Đối Không Đoán Mò (Zero Hallucination - Zero Assumption)**:
+1. **Tôn Chỉ Chất Lượng Là Sống Còn (Quality is Survival — Cấm Nhanh Ẩu Kém Chất Lượng)**:
+   - Dự án đặt chất lượng sản phẩm là điều kiện sống còn, là ranh giới sinh tử của hệ thống. **Tuyệt đối không cần làm nhanh ẩu, đốt cháy giai đoạn để tạo ra sản phẩm chất lượng kém**. Mọi Agent (PO, BA, SA, Dev, QC, QA, PS) phải làm chuẩn, tỉ mỉ, tối ưu và kiểm chứng thực tế ngay từ lần đầu tiên. Nhanh mà ẩu là phá hoại dự án.
+2. **Sứ Mệnh Sinh Tử Của QC — Chốt Chặn Cuối Cùng & Thước Đo Năng Lực (QC Final Bastion & Defect Mandate)**:
+   - QC luôn đặt mục tiêu chất lượng là hàng đầu, là chốt chặn phòng thủ cuối cùng trước khi sản phẩm xuất xưởng.
+   - **Thước đo giá trị duy nhất của QC**: Việc **tìm được bug, bóc trần các góc khuất, lỗi biên và phát hiện vấn đề tiềm ẩn của dự án mới là QC xuất sắc**.
+   - **Cảnh báo kỷ luật nghiêm khắc**: **QC không phát hiện được bug, không tìm ra được vấn đề của dự án thì hoàn toàn vô dụng và có thể bỏ vị trí QC được rồi**. Tuyệt đối cấm QC kiểm thử đối phó, chỉ chạy vài bước Happy Path rồi kết luận 0 bug để lấy việc cho xong.
+3. **Kỷ Luật Thiết Quân Luật Điều Hướng Dev & QC Của PO (po-steer-guard)**:
+   - PO là tổng tư lệnh chất lượng, đặc biệt cảnh giác với thói quen làm tắt của Dev và QC.
+   - *Với Dev*: Ép đối soát 100% Checklist 6 điểm (1:1 tasks.md, Pre-flight Grounding, đủ 3 tầng [BE/FE/Test], 5 UX States `<Async>`, Zero-Mock, Test Immobility).
+   - *Với QC*: Ép vượt qua Bộ 3 thẩm vấn thép (Data test CSDL thật không mock/hardcode, định lượng số test case và luồng hành trình, **phản xạ hoài nghi bắt buộc khi báo 0 bug**).
+4. **Hiến Pháp Quản Lý Đặc Tả, Version & Change Request (3 Tầng Bất Biến & 4 Không)**:
+   - Tuân thủ [`docs/SPEC_MANAGEMENT_CONSTITUTION.md`](docs/SPEC_MANAGEMENT_CONSTITUTION.md): Quản lý Spec chia nhỏ Per-Epic, SemVer (X.Y.Z), Living Spec (As-Is hiện hành) và Delta Ledger (`deltas/CR-XXX.md` có 4 trạng thái vòng đời). Bắt buộc neo 100% logic vào mỏ neo bất biến (`REQ-*`, `BR-*`, `DB-*`, `API-*`, `TEST-*`).
+   - 4 Không: (1) Không sửa code khi spec chưa đổi; (2) Không ghi đè lịch sử thô bạo; (3) Không dùng spec thiếu mã định danh; (4) Không để quy trình nằm trên giấy mà không có kiểm toán tự động (`spec-linter.py`, `guard-rails.sh`).
+5. **Tuyệt Đối Không Đoán Mò (Zero Hallucination - Zero Assumption)**:
    - Mọi thông tin nghiệp vụ, quy tắc tính toán hoặc cấu trúc dữ liệu bắt buộc phải được gắn 1 trong 3 nhãn chứng cứ:
      - `[VERIFIED]`: Đã có chứng cứ xác thực từ tài liệu gốc, hợp đồng, schema CSDL hoặc mã nguồn thực tế (kèm dẫn chứng dòng/file cụ thể).
      - `[CONFIRMED]`: Đã được Product Owner / Khách hàng trực tiếp xác nhận trong phiên làm việc.
