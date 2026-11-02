@@ -70,45 +70,14 @@ LOGS_DIR = STATE_DIR / "logs"
 
 def get_telemetry_data() -> Dict[str, Any]:
     """Đọc dữ liệu telemetry runtime chi tiết theo chuẩn 3-Human-Gate v3 — Dữ liệu động theo task thật."""
+    tdata = {}
     if TELEMETRY_FILE.exists():
         try:
             tdata = json.loads(TELEMETRY_FILE.read_text(encoding="utf-8"))
-            stages = tdata.get("agent_stages", [])
-            task_id = tdata.get("active_task", "")
-            human_gate_stage = tdata.get("human_gate_stage") or ("DONE" if tdata.get("runtime_status") == "DONE" else ("GATE_2_WAITING" if tdata.get("human_gate") == "WAITING" else "IMPLEMENTING"))
-            tdata["human_gate_stage"] = human_gate_stage
-
-            is_cr = "CR" in task_id or (tdata.get("pipeline_type") and "DELTA" in tdata.get("pipeline_type"))
-            title = tdata.get("plan_details", {}).get("title") or (f"Thực thi {task_id}" if task_id else "")
-            epic_name = tdata.get("spec", "")
-
-            if ("po_triage" not in tdata or not tdata["po_triage"]) and task_id:
-                tdata["po_triage"] = build_po_triage(task_id, title, is_cr, epic_name=epic_name)
-
-            if "qc_metrics" not in tdata or not tdata["qc_metrics"]:
-                tdata["qc_metrics"] = build_qc_metrics(task_id=task_id)
-
-            if "dod_checklist" not in tdata or not tdata["dod_checklist"]:
-                tdata["dod_checklist"] = build_dod_checklist(task_id=task_id, title=title)
-
-            if "qa_sentinel" not in tdata or not tdata["qa_sentinel"]:
-                tdata["qa_sentinel"] = build_qa_sentinel(human_gate_stage)
-
-            if task_id and (not stages or any("model" not in s for s in stages) or len(stages) != 6 or any("skill_used" not in s for s in stages)):
-                tdata["agent_stages"] = build_agent_stages(task_id, human_gate_stage, is_cr, title)
-
-            if "stepper" not in tdata or len(tdata.get("stepper", [])) != 6:
-                commit_hash = tdata.get("commit_hash", "")
-                tdata["stepper"] = build_stepper_v3(human_gate_stage, is_cr, commit_hash)
-
-            if task_id:
-                tdata["timeline_logs"] = build_agent_timeline(task_id, human_gate_stage, is_cr, title)
-
-            return tdata
         except Exception:
-            pass
-    
-    # State mặc định khi chưa có telemetry hoặc ở trạng thái IDLE
+            tdata = {}
+
+    # State mặc định từ state.json
     state_data = {}
     if STATE_FILE.exists():
         try:
@@ -116,33 +85,55 @@ def get_telemetry_data() -> Dict[str, Any]:
         except Exception:
             pass
 
-    active_task = state_data.get("active_task_id", "")
-    status = state_data.get("status", "IDLE")
-    human_gate_status = state_data.get("human_gate", "IDLE")
-    human_gate_stage = state_data.get("human_gate_stage", "IDLE")
-    is_cr = "CR" in active_task if active_task else False
-    title = state_data.get("title", f"Thực thi {active_task}" if active_task else "")
-    epic_name = state_data.get("spec", "")
+    task_id = state_data.get("active_task_id") or tdata.get("active_task", "")
+    runtime_status = state_data.get("status") or tdata.get("runtime_status", "IDLE")
+    human_gate = state_data.get("human_gate") or tdata.get("human_gate", "IDLE")
 
-    return {
-        "active_task": active_task,
-        "runtime_status": status,
-        "human_gate": human_gate_status,
-        "human_gate_stage": human_gate_stage,
-        "po_triage": build_po_triage(active_task, title, is_cr, epic_name=epic_name) if active_task else None,
-        "qc_metrics": build_qc_metrics(task_id=active_task),
-        "dod_checklist": build_dod_checklist(task_id=active_task, title=title),
-        "qa_sentinel": build_qa_sentinel(human_gate_stage),
-        "agent_stages": build_agent_stages(active_task, human_gate_stage, is_cr, title) if active_task else [],
-        "stepper": build_stepper_v3(human_gate_stage, is_cr) if active_task else [],
-        "timeline_logs": build_agent_timeline(active_task, human_gate_stage, is_cr, title) if active_task else [],
-        "cycles": [],
-        "summary": {
-            "runs": "0 runs",
-            "duration": "0s",
-            "tokens": ""
-        }
-    }
+    # AUTO-RECONCILIATION: Kiểm tra xem task_id này trong tasks.md thực tế đã xong [x] chưa
+    if task_id:
+        try:
+            task_info = live_bridge.get_task_info(task_id)
+            if task_info.get("is_done") and runtime_status != "DONE":
+                runtime_status = "DONE"
+                human_gate = "IDLE"
+                # Cập nhật lại state_data & ghi file state.json để đồng bộ toàn hệ thống
+                state_data["status"] = "DONE"
+                state_data["human_gate"] = "IDLE"
+                state_data["last_updated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                try:
+                    STATE_FILE.write_text(json.dumps(state_data, indent=2, ensure_ascii=False), encoding="utf-8")
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    human_gate_stage = "DONE" if runtime_status == "DONE" else (
+        state_data.get("human_gate_stage") or tdata.get("human_gate_stage") or (
+            "GATE_2_WAITING" if human_gate == "WAITING" else "IDLE"
+        )
+    )
+
+    is_cr = "CR" in task_id or (state_data.get("pipeline") and "DELTA" in state_data.get("pipeline"))
+    title = state_data.get("title") or tdata.get("plan_details", {}).get("title") or (f"Thực thi {task_id}" if task_id else "Chờ kích hoạt task mới")
+    epic_name = state_data.get("spec") or tdata.get("spec", "")
+
+    tdata["active_task"] = task_id
+    tdata["runtime_status"] = runtime_status
+    tdata["human_gate"] = human_gate
+    tdata["human_gate_stage"] = human_gate_stage
+    tdata["spec"] = epic_name
+
+    if task_id:
+        tdata["po_triage"] = build_po_triage(task_id, title, is_cr, epic_name=epic_name)
+        tdata["qc_metrics"] = build_qc_metrics(task_id=task_id)
+        tdata["dod_checklist"] = build_dod_checklist(task_id=task_id, title=title)
+        tdata["qa_sentinel"] = build_qa_sentinel(human_gate_stage)
+        tdata["agent_stages"] = build_agent_stages(task_id, human_gate_stage, is_cr, title)
+        commit_hash = tdata.get("commit_hash", "")
+        tdata["stepper"] = build_stepper_v3(human_gate_stage, is_cr, commit_hash)
+        tdata["timeline_logs"] = build_agent_timeline(task_id, human_gate_stage, is_cr, title)
+
+    return tdata
 
 @app.get("/api/dag")
 def get_dag_graph(epic: str = None, milestone: str = None, status: str = None, search: str = None):
@@ -446,7 +437,10 @@ def get_backlog_items():
     if not backlog_file.exists():
         return {"total": 0, "pending": 0, "done": 0, "items": []}
 
-    lines = backlog_file.read_text(encoding="utf-8").splitlines()
+    raw_content = backlog_file.read_text(encoding="utf-8")
+    # Lọc bỏ toàn bộ HTML comments <!-- ... --> để không parse các dòng ví dụ mẫu
+    clean_content = re.sub(r"<!--.*?-->", "", raw_content, flags=re.DOTALL)
+    lines = clean_content.splitlines()
     items = []
     current_section = "General Backlog"
 
@@ -496,7 +490,7 @@ def get_backlog_items():
             # Kiểm tra chéo với tasks.md thực tế nếu BACKLOG.md chưa cập nhật [x]
             if not is_done and item_id:
                 try:
-                    info = runner.get_task_info(item_id)
+                    info = live_bridge.get_task_info(item_id)
                     if info.get("is_done"):
                         is_done = True
                 except Exception:
@@ -638,10 +632,10 @@ async def create_new_change_request(payload: Dict[str, Any]):
     img_md_parts = [f"![{im['name']}]({im['url']})" for im in saved_images]
     img_md = f" [Đính kèm: {' '.join(img_md_parts)}]" if img_md_parts else ""
 
-    # Ghi nhận vào task_attachments.json để tra cứu nhanh khi mở modal chi tiết
-    attachments_dir = STATE_DIR
-    attachments_dir.mkdir(parents=True, exist_ok=True)
-    attachments_file = attachments_dir / "task_attachments.json"
+    # Ghi nhận vào .nacen/task_attachments.json để tra cứu nhanh khi mở modal chi tiết
+    nacen_dir = ROOT_DIR / ".nacen"
+    nacen_dir.mkdir(parents=True, exist_ok=True)
+    attachments_file = nacen_dir / "task_attachments.json"
     attachments_map = {}
     if attachments_file.exists():
         try:
@@ -664,14 +658,13 @@ async def create_new_change_request(payload: Dict[str, Any]):
         with open(tasks_file, "a", encoding="utf-8") as f:
             f.write(new_task_line)
     
-    # 5. Đồng bộ vào BACKLOG.md
-    for cand_bl in [ROOT_DIR / "Specification" / "BACKLOG.md", ROOT_DIR / "docs" / "BACKLOG.md", ROOT_DIR / "backlog" / "BACKLOG.md", ROOT_DIR / "backlog" / "ROADMAP.md"]:
-        if cand_bl.exists():
-            desc_part = f" — {description}" if description else ""
-            backlog_line = f"- [ ] `{new_task_id}` [{epic_id}][{cr_type}][{priority}] (Người gửi: {author}): {title}{desc_part}{img_md}\n"
-            with open(cand_bl, "a", encoding="utf-8") as f:
-                f.write(backlog_line)
-            break
+    # 5. Đồng bộ vào Specification/BACKLOG.md
+    backlog_file = ROOT_DIR / "Specification" / "BACKLOG.md"
+    if backlog_file.exists():
+        desc_part = f" — {description}" if description else ""
+        backlog_line = f"- [ ] `{new_task_id}` [{epic_id}][{cr_type}][{priority}] (Người gửi: {author}): {title}{desc_part}{img_md}\n"
+        with open(backlog_file, "a", encoding="utf-8") as f:
+            f.write(backlog_line)
 
     # 6. Quét lại đồ thị Wave DAG
     dag_engine.scan_all_specs()
@@ -689,14 +682,14 @@ async def create_new_change_request(payload: Dict[str, Any]):
 @app.get("/api/task/attachments")
 def get_task_attachments(id: str):
     """Lấy danh sách ảnh đính kèm của một task."""
-    for cand_af in [STATE_DIR / "task_attachments.json", ROOT_DIR / ".tc" / "task_attachments.json", ROOT_DIR / ".nacen" / "task_attachments.json"]:
-        if cand_af.exists():
-            try:
-                data = json.loads(cand_af.read_text(encoding="utf-8"))
-                if id in data:
-                    return data[id]
-            except Exception:
-                pass
+    attachments_file = ROOT_DIR / ".nacen" / "task_attachments.json"
+    if attachments_file.exists():
+        try:
+            data = json.loads(attachments_file.read_text(encoding="utf-8"))
+            if id in data:
+                return data[id]
+        except Exception:
+            pass
     return {"task_id": id, "images": []}
 
 @app.post("/api/action/stop")
@@ -789,25 +782,48 @@ async def sse_stream(request: Request):
     """Server-Sent Events: Stream trạng thái thời gian thực tới trình duyệt."""
     async def event_generator():
         last_mtime = 0
+        heartbeat_counter = 0
+        backlog_file = ROOT_DIR / "Specification" / "BACKLOG.md"
+        specs_dir = ROOT_DIR / "SourceCode" / "specs"
+
         while True:
             if await request.is_disconnected():
                 break
             
-            # Kiểm tra xem state hoặc telemetry có cập nhật không
+            # Kiểm tra xem state, telemetry, backlog hoặc các file tasks.md có thay đổi mtime không
             mtime = 0
             if STATE_FILE.exists():
                 mtime = max(mtime, STATE_FILE.stat().st_mtime)
             if TELEMETRY_FILE.exists():
                 mtime = max(mtime, TELEMETRY_FILE.stat().st_mtime)
+            if backlog_file.exists():
+                mtime = max(mtime, backlog_file.stat().st_mtime)
+            if specs_dir.exists():
+                try:
+                    for tpath in specs_dir.glob("**/tasks.md"):
+                        mtime = max(mtime, tpath.stat().st_mtime)
+                except Exception:
+                    pass
 
             if mtime != last_mtime:
                 last_mtime = mtime
                 telemetry = get_telemetry_data()
-                yield f"data: {json.dumps(telemetry)}\n\n"
+                yield f"data: {json.dumps(telemetry, ensure_ascii=False)}\n\n"
+
+            heartbeat_counter += 1
+            if heartbeat_counter >= 10:  # ~15s gửi ping giữ kết nối qua proxy Next.js
+                heartbeat_counter = 0
+                yield ": ping\n\n"
 
             await asyncio.sleep(1.5)
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    headers = {
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+        "Content-Type": "text/event-stream"
+    }
+    return StreamingResponse(event_generator(), media_type="text/event-stream", headers=headers)
 
 @app.get("/")
 def serve_index():
@@ -822,5 +838,39 @@ WIREFRAMES_DIR = ROOT_DIR / "XUAT_MAN_HINH_WEB_HTML"
 if WIREFRAMES_DIR.exists():
     app.mount("/wireframes", StaticFiles(directory=str(WIREFRAMES_DIR)), name="wireframes")
 
+import argparse
+import socket
+
+def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        return s.connect_ex((host, port)) == 0
+
+def find_available_port(start_port: int = 8421, max_attempts: int = 20) -> int:
+    port = start_port
+    while port < start_port + max_attempts:
+        if not is_port_in_use(port):
+            return port
+        port += 1
+    return start_port
+
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=8420, reload=False)
+    parser = argparse.ArgumentParser(description="NacenTech Agent Dashboard Server")
+    parser.add_argument("--port", type=int, default=None, help="Port to run server on (default: 8420)")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host address (default: 0.0.0.0)")
+    args, _ = parser.parse_known_args()
+
+    # Ưu tiên: CLI flag -> Biến môi trường PORT/DASHBOARD_PORT -> Cổng mặc định 8420 (Khớp cấu hình rewrite Next.js)
+    env_port = os.environ.get("PORT") or os.environ.get("DASHBOARD_PORT")
+    selected_port = args.port or (int(env_port) if env_port else None)
+
+    if not selected_port:
+        selected_port = find_available_port(8420)
+    elif is_port_in_use(selected_port):
+        print(f"⚠️ Cảnh báo: Cổng {selected_port} đang bị chiếm dụng bởi tiến trình khác!")
+        fallback_port = find_available_port(selected_port + 1)
+        print(f"🔄 Tự động chuyển hướng sang cổng khả dụng kế tiếp: {fallback_port}")
+        selected_port = fallback_port
+
+    print(f"🚀 [NacenTech Dashboard] Khởi chạy thành công tại: http://localhost:{selected_port}")
+    uvicorn.run("server:app", host=args.host, port=selected_port, reload=False)

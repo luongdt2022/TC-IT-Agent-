@@ -422,24 +422,21 @@ class LoopEngine:
             notify_desktop(f"TC-Loop: {task_id} FAILED", f"{reason}. Đã dừng để người can thiệp.")
 
     def resolve_agent_cli(self) -> tuple[str, str | None]:
-        """Tự động phát hiện CLI agent có sẵn (claude, agy, cursor...)."""
-        cfg_cli = self.policy.get("agents", {}).get("cli", "auto").lower()
+        """Tự động phát hiện CLI agent có sẵn — Ưu tiên Antigravity AgentAPI gốc."""
+        cfg_cli = self.policy.get("agents", {}).get("cli", "antigravity").lower()
 
-        # 1. claude
+        # 1. Ưu tiên cao nhất: Antigravity AgentAPI gốc của môi trường
+        agentapi_path = Path(os.path.expanduser("~")) / ".gemini" / "antigravity" / "bin" / "agentapi"
+        if agentapi_path.exists() and os.access(str(agentapi_path), os.X_OK):
+            return "antigravity", str(agentapi_path)
+
+        # 2. claude
         if cfg_cli in ["claude", "auto"]:
             claude_path = shutil.which("claude") or os.path.expanduser("~/.local/bin/claude")
             if os.path.exists(str(claude_path)) and os.access(str(claude_path), os.X_OK):
                 return "claude", str(claude_path)
 
-        # 2. agy (Google Antigravity)
-        if cfg_cli in ["agy", "auto"]:
-            agy_path = shutil.which("agy")
-            if agy_path:
-                return "agy", agy_path
-
-        # 3. Fallback
-        if shutil.which("claude"):
-            return "claude", shutil.which("claude")
+        # 3. Fallback agy
         if shutil.which("agy"):
             return "agy", shutil.which("agy")
 
@@ -456,8 +453,8 @@ Hệ thống kiểm thử báo lỗi sau:
 {previous_error[:2500]}
 Hãy đọc kỹ thông báo lỗi trên để sửa đúng căn nguyên, không lặp lại lỗi cũ.
 """
-        prompt = f"""Bạn là Senior Full-Stack Developer trong dự án {project_name}.
-Nhiệm vụ: Thực thi triệt để và trọn vẹn task kỹ thuật sau:
+        prompt = f"""Bạn là po-pm (Product Owner & Project Manager) — Tổng tư lệnh điều phối tối cao theo chuẩn AGENTS.md và Hiến pháp dự án.
+Nhiệm vụ: Tiếp nhận, sàng lọc và tổng điều phối thực thi trọn vẹn task kỹ thuật sau:
 - Epic: {self.spec_dir_name}
 - Task ID: {task.task_id} {task.tag}
 - Mô tả: {task.description}
@@ -467,14 +464,19 @@ TÀI LIỆU THAM CHIẾU BẮT BUỘC (GROUNDING):
 - Bản kế hoạch kiến trúc: {self.plan_file.relative_to(ROOT_DIR) if self.plan_file.exists() else 'plan.md'}
 - Danh mục công việc: {self.tasks_file.relative_to(ROOT_DIR) if self.tasks_file.exists() else 'tasks.md'}
 - Hiến pháp dự án: AGENTS.md & constitution.md (Clean Architecture, Zero-Mock, 5 UX states, Scoped RBAC)
+- Quy chuẩn chuyên trách: .agents/ (po-pm.md, ba.md, sa.md, dev.md, qc.md, qa.md)
+- Kỹ năng điều phối chuyên trách: skills/po-steer-guard/SKILL.md, skills/speckit-delta/SKILL.md, skills/speckit-autopilot/SKILL.md
 
 {error_context}
-QUY CHUẨN KỸ THUẬT BẮT BUỘC:
-1. Đọc kỹ spec.md và plan.md trước khi viết mã để đảm bảo đúng schema CSDL/API và logic nghiệp vụ.
-2. Viết mã nguồn thực tế, chất lượng cao, tuyệt đối không tạo mock ngầm trên frontend (Zero-Mock discipline).
-3. Giữ bán kính thay đổi file tối thiểu (Blast Radius <= {self.policy['loop'].get('blast_radius_max_files', 8)} files).
-4. Đảm bảo toàn bộ mã nguồn biên dịch thành công 0 cảnh báo/lỗi và vượt qua các bài kiểm thử liên quan.
-5. Khi hoàn thành, tóm tắt ngắn gọn các file đã tạo/sửa.
+CHỈ THỊ ĐIỀU PHỐI ĐA TÁC TỬ (BẮT BUỘC DÙNG TOOL invoke_subagent ĐỂ CÔ LẬP CONTEXT KHÁCH QUAN):
+Là PO, bạn TUYỆT ĐỐI KHÔNG tự mình viết code hoặc tự mình kiểm thử. Bạn PHẢI dùng tool invoke_subagent để kích hoạt lần lượt từng Agent chuyên trách chạy trên luồng riêng biệt:
+1. KÍCH HOẠT BA (ba) qua invoke_subagent: Rà soát phạm vi, lập Cross-Surface Impact Matrix, chuẩn hóa REQ-* và BR-*.
+2. KÍCH HOẠT SA (sa) qua invoke_subagent: Thẩm định Clean Architecture, kế hoạch file can thiệp và phân rã tasks.md.
+3. KÍCH HOẠT DEV (dev) qua invoke_subagent: Thi công mã nguồn thực tế, chuẩn hóa 5 UX States qua <Async>, Zero-Mock 100%. Ép nộp bằng chứng git diff thật.
+4. KÍCH HOẠT QC (qc) qua invoke_subagent: Kiểm thử Hộp Đen 4 tầng (Unit 100% BR-*, Contract, DB PostgreSQL thật, Playwright E2E). Áp dụng phản xạ hoài nghi khi báo 0 bug.
+5. KÍCH HOẠT QA (qa) qua invoke_subagent: Kiểm toán độc lập Git Diff, tư vấn Go/No-Go Release.
+
+Sau khi các Subagent hoàn thành các luồng độc lập, PO tổng hợp Biên bản Nghiệm thu DoD xuất xưởng và cập nhật tasks.md.
 """
         return prompt
 
@@ -490,7 +492,16 @@ QUY CHUẨN KỸ THUẬT BẮT BUỘC:
 
         agent_log_file = LOGS_DIR / f"{task.task_id}_attempt_{attempt_num}_agent.log"
 
-        if cli_type == "claude":
+        if cli_type == "antigravity":
+            model = dev_model if dev_model in ["flash_lite", "flash", "pro"] else "pro"
+            cmd = [
+                binary_path,
+                "new-conversation",
+                f"--model={model}",
+                f"--title=[{task.task_id}] {task.description[:50]}",
+                prompt
+            ]
+        elif cli_type == "claude":
             cmd = [
                 binary_path,
                 "-p", prompt,

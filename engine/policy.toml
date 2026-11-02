@@ -26,10 +26,10 @@ auto_commit = true
 auto_advance = true
 
 [agents]
-# CLI runner: "auto" (tự động phát hiện agy hoặc claude có sẵn trên PATH), "claude", "agy"
-cli = "auto"
-dev_model = "sonnet"
-review_model = "opus"
+# Runner chính: Antigravity qua AgentAPI gốc (không dùng CLI bên thứ ba, không dùng API key)
+cli = "antigravity"
+dev_model = "pro"
+review_model = "pro"
 
 [verify]
 # Danh sách các lệnh kiểm tra toán học tĩnh bắt buộc phải pass 100% trước khi commit & tick [x]
