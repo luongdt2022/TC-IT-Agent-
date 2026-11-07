@@ -1,3 +1,8 @@
+---
+name: wf-delta
+description: "Quy trình thay đổi yêu cầu (Change Request & Delta) và chống trôi dạt tri thức kiến trúc trong dự án."
+---
+
 # QUY TRÌNH THAY ĐỔI YÊU CẦU: wf-delta (CHANGE REQUEST & CHỐNG TRÔI DẠT TRI THỨC)
 
 > **Mã Quy Trình**: `wf-delta`  

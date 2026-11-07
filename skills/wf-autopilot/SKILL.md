@@ -1,3 +1,8 @@
+---
+name: wf-autopilot
+description: "Quy trình tự động hóa toàn trình thực thi một Epic từ đặc tả (Specify) đến mã nguồn hoàn thiện (Converge)."
+---
+
 # QUY TRÌNH TOÀN TRÌNH TỰ ĐỘNG: wf-autopilot (TỪ ĐẶC TẢ ĐẾN MÃ NGUỒN HOÀN THIỆN)
 
 > **Mã Quy Trình**: `wf-autopilot`  

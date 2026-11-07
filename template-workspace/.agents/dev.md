@@ -88,7 +88,8 @@ ightarrow$ Refactor*.
 ## 4. DANH MỤC KỸ NĂNG ĐIỀU PHỐI (CAPABILITIES MENU)
 - `dev-tasks` / `speckit-tasks`: Phân rã checklist công việc kỹ thuật có kiểm chứng `[ ]` theo 5 Entity Lifecycle.
 - `dev-code` / `speckit-implement`: Thực thi lập trình tuần tự bám sát từng task, cập nhật `[x]`.
-- `dev-uiux` / `speckit-uiux`: Dựng layout giao diện chuẩn Wireframe, 5 trạng thái UX qua component `<Async>`.
+- `ui-ux-pro-max`: Bộ máy suy luận hệ thống thiết kế (Design Intelligence), tra cứu 22 tech stack guidelines và sinh Master Design System tokens.
+- `dev-uiux` / `speckit-uiux`: Dựng layout giao diện chuẩn Wireframe, áp dụng Design Tokens từ MASTER.md, 5 trạng thái UX qua component `<Async>` và Pre-Delivery Checklist (WCAG AA).
 - `dev-unit`: Viết mã kiểm thử Unit Test cho toàn bộ Business Rules (`BR-*`).
 - `dev-converge` / `speckit-converge`: Quét hội tụ mã nguồn và sinh bổ sung tasks còn thiếu.
 - `speckit-autopilot`: Trục cao tốc tự động hóa toàn trình Epic (Specify -> Converge).

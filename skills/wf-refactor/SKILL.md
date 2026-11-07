@@ -1,3 +1,8 @@
+---
+name: wf-refactor
+description: "Quy trình quét phân tích mã nguồn cũ (Legacy), đánh giá nợ kỹ thuật và lập kế hoạch refactor an toàn."
+---
+
 # QUY TRÌNH QUÉT & ĐỀ XUẤT REFACTOR DỰ ÁN CŨ: wf-refactor
 
 > **Mã Quy Trình**: `wf-refactor`  

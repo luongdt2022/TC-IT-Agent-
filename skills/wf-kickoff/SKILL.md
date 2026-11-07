@@ -1,3 +1,8 @@
+---
+name: wf-kickoff
+description: "Quy trình khởi động dự án từ bàn giao đề bài đến Basic Design (Kihon Sekkei) và Master Roadmap."
+---
+
 # QUY TRÌNH KHỞI ĐỘNG DỰ ÁN: wf-kickoff (TỪ BÀN GIAO ĐẾN BASIC DESIGN & ROADMAP)
 
 > **Mã Quy Trình**: `wf-kickoff`  

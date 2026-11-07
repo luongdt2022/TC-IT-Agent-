@@ -1,3 +1,8 @@
+---
+name: wf-audit
+description: "Quy trình kiểm toán toàn diện hội tụ, ma trận truy vết khép kín và dọn dẹp rác mã nguồn trước khi xuất xưởng."
+---
+
 # QUY TRÌNH KIỂM TOÁN TOÀN DIỆN: wf-audit (KIỂM TOÁN HỘI TỤ, TRUY VẾT & DỌN RÁC)
 
 > **Mã Quy Trình**: `wf-audit`  
