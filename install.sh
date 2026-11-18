@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# TC IT AGENT FRAMEWORK — UNIVERSAL ENTERPRISE INSTALLER & UPDATER (v2.0)
-# Cài đặt & Cập nhật bộ 6 Persona, Kỹ năng Role, Workflows & Cấu trúc Thư mục
-# Hoạt động độc lập trên mọi nền tảng: Antigravity, Cursor, Windsurf, Claude, Codex
+# TC IT AGENT FRAMEWORK — UNIVERSAL ENTERPRISE INSTALLER & UPDATER (v4.0)
+# Cài đặt & Cập nhật 7 Subagents (.agents/agents/), Hooks, Core Skills, Workflows
 # ==============================================================================
 
 set -euo pipefail
@@ -14,38 +13,52 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${BLUE}${BOLD}==============================================================================${NC}"
-echo -e "${BLUE}${BOLD}   TC IT AGENT FRAMEWORK V2.0 — BỘ MÁY ĐA TÁC TỬ DOANH NGHIỆP UNIVERSAL        ${NC}"
+echo -e "${BLUE}${BOLD}   TC IT AGENT FRAMEWORK V4.0 — ENTERPRISE MULTI-AGENT SYSTEM                 ${NC}"
 echo -e "${BLUE}${BOLD}==============================================================================${NC}"
 echo -e "Nguồn cài đặt: ${SCRIPT_DIR}\n"
 
 usage() {
     echo -e "Cách sử dụng:"
-    echo -e "  1. Cài đặt vào 1 dự án MỚI hoặc dự án ĐANG CHẠY:"
-    echo -e "     ${BOLD}./install.sh /duong-dan/toi/du-an --name \"TenDuAn\" [tùy chọn nền tảng]${NC}"
+    echo -e "  1. Cài đặt vào dự án MỚI hoặc ĐANG CHẠY:"
+    echo -e "     ${BOLD}./install.sh /duong-dan/toi/du-an --name \"TenDuAn\" [--with-seo] [tùy chọn nền tảng]${NC}"
+    echo -e "  2. CẬP NHẬT (--update) bảo toàn code dự án:"
+    echo -e "     ${BOLD}./install.sh /duong-dan/toi/du-an --update [--with-seo]${NC}"
+    echo -e "  3. Cài đặt toàn cục cho Antigravity IDE:"
+    echo -e "     ${BOLD}./install.sh --global [--with-seo]${NC}"
     echo -e ""
-    echo -e "  2. CẬP NHẬT (Update) cho một dự án đã tích hợp trước đó (Không làm mất code dự án):"
-    echo -e "     ${BOLD}./install.sh /duong-dan/toi/du-an --update${NC}"
-    echo -e ""
-    echo -e "  Tùy chọn nền tảng hỗ trợ:"
-    echo -e "     ${CYAN}--all${NC}          Cài đặt adapter cho TẤT CẢ các nền tảng (Cursor, Windsurf, Claude, Codex)"
-    echo -e "     ${CYAN}--cursor${NC}       Cài đặt cấu hình cho Cursor IDE (.cursorrules & .cursor/rules/)"
-    echo -e "     ${CYAN}--windsurf${NC}     Cài đặt cấu hình cho Windsurf IDE (.windsurfrules)"
-    echo -e "     ${CYAN}--claude${NC}       Cài đặt cấu hình cho Claude Code CLI (CLAUDE.md)"
-    echo -e "     ${CYAN}--antigravity${NC}  Cài đặt cho Google Antigravity (.agents/ & skills/)"
-    echo -e "     ${CYAN}--generic${NC}      Cài đặt chuẩn Markdown cho Codex, DeepSeek, Aider, Cline (AGENTS.md)"
-    echo -e ""
-    echo -e "  3. Cài đặt kỹ năng toàn cục (Global cho Antigravity IDE trên máy):"
-    echo -e "     ${BOLD}./install.sh --global${NC}\n"
+    echo -e "  Tùy chọn:"
+    echo -e "     ${CYAN}--with-seo${NC}     Cài thêm gói 31 kỹ năng SEO chuyên sâu (packs/seo/)"
+    echo -e "     ${CYAN}--all${NC}          Cài adapter cho tất cả IDE (mặc định)"
+    echo -e "     ${CYAN}--antigravity${NC}  Cài chuẩn Antigravity (.agents/agents/, hooks.json, skills)"
+    echo -e "     ${CYAN}--cursor${NC}       Cài Cursor (.cursorrules & .cursor/rules/)"
+    echo -e "     ${CYAN}--windsurf${NC}     Cài Windsurf (.windsurfrules)"
+    echo -e "     ${CYAN}--claude${NC}       Cài Claude Code (CLAUDE.md)"
+    echo -e "     ${CYAN}--generic${NC}      Cài AGENTS.md chuẩn chung"
     exit 1
+}
+
+render_template() {
+    local src="$1"
+    local dst="$2"
+    local proj="$3"
+    local dt="$4"
+    python3 -c '
+import sys, pathlib
+src, dst, proj, dt = sys.argv[1:5]
+txt = pathlib.Path(src).read_text(encoding="utf-8")
+txt = txt.replace("{{PROJECT_NAME}}", proj).replace("{{DATE}}", dt)
+pathlib.Path(dst).write_text(txt, encoding="utf-8")
+' "$src" "$dst" "$proj" "$dt"
 }
 
 TARGET_DIR=""
 PROJECT_NAME=""
 IS_GLOBAL=false
 IS_UPDATE=false
+WITH_SEO=false
 OPT_ALL=true
 OPT_CURSOR=false
 OPT_WINDSURF=false
@@ -53,101 +66,54 @@ OPT_CLAUDE=false
 OPT_ANTIGRAVITY=false
 OPT_GENERIC=false
 
-# Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --global)
-            IS_GLOBAL=true
-            shift
-            ;;
-        --update)
-            IS_UPDATE=true
-            shift
-            ;;
-        --name)
-            PROJECT_NAME="$2"
-            shift 2
-            ;;
-        --all)
-            OPT_ALL=true
-            shift
-            ;;
-        --cursor)
-            OPT_ALL=false
-            OPT_CURSOR=true
-            shift
-            ;;
-        --windsurf)
-            OPT_ALL=false
-            OPT_WINDSURF=true
-            shift
-            ;;
-        --claude)
-            OPT_ALL=false
-            OPT_CLAUDE=true
-            shift
-            ;;
-        --antigravity)
-            OPT_ALL=false
-            OPT_ANTIGRAVITY=true
-            shift
-            ;;
-        --generic)
-            OPT_ALL=false
-            OPT_GENERIC=true
-            shift
-            ;;
-        -h|--help)
-            usage
-            ;;
+        --global) IS_GLOBAL=true; shift ;;
+        --update) IS_UPDATE=true; shift ;;
+        --with-seo) WITH_SEO=true; shift ;;
+        --name) PROJECT_NAME="$2"; shift 2 ;;
+        --all) OPT_ALL=true; shift ;;
+        --cursor) OPT_ALL=false; OPT_CURSOR=true; shift ;;
+        --windsurf) OPT_ALL=false; OPT_WINDSURF=true; shift ;;
+        --claude) OPT_ALL=false; OPT_CLAUDE=true; shift ;;
+        --antigravity) OPT_ALL=false; OPT_ANTIGRAVITY=true; shift ;;
+        --generic) OPT_ALL=false; OPT_GENERIC=true; shift ;;
+        -h|--help) usage ;;
         *)
-            if [[ -z "$TARGET_DIR" ]]; then
-                TARGET_DIR="$1"
-            fi
-            shift
-            ;;
+            if [[ -z "$TARGET_DIR" ]]; then TARGET_DIR="$1"; fi
+            shift ;;
     esac
 done
 
-# If global installation requested
 if [[ "$IS_GLOBAL" == true ]]; then
     GLOBAL_SKILLS_DIR="${HOME}/.gemini/config/skills"
-    echo -e "${YELLOW}>> Đang cài đặt/cập nhật bộ Kỹ năng vào thư viện toàn cục:${NC} ${GLOBAL_SKILLS_DIR}"
-    mkdir -p "${GLOBAL_SKILLS_DIR}"
+    GLOBAL_AGENTS_DIR="${HOME}/.gemini/config/agents"
+    echo -e "${YELLOW}>> Cài đặt Core Skills -> ${GLOBAL_SKILLS_DIR}${NC}"
+    mkdir -p "${GLOBAL_SKILLS_DIR}" "${GLOBAL_AGENTS_DIR}"
     cp -Rf "${SCRIPT_DIR}/skills/"* "${GLOBAL_SKILLS_DIR}/"
-    echo -e "${GREEN}✓ Đã cập nhật thành công Skills toàn cục vào ${GLOBAL_SKILLS_DIR}!${NC}"
+    if [[ "$WITH_SEO" == true && -d "${SCRIPT_DIR}/packs/seo/skills" ]]; then
+        echo -e "${YELLOW}>> Cài đặt thêm gói SEO Pack (--with-seo)...${NC}"
+        cp -Rf "${SCRIPT_DIR}/packs/seo/skills/"* "${GLOBAL_SKILLS_DIR}/"
+    fi
+    cp -Rf "${SCRIPT_DIR}/.agents/agents/"*.md "${GLOBAL_AGENTS_DIR}/"
+    echo -e "${GREEN}✓ Đã cập nhật Skills & 7 Subagents toàn cục thành công!${NC}"
     exit 0
 fi
 
-# Interactive mode if target dir is empty
 if [[ -z "$TARGET_DIR" ]]; then
-    echo -e "${YELLOW}[Chế độ tương tác]${NC}"
-    read -p "Nhập đường dẫn thư mục dự án đích cần cài đặt / cập nhật: " TARGET_DIR
-    if [[ -z "$TARGET_DIR" ]]; then
-        echo -e "${RED}Lỗi: Đường dẫn dự án không được để trống!${NC}"
-        exit 1
-    fi
+    read -p "Nhập đường dẫn thư mục dự án đích: " TARGET_DIR
+    [[ -z "$TARGET_DIR" ]] && { echo -e "${RED}Lỗi: Đường dẫn dự án trống!${NC}"; exit 1; }
 fi
 
-# Resolve absolute path for target directory
 if [[ ! -d "$TARGET_DIR" ]]; then
-    if [[ "$IS_UPDATE" == true ]]; then
-        echo -e "${RED}Lỗi: Thư mục '$TARGET_DIR' không tồn tại, không thể chạy chế độ --update!${NC}"
-        exit 1
-    fi
-    read -p "Thư mục '$TARGET_DIR' chưa tồn tại. Bạn có muốn tạo mới không? (y/N): " CREATE_CONFIRM
-    if [[ "$CREATE_CONFIRM" =~ ^[Yy]$ ]]; then
-        mkdir -p "$TARGET_DIR"
-    else
-        echo -e "${RED}Đã hủy cài đặt.${NC}"
-        exit 1
-    fi
+    [[ "$IS_UPDATE" == true ]] && { echo -e "${RED}Lỗi: '$TARGET_DIR' không tồn tại!${NC}"; exit 1; }
+    read -p "Thư mục '$TARGET_DIR' chưa tồn tại. Tạo mới? (y/N): " CREATE_CONFIRM
+    [[ "$CREATE_CONFIRM" =~ ^[Yy]$ ]] && mkdir -p "$TARGET_DIR" || exit 1
 fi
 
 TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
-
+DEFAULT_NAME="$(basename "$TARGET_DIR")"
 if [[ -z "$PROJECT_NAME" ]]; then
-    DEFAULT_NAME="$(basename "$TARGET_DIR")"
     if [[ "$IS_UPDATE" == false ]]; then
         read -p "Nhập tên dự án [mặc định: $DEFAULT_NAME]: " INPUT_NAME
         PROJECT_NAME="${INPUT_NAME:-$DEFAULT_NAME}"
@@ -155,112 +121,69 @@ if [[ -z "$PROJECT_NAME" ]]; then
         PROJECT_NAME="$DEFAULT_NAME"
     fi
 fi
-
 CURRENT_DATE="$(date +%Y-%m-%d)"
 
-# ==============================================================================
-# CHẾ ĐỘ CẬP NHẬT (--update) — AN TOÀN TUYỆT ĐỐI CHO SOURCE CODE HIỆN TẠI
-# ==============================================================================
-if [[ "$IS_UPDATE" == true ]]; then
-    echo -e "\n${YELLOW}>> CHẾ ĐỘ CẬP NHẬT: Đang đồng bộ phiên bản Agent mới nhất vào dự án...${NC}"
-    echo -e "Dự án: ${BOLD}${PROJECT_NAME}${NC} (${TARGET_DIR})\n"
-
-    # 1. Cập nhật .agents/
-    echo -e "${CYAN}[1/6] Cập nhật 7 Persona (.agents/)...${NC}"
-    mkdir -p "${TARGET_DIR}/.agents"
-    cp -Rf "${SCRIPT_DIR}/.agents/"*.md "${TARGET_DIR}/.agents/"
-
-    # 2. Cập nhật skills/
-    echo -e "${CYAN}[2/6] Cập nhật bộ Kỹ năng (skills/)...${NC}"
-    mkdir -p "${TARGET_DIR}/skills"
-    cp -Rf "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
-
-    # 3. Cập nhật workflows/
-    echo -e "${CYAN}[3/6] Cập nhật các Quy trình chuẩn (workflows/)...${NC}"
-    mkdir -p "${TARGET_DIR}/workflows"
-    cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
-
-    # 4. Cập nhật scripts/ gác cổng kiến trúc & Shadow QA
-    echo -e "${CYAN}[4/6] Cập nhật scripts gác cổng & Shadow QA...${NC}"
-    mkdir -p "${TARGET_DIR}/scripts"
-    if [[ -d "${SCRIPT_DIR}/scripts" ]]; then
-        cp -Rf "${SCRIPT_DIR}/scripts/"* "${TARGET_DIR}/scripts/"
-        chmod +x "${TARGET_DIR}/scripts/"*.sh "${TARGET_DIR}/scripts/"*.py 2>/dev/null || true
-    fi
-    mkdir -p "${TARGET_DIR}/docs/decisions" "${TARGET_DIR}/docs/system" \
-             "${TARGET_DIR}/.facts" \
-             "${TARGET_DIR}/.memory/checkpoints" \
-             "${TARGET_DIR}/.memory/learnings" \
-             "${TARGET_DIR}/.memory/handoffs" \
+sync_framework_assets() {
+    mkdir -p "${TARGET_DIR}/.agents/agents" "${TARGET_DIR}/.agents/skills" \
+             "${TARGET_DIR}/skills" "${TARGET_DIR}/workflows" \
+             "${TARGET_DIR}/scripts" "${TARGET_DIR}/engine" "${TARGET_DIR}/dashboard" \
+             "${TARGET_DIR}/docs/decisions" "${TARGET_DIR}/docs/system" \
+             "${TARGET_DIR}/.facts" "${TARGET_DIR}/.memory/checkpoints" \
+             "${TARGET_DIR}/.memory/learnings" "${TARGET_DIR}/.memory/handoffs" \
              "${TARGET_DIR}/logs"
-    if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
-        touch "${TARGET_DIR}/docs/open-questions.md"
+
+    # 1. Subagents & Hooks
+    cp -Rf "${SCRIPT_DIR}/.agents/agents/"*.md "${TARGET_DIR}/.agents/agents/"
+    cp -f "${SCRIPT_DIR}/.agents/hooks.json" "${TARGET_DIR}/.agents/hooks.json"
+
+    # 2. Core Skills (+ optional SEO pack)
+    cp -Rf "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
+    cp -Rf "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/.agents/skills/"
+    if [[ "$WITH_SEO" == true && -d "${SCRIPT_DIR}/packs/seo/skills" ]]; then
+        cp -Rf "${SCRIPT_DIR}/packs/seo/skills/"* "${TARGET_DIR}/skills/"
+        cp -Rf "${SCRIPT_DIR}/packs/seo/skills/"* "${TARGET_DIR}/.agents/skills/"
     fi
 
-    # 5. Cập nhật Autonomous Loop Engine & Shortcut Controller
-    echo -e "${CYAN}[5/6] Cập nhật Autonomous Loop Engine & Bảng điều khiển ./loop...${NC}"
-    mkdir -p "${TARGET_DIR}/engine"
-    if [[ -f "${SCRIPT_DIR}/engine/tc-loop.py" ]]; then
-        cp -f "${SCRIPT_DIR}/engine/tc-loop.py" "${TARGET_DIR}/engine/"
-        chmod +x "${TARGET_DIR}/engine/tc-loop.py" 2>/dev/null || true
-    fi
-    if [[ ! -f "${TARGET_DIR}/engine/policy.toml" && -f "${SCRIPT_DIR}/engine/policy.toml" ]]; then
+    # 3. Workflows & Scripts
+    cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
+    cp -Rf "${SCRIPT_DIR}/scripts/"* "${TARGET_DIR}/scripts/"
+    chmod +x "${TARGET_DIR}/scripts/"*.sh "${TARGET_DIR}/scripts/"*.py 2>/dev/null || true
+
+    # 4. Engine, ./loop & Dashboard
+    cp -f "${SCRIPT_DIR}/engine/tc-loop.py" "${TARGET_DIR}/engine/"
+    chmod +x "${TARGET_DIR}/engine/tc-loop.py" 2>/dev/null || true
+    if [[ ! -f "${TARGET_DIR}/engine/policy.toml" ]]; then
         cp -f "${SCRIPT_DIR}/engine/policy.toml" "${TARGET_DIR}/engine/"
     fi
-    if [[ -f "${SCRIPT_DIR}/loop" ]]; then
-        cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
-        chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
-    fi
-    if [[ -d "${SCRIPT_DIR}/dashboard" ]]; then
-        mkdir -p "${TARGET_DIR}/dashboard"
-        cp -Rf "${SCRIPT_DIR}/dashboard/"* "${TARGET_DIR}/dashboard/"
-    fi
+    cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
+    chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
+    cp -Rf "${SCRIPT_DIR}/dashboard/"* "${TARGET_DIR}/dashboard/"
+}
 
-    # 6. Cập nhật các Adapters cấu hình IDE (Không ghi đè constitution hay dữ liệu dự án)
-    echo -e "${CYAN}[6/6] Cập nhật các Platform Adapters...${NC}"
-    if [[ -f "${TARGET_DIR}/.cursorrules" || "$OPT_ALL" == true ]]; then
-        sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" > "${TARGET_DIR}/.cursorrules"
+if [[ "$IS_UPDATE" == true ]]; then
+    echo -e "\n${YELLOW}>> CHẾ ĐỘ CẬP NHẬT (--update): ${PROJECT_NAME}${NC}"
+    sync_framework_assets
+    if [[ -f "${TARGET_DIR}/.cursorrules" || "$OPT_ALL" == true || "$OPT_CURSOR" == true ]]; then
         mkdir -p "${TARGET_DIR}/.cursor/rules"
-        sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" > "${TARGET_DIR}/.cursor/rules/tc-agent.mdc"
+        render_template "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" "${TARGET_DIR}/.cursorrules" "$PROJECT_NAME" "$CURRENT_DATE"
+        render_template "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" "${TARGET_DIR}/.cursor/rules/tc-agent.mdc" "$PROJECT_NAME" "$CURRENT_DATE"
     fi
-
-    if [[ -f "${TARGET_DIR}/.windsurfrules" || "$OPT_ALL" == true ]]; then
-        sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/windsurf.rules.template" > "${TARGET_DIR}/.windsurfrules"
+    if [[ -f "${TARGET_DIR}/.windsurfrules" || "$OPT_ALL" == true || "$OPT_WINDSURF" == true ]]; then
+        render_template "${SCRIPT_DIR}/templates/adapters/windsurf.rules.template" "${TARGET_DIR}/.windsurfrules" "$PROJECT_NAME" "$CURRENT_DATE"
     fi
-
-    if [[ -f "${TARGET_DIR}/CLAUDE.md" || "$OPT_ALL" == true ]]; then
-        sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/claude.md.template" > "${TARGET_DIR}/CLAUDE.md"
+    if [[ -f "${TARGET_DIR}/CLAUDE.md" || "$OPT_ALL" == true || "$OPT_CLAUDE" == true ]]; then
+        render_template "${SCRIPT_DIR}/templates/adapters/claude.md.template" "${TARGET_DIR}/CLAUDE.md" "$PROJECT_NAME" "$CURRENT_DATE"
     fi
-
-    echo -e "\n${GREEN}${BOLD}✓ CẬP NHẬT HOÀN TẤT!${NC}"
-    echo -e "Toàn bộ Agent Personas, Skills, Workflows, Guardrails, Engine và ./loop đã được nâng cấp lên phiên bản mới nhất."
-    echo -e "Lưu ý: Mã nguồn, tài liệu dự án trong ${BOLD}src/, docs/, backlog/, specs/${NC} được bảo toàn nguyên vẹn 100%.\n"
+    echo -e "${GREEN}${BOLD}✓ CẬP NHẬT HOÀN TẤT (v4.0)! Mã nguồn và dữ liệu dự án được bảo toàn 100%.${NC}"
     exit 0
 fi
 
-# ==============================================================================
-# CHẾ ĐỘ CÀI ĐẶT MỚI (INITIAL SETUP)
-# ==============================================================================
-echo -e "\n${BLUE}==============================================================================${NC}"
-echo -e "Bắt đầu triển khai Framework vào: ${BOLD}${TARGET_DIR}${NC}"
-echo -e "Tên dự án: ${BOLD}${PROJECT_NAME}${NC}"
-echo -e "${BLUE}==============================================================================${NC}\n"
-
-# 1. Tạo Khung Thư Mục Chuẩn Chống Rác (Anti-Clutter Directory Matrix)
-echo -e "${YELLOW}[1/7] Khởi tạo khung thư mục chuẩn mực (Zero-Tolerance Root Dumping & ECC Compliance)...${NC}"
-mkdir -p "${TARGET_DIR}/.agents" \
-         "${TARGET_DIR}/.facts" \
-         "${TARGET_DIR}/.memory/checkpoints" \
-         "${TARGET_DIR}/.memory/learnings" \
-         "${TARGET_DIR}/.memory/handoffs" \
-         "${TARGET_DIR}/logs" \
-         "${TARGET_DIR}/engine" \
-         "${TARGET_DIR}/docs/00-presale-proposal" \
+# INITIAL SETUP
+mkdir -p "${TARGET_DIR}/docs/00-presale-proposal" \
          "${TARGET_DIR}/docs/01-basic-design" \
          "${TARGET_DIR}/docs/02-detail-design" \
-         "${TARGET_DIR}/docs/decisions" \
-         "${TARGET_DIR}/docs/system" \
          "${TARGET_DIR}/docs/change-requests" \
+         "${TARGET_DIR}/docs/wireframes" \
          "${TARGET_DIR}/backlog/EPICS" \
          "${TARGET_DIR}/backlog/USER_STORIES" \
          "${TARGET_DIR}/specs" \
@@ -271,129 +194,42 @@ mkdir -p "${TARGET_DIR}/.agents" \
          "${TARGET_DIR}/src/WebApp" \
          "${TARGET_DIR}/tests/unit" \
          "${TARGET_DIR}/tests/integration" \
-         "${TARGET_DIR}/tests/e2e/screenshots" \
-         "${TARGET_DIR}/workflows" \
-         "${TARGET_DIR}/skills" \
-         "${TARGET_DIR}/scripts"
+         "${TARGET_DIR}/tests/e2e/screenshots"
 
-touch "${TARGET_DIR}/docs/00-presale-proposal/.gitkeep" \
-      "${TARGET_DIR}/docs/01-basic-design/.gitkeep" \
-      "${TARGET_DIR}/docs/02-detail-design/.gitkeep" \
-      "${TARGET_DIR}/docs/decisions/.gitkeep" \
-      "${TARGET_DIR}/docs/system/.gitkeep" \
-      "${TARGET_DIR}/docs/change-requests/.gitkeep" \
-      "${TARGET_DIR}/backlog/EPICS/.gitkeep" \
-      "${TARGET_DIR}/backlog/USER_STORIES/.gitkeep" \
-      "${TARGET_DIR}/specs/.gitkeep" \
-      "${TARGET_DIR}/src/Domain/.gitkeep" \
-      "${TARGET_DIR}/src/Application/.gitkeep" \
-      "${TARGET_DIR}/src/Infrastructure/.gitkeep" \
-      "${TARGET_DIR}/src/Presentation/.gitkeep" \
-      "${TARGET_DIR}/src/WebApp/.gitkeep" \
-      "${TARGET_DIR}/tests/unit/.gitkeep" \
-      "${TARGET_DIR}/tests/integration/.gitkeep" \
-      "${TARGET_DIR}/tests/e2e/screenshots/.gitkeep"
+touch "${TARGET_DIR}/docs/open-questions.md"
+sync_framework_assets
 
-if [[ ! -f "${TARGET_DIR}/docs/open-questions.md" ]]; then
-    touch "${TARGET_DIR}/docs/open-questions.md"
+if [[ "$OPT_ALL" == true || "$OPT_ANTIGRAVITY" == true || "$OPT_GENERIC" == true ]]; then
+    render_template "${SCRIPT_DIR}/templates/AGENTS.enterprise.template.md" "${TARGET_DIR}/AGENTS.md" "$PROJECT_NAME" "$CURRENT_DATE"
 fi
-
-if [[ -d "${SCRIPT_DIR}/scripts" ]]; then
-    cp -Rf "${SCRIPT_DIR}/scripts/"* "${TARGET_DIR}/scripts/"
-    chmod +x "${TARGET_DIR}/scripts/"*.sh "${TARGET_DIR}/scripts/"*.py 2>/dev/null || true
-fi
-
-# Cài đặt Autonomous Loop Engine và Shortcut Controller
-if [[ -d "${SCRIPT_DIR}/engine" ]]; then
-    cp -Rf "${SCRIPT_DIR}/engine/"* "${TARGET_DIR}/engine/"
-    chmod +x "${TARGET_DIR}/engine/tc-loop.py" 2>/dev/null || true
-fi
-if [[ -f "${SCRIPT_DIR}/loop" ]]; then
-    cp -f "${SCRIPT_DIR}/loop" "${TARGET_DIR}/loop"
-    chmod +x "${TARGET_DIR}/loop" 2>/dev/null || true
-fi
-if [[ -d "${SCRIPT_DIR}/dashboard" ]]; then
-    mkdir -p "${TARGET_DIR}/dashboard"
-    cp -Rf "${SCRIPT_DIR}/dashboard/"* "${TARGET_DIR}/dashboard/"
-fi
-
-echo -e "${GREEN}✓ Đã tạo thành công cây thư mục phân tầng chuẩn Clean Architecture, Docs & Loop Engine!${NC}"
-
-# 2. Cài đặt 7 Personas vào .agents/
-echo -e "\n${YELLOW}[2/6] Cài đặt 7 Persona chuyên trách (PS, PO/PM, BA, SA, Dev, QC/EC, QA)...${NC}"
-cp -Rf "${SCRIPT_DIR}/.agents/"*.md "${TARGET_DIR}/.agents/"
-echo -e "${GREEN}✓ Đã sao chép 7 Personas vào .agents/!${NC}"
-
-# 3. Cài đặt Kỹ năng theo Role & Workflows
-echo -e "\n${YELLOW}[3/6] Cài đặt bộ Kỹ năng & Quy trình chuẩn (wf-*)...${NC}"
-cp -Rf "${SCRIPT_DIR}/skills/"* "${TARGET_DIR}/skills/"
-cp -Rf "${SCRIPT_DIR}/workflows/"* "${TARGET_DIR}/workflows/"
-echo -e "${GREEN}✓ Đã cài đặt bộ Kỹ năng và Quy trình chuẩn!${NC}"
-
-# 4. Khởi tạo AGENTS.md, constitution.md và BD-00-overview.md
-echo -e "\n${YELLOW}[4/6] Khởi tạo tài liệu điều hành AGENTS.md và Hiến pháp kỹ thuật...${NC}"
-sed -e "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" \
-    -e "s/{{DATE}}/${CURRENT_DATE}/g" \
-    "${SCRIPT_DIR}/templates/AGENTS.enterprise.template.md" > "${TARGET_DIR}/AGENTS.md"
-
-sed -e "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" \
-    -e "s/{{DATE}}/${CURRENT_DATE}/g" \
-    "${SCRIPT_DIR}/templates/constitution.template.md" > "${TARGET_DIR}/constitution.md"
-
+render_template "${SCRIPT_DIR}/templates/constitution.template.md" "${TARGET_DIR}/constitution.md" "$PROJECT_NAME" "$CURRENT_DATE"
 if [[ ! -f "${TARGET_DIR}/docs/01-basic-design/BD-00-overview.md" ]]; then
-    sed -e "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" \
-        -e "s/{{DATE}}/${CURRENT_DATE}/g" \
-        "${SCRIPT_DIR}/templates/TEMPLATE-basic-design.md" > "${TARGET_DIR}/docs/01-basic-design/BD-00-overview.md"
+    render_template "${SCRIPT_DIR}/templates/TEMPLATE-basic-design.md" "${TARGET_DIR}/docs/01-basic-design/BD-00-overview.md" "$PROJECT_NAME" "$CURRENT_DATE"
 fi
 
-# 5. Cài đặt Adapters Đa Nền Tảng (Cursor, Windsurf, Claude Code, etc.)
-echo -e "\n${YELLOW}[5/6] Cài đặt các Platform Adapters...${NC}"
 if [[ "$OPT_ALL" == true || "$OPT_CURSOR" == true ]]; then
-    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" > "${TARGET_DIR}/.cursorrules"
     mkdir -p "${TARGET_DIR}/.cursor/rules"
-    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" > "${TARGET_DIR}/.cursor/rules/tc-agent.mdc"
-    echo -e "${GREEN}  ✓ Đã kích hoạt Cursor Rules (.cursorrules & .cursor/rules/)${NC}"
+    render_template "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" "${TARGET_DIR}/.cursorrules" "$PROJECT_NAME" "$CURRENT_DATE"
+    render_template "${SCRIPT_DIR}/templates/adapters/cursor.rules.template" "${TARGET_DIR}/.cursor/rules/tc-agent.mdc" "$PROJECT_NAME" "$CURRENT_DATE"
 fi
-
 if [[ "$OPT_ALL" == true || "$OPT_WINDSURF" == true ]]; then
-    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/windsurf.rules.template" > "${TARGET_DIR}/.windsurfrules"
-    echo -e "${GREEN}  ✓ Đã kích hoạt Windsurf Cascade Rules (.windsurfrules)${NC}"
+    render_template "${SCRIPT_DIR}/templates/adapters/windsurf.rules.template" "${TARGET_DIR}/.windsurfrules" "$PROJECT_NAME" "$CURRENT_DATE"
 fi
-
 if [[ "$OPT_ALL" == true || "$OPT_CLAUDE" == true ]]; then
-    sed "s/{{PROJECT_NAME}}/${PROJECT_NAME}/g" "${SCRIPT_DIR}/templates/adapters/claude.md.template" > "${TARGET_DIR}/CLAUDE.md"
-    echo -e "${GREEN}  ✓ Đã kích hoạt Claude Code CLI (CLAUDE.md)${NC}"
+    render_template "${SCRIPT_DIR}/templates/adapters/claude.md.template" "${TARGET_DIR}/CLAUDE.md" "$PROJECT_NAME" "$CURRENT_DATE"
 fi
 
-# 6. Tạo Script cập nhật 1 chạm (update-tc-agent.sh) cho dự án con
-echo -e "\n${YELLOW}[6/6] Tạo script cập nhật 1 chạm (update-tc-agent.sh)...${NC}"
-cat << 'EOF' > "${TARGET_DIR}/update-tc-agent.sh"
+if [[ -d "${TARGET_DIR}/.git" && -f "${TARGET_DIR}/scripts/install-hooks.sh" ]]; then
+    bash "${TARGET_DIR}/scripts/install-hooks.sh" >/dev/null 2>&1 || true
+fi
+
+cat << EOF > "${TARGET_DIR}/update-tc-agent.sh"
 #!/usr/bin/env bash
 set -euo pipefail
-SOURCE_REPO="TC_AGENT_SOURCE_PATH_PLACEHOLDER"
-
-if [[ ! -d "$SOURCE_REPO" ]]; then
-    echo "Lỗi: Không tìm thấy thư mục gốc của TC IT Agent tại: $SOURCE_REPO"
-    echo "Hãy kiểm tra lại đường dẫn hoặc clone lại TC IT Agent."
-    exit 1
-fi
-
-echo ">> Đang lấy bản cập nhật Agent mới nhất từ: $SOURCE_REPO ..."
-"$SOURCE_REPO/install.sh" "$(pwd)" --update
+SOURCE_REPO="${SCRIPT_DIR}"
+[[ ! -d "\$SOURCE_REPO" ]] && { echo "Không tìm thấy TC IT Agent tại: \$SOURCE_REPO"; exit 1; }
+"\$SOURCE_REPO/install.sh" "\$(pwd)" --update
 EOF
-
-sed -i '' "s|TC_AGENT_SOURCE_PATH_PLACEHOLDER|${SCRIPT_DIR}|g" "${TARGET_DIR}/update-tc-agent.sh" 2>/dev/null || \
-sed -i "s|TC_AGENT_SOURCE_PATH_PLACEHOLDER|${SCRIPT_DIR}|g" "${TARGET_DIR}/update-tc-agent.sh"
 chmod +x "${TARGET_DIR}/update-tc-agent.sh"
 
-echo -e "${GREEN}  ✓ Đã tạo script '${BOLD}update-tc-agent.sh${NC}' trong thư mục dự án.${NC}"
-
-echo -e "\n${BLUE}${BOLD}==============================================================================${NC}"
-echo -e "${GREEN}${BOLD}✓ CÀI ĐẶT THÀNH CÔNG TC IT AGENT FRAMEWORK V2.3 ENTERPRISE VÀO DỰ ÁN!${NC}"
-echo -e "${BLUE}${BOLD}==============================================================================${NC}"
-echo -e "Thư mục dự án: ${BOLD}${TARGET_DIR}${NC}"
-echo -e "Các bước tiếp theo:"
-echo -e "  1. Mở dự án trong Google Antigravity, Claude Code, Cursor hoặc Windsurf."
-echo -e "  2. Bật Vòng lặp Tự trị AI: gõ ${CYAN}./loop${NC} (Bảng điều khiển 1 chạm, chạy ngầm tmux, E2E Pipeline tự động giải quyết backlog)."
-echo -e "  3. Tác vụ điều phối qua chat: ${CYAN}/wf-presale${NC} (lên Proposal), ${CYAN}/wf-kickoff${NC} (Basic Design), ${CYAN}/wf-autopilot${NC} (thực thi Epic)."
-echo -e "  4. Khi TC IT Agent gốc có bản nâng cấp trên Git, ở dự án này chỉ cần chạy: ${BOLD}./update-tc-agent.sh${NC}\n"
+echo -e "${GREEN}${BOLD}✓ CÀI ĐẶT THÀNH CÔNG TC IT AGENT FRAMEWORK V4.0 VÀO ${TARGET_DIR}!${NC}"

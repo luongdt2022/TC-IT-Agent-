@@ -50,15 +50,18 @@ if [[ -n "${TRANSCRIPT_FILE}" && -f "${TRANSCRIPT_FILE}" ]]; then
     echo -e "  -> Tổng Token Context: ${BOLD}${TOTAL_TOKENS}${NC} (Cache: ${CACHE_TOKENS}, Input: ${INPUT_TOKENS}, Output: ${OUTPUT_TOKENS})"
     
     # Đánh giá 3 ngưỡng
-    if [[ ${TOTAL_TOKENS} -ge 120000 ]]; then
-        echo -e "${RED}${BOLD}  [BÁO ĐỘNG ĐỎ] Context đạt ngưỡng ${TOTAL_TOKENS} tokens (>= 80% dung lượng)!${NC}"
+    CTX_LIMIT=${TC_CONTEXT_WINDOW:-1000000}
+    WARN_LIMIT=$((CTX_LIMIT * 60 / 100))
+    RED_LIMIT=$((CTX_LIMIT * 80 / 100))
+    if [[ ${TOTAL_TOKENS} -ge ${RED_LIMIT} ]]; then
+        echo -e "${RED}${BOLD}  [BÁO ĐỘNG ĐỎ] Context đạt ngưỡng ${TOTAL_TOKENS}/${CTX_LIMIT} tokens (>= 80% dung lượng)!${NC}"
         echo -e "${RED}  ✗ NGUY CƠ CAO: Agent bắt đầu suy thoái trí nhớ, có dấu hiệu làm ẩu hoặc bỏ bước.${NC}"
         echo -e "${YELLOW}  -> HÀNH ĐỘNG BẮT BUỘC:${NC}"
         echo -e "     1. Yêu cầu Agent ghi điểm lưu: specs/<epic>/.session_checkpoint.md"
         echo -e "     2. Gõ lệnh /compact để thu gọn ngữ cảnh, hoặc mở Clean Session mới!"
         ERRORS=$((ERRORS + 1))
-    elif [[ ${TOTAL_TOKENS} -ge 80000 ]]; then
-        echo -e "${YELLOW}${BOLD}  [CẢNH BÁO SỚM] Context đã chạm ngưỡng ${TOTAL_TOKENS} tokens (>= 60% dung lượng).${NC}"
+    elif [[ ${TOTAL_TOKENS} -ge ${WARN_LIMIT} ]]; then
+        echo -e "${YELLOW}${BOLD}  [CẢNH BÁO SỚM] Context đã chạm ngưỡng ${TOTAL_TOKENS}/${CTX_LIMIT} tokens (>= 60% dung lượng).${NC}"
         echo -e "${YELLOW}  ⚠ Khuyến nghị: Tập trung dứt điểm task hiện tại, không kéo thêm file tài liệu lớn vào chat.${NC}"
         WARNINGS=$((WARNINGS + 1))
     else
@@ -82,7 +85,15 @@ if [[ -n "${MODIFIED_SOURCE}" ]]; then
     [[ ! -d "${SPECS_DIR}" && -d "${PROJECT_ROOT}/SourceCode/specs" ]] && SPECS_DIR="${PROJECT_ROOT}/SourceCode/specs"
     
     if [[ -d "${SPECS_DIR}" ]]; then
-        ACTIVE_EPICS=$(find "${SPECS_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
+        ACTIVE_SPEC=""
+        if [[ -f "${PROJECT_ROOT}/.tc-loop/state.json" ]]; then
+            ACTIVE_SPEC=$(python3 -c "import json; print(json.load(open('${PROJECT_ROOT}/.tc-loop/state.json')).get('spec',''))" 2>/dev/null || true)
+        fi
+        if [[ -n "${ACTIVE_SPEC}" && -d "${SPECS_DIR}/${ACTIVE_SPEC}" ]]; then
+            ACTIVE_EPICS="${SPECS_DIR}/${ACTIVE_SPEC}"
+        else
+            ACTIVE_EPICS=$(find "${SPECS_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
+        fi
         for ep in ${ACTIVE_EPICS}; do
             EPIC_NAME=$(basename "${ep}")
             PLAN_FILE="${ep}/plan.md"

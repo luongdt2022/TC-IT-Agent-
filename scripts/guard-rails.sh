@@ -32,7 +32,7 @@ echo -e "${BLUE}${BOLD}=========================================================
 # ------------------------------------------------------------------------------
 # 1. COMPILER & TYPECHECK VALIDATION (CHỐNG IMPORT / HÀM / TYPE ẢO)
 # ------------------------------------------------------------------------------
-echo -e "${YELLOW}[1/7] Kiểm tra TypeCheck / Compiler tĩnh...${NC}"
+echo -e "${YELLOW}[1/8] Kiểm tra TypeCheck / Compiler tĩnh...${NC}"
 
 # Case A: TypeScript / JavaScript Monorepo hoặc Single Repo
 if command -v pnpm >/dev/null 2>&1 && [[ -f "${PROJECT_ROOT}/pnpm-workspace.yaml" ]]; then
@@ -79,7 +79,7 @@ fi
 # ------------------------------------------------------------------------------
 # 2. SCHEMA & DATA MODEL VALIDATION (CHỐNG FIELD / QUAN HỆ CSDL ẢO)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[2/7] Kiểm tra Schema & Data Model CSDL...${NC}"
+echo -e "\n${YELLOW}[2/8] Kiểm tra Schema & Data Model CSDL...${NC}"
 
 PRISMA_SCHEMAS=$(find "${PROJECT_ROOT}" -name "schema.prisma" -not -path "*/node_modules/*" 2>/dev/null || true)
 if [[ -n "${PRISMA_SCHEMAS}" ]]; then
@@ -99,7 +99,7 @@ fi
 # ------------------------------------------------------------------------------
 # 3. KỶ LUẬT ZERO-MOCK TRÊN CLIENT (CHỐNG FAKE DATA TRONG CATCH/FALLBACK)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[3/7] Quét mã nguồn kiểm tra Kỷ luật Zero-Mock trên Client...${NC}"
+echo -e "\n${YELLOW}[3/8] Quét mã nguồn kiểm tra Kỷ luật Zero-Mock trên Client...${NC}"
 
 MOCK_LEAKS=""
 SCAN_DIRS=()
@@ -123,7 +123,7 @@ fi
 # ------------------------------------------------------------------------------
 # 4. KỶ LUẬT PURE BLACK-BOX & ZERO-MOCK TRONG BỘ E2E TEST CỦA QC
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[4/7] Quét kỷ luật Pure Black-Box & Zero-Mock trong bộ E2E Test của QC...${NC}"
+echo -e "\n${YELLOW}[4/8] Quét kỷ luật Pure Black-Box & Zero-Mock trong bộ E2E Test của QC...${NC}"
 
 E2E_DIRS=$(find "${PROJECT_ROOT}" -type d \( -name "e2e" -o -name "tests" \) -not -path "*/node_modules/*" 2>/dev/null || true)
 if [[ -n "${E2E_DIRS}" ]]; then
@@ -143,13 +143,20 @@ fi
 # ------------------------------------------------------------------------------
 # 5. KIỂM TOÁN ĐỘ PHỦ TRƯỜNG BIỂU MẪU WIREFRAME
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[5/7] Kiểm toán độ phủ trường biểu mẫu Wireframe vs Component (Controls Coverage)...${NC}"
+echo -e "\n${YELLOW}[5/8] Kiểm toán độ phủ trường biểu mẫu Wireframe vs Component (Controls Coverage)...${NC}"
 AUDIT_SCRIPT="${SCRIPT_DIR}/audit_wireframe_fields.py"
 if [[ -f "${AUDIT_SCRIPT}" ]]; then
-    if python3 "${AUDIT_SCRIPT}" >/dev/null 2>&1; then
-        echo -e "${GREEN}  ✓ Chốt chặn độ phủ trường biểu mẫu: Đạt chuẩn (>= 80% controls).${NC}"
+    AUDIT_RC=0
+    AUDIT_OUT=$(python3 "${AUDIT_SCRIPT}" --auto-discover 2>&1) || AUDIT_RC=$?
+    if [[ ${AUDIT_RC} -eq 0 ]]; then
+        if echo "${AUDIT_OUT}" | grep -q "SKIPPED"; then
+            echo -e "  -> Bỏ qua: Chưa có ánh xạ Wireframe <-> Component trong plan.md."
+        else
+            echo -e "${GREEN}  ✓ Chốt chặn độ phủ trường biểu mẫu: Đạt chuẩn (>= 80% controls).${NC}"
+        fi
     else
         echo -e "${RED}  ✗ Phát hiện biểu mẫu bị cắt xén trường so với Wireframe HTML gốc!${NC}"
+        echo "${AUDIT_OUT}" | tail -n 8
         ERRORS=$((ERRORS + 1))
     fi
 else
@@ -159,7 +166,7 @@ fi
 # ------------------------------------------------------------------------------
 # 6. KỶ LUẬT THƯ MỤC CHỐNG RÁC (ANTI-CLUTTER ROOT LINTER)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[6/7] Quét kỷ luật thư mục (Zero-Tolerance Root Dumping)...${NC}"
+echo -e "\n${YELLOW}[6/8] Quét kỷ luật thư mục (Zero-Tolerance Root Dumping)...${NC}"
 
 ROOGUE_FILES=$(find "${PROJECT_ROOT}" -maxdepth 1 -type f \
     -not -name "README.md" \
@@ -194,10 +201,13 @@ fi
 # 7. KIỂM TRA GROUNDING CATALOG
 # ------------------------------------------------------------------------------
 echo -e "\n${YELLOW}[7/8] Kiểm tra các điểm neo Grounding...${NC}"
-if [[ ( -d "${PROJECT_ROOT}/specs" || -d "${PROJECT_ROOT}/SourceCode/specs" ) && ( -d "${PROJECT_ROOT}/docs" || -d "${PROJECT_ROOT}/src" ) ]]; then
-    echo -e "${GREEN}  ✓ Cấu trúc dự án có sẵn các điểm neo xác thực (specs/, docs/, src/).${NC}"
-else
-    echo -e "${YELLOW}  ⚠ Cảnh báo: Chưa khởi tạo đủ thư mục specs/ hoặc docs/ cho việc Grounding.${NC}"
+if [[ -f "${SCRIPT_DIR}/spec-linter.py" ]]; then
+    if python3 "${SCRIPT_DIR}/spec-linter.py" --dir "${PROJECT_ROOT}" >/dev/null 2>&1; then
+        echo -e "${GREEN}  ✓ Spec Linter & Grounding: 100% đồng bộ (specs/ <-> ROADMAP.md).${NC}"
+    else
+        echo -e "${RED}  ✗ Spec Linter phát hiện lỗi đồng bộ hoặc thiếu file trong specs/!${NC}"
+        ERRORS=$((ERRORS + 1))
+    fi
 fi
 
 # ------------------------------------------------------------------------------

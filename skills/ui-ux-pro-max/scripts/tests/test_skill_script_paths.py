@@ -22,10 +22,13 @@ import re
 import unittest
 from pathlib import Path
 
-REPO = next(
-    parent for parent in Path(__file__).resolve().parents
-    if (parent / "scripts" / "generate-catalog-summary.py").is_file()
-)
+try:
+    REPO = next(
+        parent for parent in Path(__file__).resolve().parents
+        if (parent / "scripts" / "generate-catalog-summary.py").is_file()
+    )
+except StopIteration:
+    raise unittest.SkipTest("Upstream scripts/generate-catalog-summary.py not present in vendored skill")
 SKILL_TREES = ("cli/assets/skills", ".claude/skills")
 # The only file that may use the plugin-root form: hand-authored for the plugin install
 # and not shipped by the CLI (sync-assets.mjs mirrors data/ and scripts/, never SKILL.md).

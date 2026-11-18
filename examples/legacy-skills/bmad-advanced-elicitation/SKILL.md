@@ -12,16 +12,16 @@ Skill chuyên trách dành cho **Agent BA** để phỏng vấn và khai thác n
 ## 1. 9 KỸ THUẬT KHƠI GỢI NGHIỆP VỤ ĐỈNH CAO (9 ELICITATION PATTERNS)
 
 1. **5 Whys (Truy Vết Động Cơ Gốc)**:
-   - Khi người dùng đưa ra một giải pháp (ví dụ: *"Tôi muốn có nút xuất Excel"*), hỏi sâu từ 3-5 lần chữ "Tại sao" để tìm ra mục đích thật (ví dụ: *"Để gửi báo cáo định kỳ cho lãnh đạo tỉnh"*) $\rightarrow$ Đề xuất giải pháp tối ưu hơn (Tự động gửi email lịch định kỳ).
+   - Khi người dùng đưa ra một giải pháp (ví dụ: *"Tôi muốn có nút xuất Excel"*), hỏi sâu từ 3-5 lần chữ "Tại sao" để tìm ra mục đích thật (ví dụ: *"Để gửi báo cáo định kỳ cho lãnh đạo"*) $\rightarrow$ Đề xuất giải pháp tối ưu hơn (Tự động gửi email lịch định kỳ).
 2. **Laddering (Thang Đo Trừu Tượng)**:
-   - Leo thang lên (Upward): *"Tính năng này phục vụ mục tiêu kinh doanh nào của NacenTech?"*
+   - Leo thang lên (Upward): *"Tính năng này phục vụ mục tiêu kinh doanh/chiến lược nào của tổ chức?"*
    - Leo thang xuống (Downward): *"Cụ thể màn hình đó cần hiển thị những cột số liệu nào?"*
 3. **Strawman Proposal (Đề Xuất Bù Nhìn)**:
    - Khi khách hàng mơ hồ, BA chủ động dựng một kịch bản giả lập có chủ đích (kèm cả điểm bất hợp lý nhẹ) để kích thích người dùng phản biện và chỉ ra mong muốn thực sự.
 4. **Devil's Advocate (Luật Sư Của Quỷ)**:
-   - Chủ động đóng vai người phản đối: *"Nếu chuyên gia cố tình upload CV giả mạo bằng cấp thì hệ thống xử lý ra sao?"*
+   - Chủ động đóng vai người phản đối: *"Nếu người dùng cố tình tải lên tài liệu giả mạo hoặc thông tin sai lệch thì hệ thống xử lý ra sao?"*
 5. **Boundary Probing (Thử Thách Vùng Biên)**:
-   - Thử thách các giá trị cực hạn: *"Nếu doanh nghiệp có 10,000 công nghệ, hoặc giá chuyển giao là 0 đồng thì luồng chạy thế nào?"*
+   - Thử thách các giá trị cực hạn: *"Nếu dữ liệu có 10,000 bản ghi đồng thời, hoặc giá trị giao dịch bằng 0 thì luồng xử lý thế nào?"*
 6. **Socratic Questioning (Vấn Đáp Socrates)**:
    - Dẫn dắt người dùng tự nhận ra mâu thuẫn trong chính phát biểu của họ bằng các câu hỏi logic.
 7. **Exception Inversion (Đảo Ngược Ngoại Lệ)**:

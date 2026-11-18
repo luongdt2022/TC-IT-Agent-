@@ -10,7 +10,7 @@ metadata:
 Skill chuyên trách dành cho **Agent QC** và **Agent TechLead / SA** để bảo vệ an ninh hệ thống và phân quyền đa chiều.
 
 ## 1. MÔ HÌNH PHÂN QUYỀN 3 CHỮ SỐ (3D SCOPED RBAC)
-Trong hệ sinh thái NacenTech, quyền hạn không chỉ phụ thuộc vào `Role` mà phụ thuộc vào 3 chiều:
+Trong hệ sinh thái TC IT Agent, quyền hạn không chỉ phụ thuộc vào `Role` mà phụ thuộc vào 3 chiều:
 1. **Role (Vai trò)**: 10 Roles (SuperAdmin, Admin, SubAdmin, DN_CongNghe, DN_SanXuat, ChuyenGia_Full, ChuyenGia_Basic, HocVien, KhachHang, VangLai).
 2. **Scope (Phạm vi dữ liệu)**: Toàn hệ thống (Global), Đơn vị sở tại (Org/Tenant), Bản ghi cá nhân (Personal/Owner), Phạm vi địa bàn (Province/Region).
 3. **Action (Hành động)**: Create, Read, Update, Delete, Approve, Export, Audit.

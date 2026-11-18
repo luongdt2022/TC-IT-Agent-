@@ -1,13 +1,11 @@
 ---
-name: "speckit-implement"
+name: speckit-implement
 description: "Execute the implementation plan by processing and executing all tasks defined in tasks.md"
 compatibility: "Requires spec-kit project structure with .specify/ directory"
 metadata:
   author: "github-spec-kit"
   source: "templates/commands/implement.md"
 ---
-
-
 ## User Input
 
 ```text

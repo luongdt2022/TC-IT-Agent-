@@ -137,14 +137,16 @@ def load_policy() -> dict:
             "basic_design_dir": "docs/01-basic-design",
             "max_attempts_per_task": 3,
             "session_timeout_seconds": 600,
+            "poll_interval_seconds": 5,
             "blast_radius_max_files": 8,
+            "require_code_diff": True,
             "auto_commit": True,
             "auto_advance": True,
         },
         "agents": {
-            "cli": "auto",
-            "dev_model": "sonnet",
-            "review_model": "opus",
+            "cli": "antigravity",
+            "dev_model": "pro",
+            "review_model": "pro",
         },
         "verify": {
             "commands": [
@@ -381,6 +383,53 @@ class LoopEngine:
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(state, f, indent=2, ensure_ascii=False)
 
+    def record_telemetry(self, task_id: str, stage: str, status: str, details: str = "", conversation_id: str = ""):
+        """Ghi nhận telemetry runtime thực tế ra .tc-loop/telemetry.json."""
+        telemetry_file = STATE_DIR / "telemetry.json"
+        tdata = {}
+        if telemetry_file.exists():
+            try:
+                tdata = json.loads(telemetry_file.read_text(encoding="utf-8"))
+            except Exception:
+                tdata = {}
+        tdata["active_task"] = task_id
+        tdata["spec"] = self.spec_dir_name
+        tdata["runtime_status"] = status
+        tdata["current_stage"] = stage
+        if conversation_id:
+            tdata["conversation_id"] = conversation_id
+        tdata["last_updated"] = datetime.now().isoformat()
+        events = tdata.setdefault("events", [])
+        events.append({
+            "task_id": task_id,
+            "stage": stage,
+            "status": status,
+            "details": details[:300],
+            "timestamp": datetime.now().isoformat()
+        })
+        tdata["events"] = events[-100:]
+        telemetry_file.write_text(json.dumps(tdata, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    def ensure_isolation_branch(self):
+        """Tạo/chuyển sang nhánh cách ly theo cấu hình [scm].isolation."""
+        scm_cfg = self.policy.get("scm", {})
+        isolation = scm_cfg.get("isolation", "none")
+        if isolation != "branch":
+            return
+        prefix = scm_cfg.get("branch_prefix", "loop/")
+        target_branch = f"{prefix}{self.spec_dir_name}"
+        cur = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=ROOT_DIR, capture_output=True, text=True)
+        if cur.returncode != 0:
+            return
+        current_branch = cur.stdout.strip()
+        if current_branch == target_branch:
+            return
+        exists = subprocess.run(["git", "show-ref", "--verify", "--quiet", f"refs/heads/{target_branch}"], cwd=ROOT_DIR)
+        if exists.returncode == 0:
+            subprocess.run(["git", "checkout", target_branch], cwd=ROOT_DIR, capture_output=True, text=True)
+        else:
+            subprocess.run(["git", "checkout", "-b", target_branch], cwd=ROOT_DIR, capture_output=True, text=True)
+
     def verify_gates(self) -> tuple[bool, str]:
         """Thực thi các lệnh verify toán học tĩnh cấu hình trong policy.toml."""
         commands = self.policy.get("verify", {}).get("commands", [])
@@ -422,23 +471,23 @@ class LoopEngine:
             notify_desktop(f"TC-Loop: {task_id} FAILED", f"{reason}. Đã dừng để người can thiệp.")
 
     def resolve_agent_cli(self) -> tuple[str, str | None]:
-        """Tự động phát hiện CLI agent có sẵn — Ưu tiên Antigravity AgentAPI gốc."""
+        """Phát hiện CLI agent theo cấu hình [agents].cli trong policy.toml."""
         cfg_cli = self.policy.get("agents", {}).get("cli", "antigravity").lower()
-
-        # 1. Ưu tiên cao nhất: Antigravity AgentAPI gốc của môi trường
         agentapi_path = Path(os.path.expanduser("~")) / ".gemini" / "antigravity" / "bin" / "agentapi"
-        if agentapi_path.exists() and os.access(str(agentapi_path), os.X_OK):
-            return "antigravity", str(agentapi_path)
+        claude_path = shutil.which("claude") or os.path.expanduser("~/.local/bin/claude")
+        agy_path = shutil.which("agy")
 
-        # 2. claude
-        if cfg_cli in ["claude", "auto"]:
-            claude_path = shutil.which("claude") or os.path.expanduser("~/.local/bin/claude")
-            if os.path.exists(str(claude_path)) and os.access(str(claude_path), os.X_OK):
-                return "claude", str(claude_path)
+        candidates = []
+        if cfg_cli == "claude":
+            candidates = [("claude", claude_path), ("antigravity", str(agentapi_path)), ("agy", agy_path)]
+        elif cfg_cli == "agy":
+            candidates = [("agy", agy_path), ("antigravity", str(agentapi_path)), ("claude", claude_path)]
+        else:
+            candidates = [("antigravity", str(agentapi_path)), ("claude", claude_path), ("agy", agy_path)]
 
-        # 3. Fallback agy
-        if shutil.which("agy"):
-            return "agy", shutil.which("agy")
+        for name, path in candidates:
+            if path and os.path.exists(str(path)) and os.access(str(path), os.X_OK):
+                return name, str(path)
 
         return "none", None
 
@@ -464,8 +513,8 @@ TÀI LIỆU THAM CHIẾU BẮT BUỘC (GROUNDING):
 - Bản kế hoạch kiến trúc: {self.plan_file.relative_to(ROOT_DIR) if self.plan_file.exists() else 'plan.md'}
 - Danh mục công việc: {self.tasks_file.relative_to(ROOT_DIR) if self.tasks_file.exists() else 'tasks.md'}
 - Hiến pháp dự án: AGENTS.md & constitution.md (Clean Architecture, Zero-Mock, 5 UX states, Scoped RBAC)
-- Quy chuẩn chuyên trách: .agents/ (po-pm.md, ba.md, sa.md, dev.md, qc.md, qa.md)
-- Kỹ năng điều phối chuyên trách: skills/po-steer-guard/SKILL.md, skills/speckit-delta/SKILL.md, skills/speckit-autopilot/SKILL.md
+- Quy chuẩn chuyên trách: .agents/agents/ (po-pm.md, ba.md, sa.md, dev.md, qc.md, qa.md)
+- Kỹ năng điều phối chuyên trách: skills/po-steer-guard/SKILL.md, skills/wf-delta/SKILL.md, skills/wf-autopilot/SKILL.md
 
 {error_context}
 CHỈ THỊ ĐIỀU PHỐI ĐA TÁC TỬ (BẮT BUỘC DÙNG TOOL invoke_subagent ĐỂ CÔ LẬP CONTEXT KHÁCH QUAN):
@@ -479,6 +528,58 @@ Là PO, bạn TUYỆT ĐỐI KHÔNG tự mình viết code hoặc tự mình ki�
 Sau khi các Subagent hoàn thành các luồng độc lập, PO tổng hợp Biên bản Nghiệm thu DoD xuất xưởng và cập nhật tasks.md.
 """
         return prompt
+
+    def _wait_antigravity_conversation(self, binary_path: str, conv_id: str, timeout: int) -> tuple[bool, str]:
+        """Chờ phiên Antigravity hoàn tất thông qua get-conversation-metadata và transcript.jsonl."""
+        poll_interval = self.policy.get("loop", {}).get("poll_interval_seconds", 5)
+        transcript_path = Path(os.path.expanduser("~")) / ".gemini" / "antigravity" / "brain" / conv_id / ".system_generated" / "logs" / "transcript.jsonl"
+        deadline = time.time() + timeout
+        last_mtime = 0.0
+        stable_rounds = 0
+
+        while time.time() < deadline:
+            time.sleep(poll_interval)
+            try:
+                meta = subprocess.run(
+                    [binary_path, "get-conversation-metadata", conv_id],
+                    cwd=ROOT_DIR,
+                    capture_output=True,
+                    text=True,
+                    timeout=15
+                )
+                if meta.returncode == 0 and meta.stdout.strip():
+                    mdata = json.loads(meta.stdout)
+                    status_str = json.dumps(mdata).upper()
+                    if any(k in status_str for k in ['"IDLE"', '"COMPLETED"', '"DONE"', '"FINISHED"']):
+                        return True, "Antigravity conversation completed."
+                    if any(k in status_str for k in ['"FAILED"', '"ERROR"', '"CANCELED"']):
+                        return False, f"Antigravity conversation failed: {meta.stdout[:250]}"
+            except Exception:
+                pass
+
+            # Fallback kiểm tra transcript.jsonl: lượt cuối là PLANNER_RESPONSE không có tool_calls và file đứng yên 2 chu kỳ
+            if transcript_path.exists():
+                try:
+                    cur_mtime = transcript_path.stat().st_mtime
+                    lines = transcript_path.read_text(encoding="utf-8", errors="ignore").strip().splitlines()
+                    if lines:
+                        last_step = json.loads(lines[-1])
+                        is_final_planner = (
+                            last_step.get("type") == "PLANNER_RESPONSE"
+                            and not last_step.get("tool_calls")
+                            and last_step.get("status") == "DONE"
+                        )
+                        if is_final_planner and cur_mtime == last_mtime:
+                            stable_rounds += 1
+                            if stable_rounds >= 2:
+                                return True, "Antigravity transcript reached final response."
+                        else:
+                            stable_rounds = 0
+                    last_mtime = cur_mtime
+                except Exception:
+                    pass
+
+        return False, f"Antigravity conversation {conv_id} timeout sau {timeout} giây."
 
     def invoke_agent(self, task: TaskItem, attempt_num: int, previous_error: str = "", custom_prompt: str = "") -> tuple[bool, str]:
         """Triệu hồi Agent CLI để lập trình task với Fresh Context độc lập."""
@@ -535,6 +636,20 @@ Sau khi các Subagent hoàn thành các luồng độc lập, PO tổng hợp Bi
                     return False, "AUTH_EXPIRED: Token Claude Code đã hết hạn (chạy 'claude login' để đăng nhập lại)"
                 return False, output[:300]
 
+            if cli_type == "antigravity":
+                conv_id = ""
+                try:
+                    resp = json.loads(p.stdout)
+                    conv_id = resp.get("response", {}).get("newConversation", {}).get("conversationId", "")
+                except Exception:
+                    pass
+                if conv_id:
+                    self.record_telemetry(task.task_id, stage="AGENT_RUNNING", status="IN_PROGRESS", conversation_id=conv_id)
+                    done_ok, wait_msg = self._wait_antigravity_conversation(binary_path, conv_id, timeout)
+                    if not done_ok:
+                        return False, wait_msg
+                    return True, f"conversationId={conv_id}: {wait_msg}"
+
             return True, output
         except subprocess.TimeoutExpired:
             return False, f"Agent CLI timeout sau {timeout} giây."
@@ -559,6 +674,7 @@ Sau khi các Subagent hoàn thành các luồng độc lập, PO tổng hợp Bi
         print(f"• Tổng số task : {len(tasks)} | Chưa xong: {len([t for t in tasks if not t.is_done])}")
         print(f"• Verify checks: {len(self.policy['verify']['commands'])} chốt chặn\n")
 
+        self.ensure_isolation_branch()
         executed_count = 0
         for task in tasks:
             if task.is_done:
@@ -607,24 +723,39 @@ Sau khi các Subagent hoàn thành các luồng độc lập, PO tổng hợp Bi
                 print(f"  ├─ {C_CYAN}🔍 Chạy Verify Gates kiểm thử mã nguồn...{C_RESET}")
                 passed, msg = self.verify_gates()
                 if passed:
-                    # Kiểm tra Blast Radius
+                    # Kiểm tra Blast Radius & Zero-Diff cho task code
                     ok_radius, changed = self.check_blast_radius()
                     if not ok_radius:
                         print(f"  ├─ {C_RED}[X] Vi phạm Blast Radius: Thay đổi {len(changed)} files (tối đa {self.policy['loop']['blast_radius_max_files']}){C_RESET}")
                         self.log_attention(task.task_id, "Vi phạm Blast Radius", f"Files: {changed}")
                         break
 
+                    is_code_task = any(k in task.tag.upper() for k in ("BE", "FE", "TEST", "INFRA", "DELTA", "DEV"))
+                    code_changes = [f for f in changed if not f.endswith("tasks.md")]
+                    if self.policy["loop"].get("require_code_diff", True) and is_code_task and not code_changes:
+                        msg_zd = f"ZERO_DIFF_EMPTY: Task {task.task_id} {task.tag} chưa tạo ra thay đổi mã nguồn thực tế nào."
+                        print(f"  ├─ {C_YELLOW}⚠ {msg_zd}{C_RESET}")
+                        previous_error = msg_zd
+                        continue
+
                     # Tick [x] vào tasks.md
                     update_task_in_file(self.tasks_file, task.task_id)
 
-                    # Tạo Git commit nguyên tử
+                    # Tạo Git commit nguyên tử an toàn (shell=False, không --allow-empty)
                     commit_hash = ""
-                    if self.policy["scm"].get("auto_commit", True):
-                        commit_msg = f"feat({self.spec_dir_name}): [{task.task_id}] {task.description}"
-                        run_command(f'git add -A && git commit -m "{commit_msg}" --allow-empty', cwd=ROOT_DIR)
-                        _, hash_out, _ = run_command("git rev-parse --short HEAD", cwd=ROOT_DIR)
-                        commit_hash = hash_out.strip()
-                        print(f"  ├─ {C_GREEN}✓ Git Commit: {commit_hash} - {commit_msg}{C_RESET}")
+                    auto_commit = self.policy["loop"].get("auto_commit", self.policy["scm"].get("auto_commit", True))
+                    if auto_commit:
+                        commit_prefix = self.policy["scm"].get("commit_prefix", "feat")
+                        safe_desc = task.description.replace("`", "").strip()[:72]
+                        commit_msg = f"{commit_prefix}({self.spec_dir_name}): [{task.task_id}] {safe_desc}"
+                        subprocess.run(["git", "add", "-A"], cwd=ROOT_DIR, capture_output=True, text=True)
+                        cm_res = subprocess.run(["git", "commit", "-m", commit_msg], cwd=ROOT_DIR, capture_output=True, text=True)
+                        if cm_res.returncode == 0:
+                            hp = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT_DIR, capture_output=True, text=True)
+                            commit_hash = hp.stdout.strip()
+                            print(f"  ├─ {C_GREEN}✓ Git Commit: {commit_hash} - {commit_msg}{C_RESET}")
+                        else:
+                            print(f"  ├─ {C_YELLOW}⚠ Không có thay đổi mới để commit ({cm_res.stderr.strip()[:120]}){C_RESET}")
 
                     print(f"  └─ {C_GREEN}✓ HOÀN TẤT TASK {task.task_id} -> Đã tick [x]{C_RESET}")
                     task_success = True
@@ -845,8 +976,8 @@ Nhiệm vụ:
                             prompt_delta = f"""Bạn là Software Architect (TechLead/SA Agent).
 Change Request: {item.title} cho Epic {target_epic}.
 Nhiệm vụ:
-1. Quét ma trận truy vết khép kín (traceability-auditor).
-2. Thực hiện quy trình speckit-delta / wf-delta cho {task_specs_dir}/{target_epic}/:
+1. Quét ma trận truy vết khép kín (ba-trace).
+2. Thực hiện quy trình wf-delta cho {task_specs_dir}/{target_epic}/:
    - Ghi Delta section vào spec.md.
    - Cập nhật plan.md với phương án non-destructive migration.
    - Bổ sung các tasks Delta [BE]/[FE]/[Test] mới vào cuối file tasks.md (bảo toàn các task cũ).
@@ -983,7 +1114,8 @@ def main():
     add_p.add_argument("--tag", default="CR", help="Nhãn phân loại (CR, FEATURE, BUG)")
 
     # Command: verify
-    subparsers.add_parser("verify", help="Chạy kiểm tra các chốt chặn Verify Gates")
+    ver_p = subparsers.add_parser("verify", help="Chạy kiểm tra các chốt chặn Verify Gates")
+    ver_p.add_argument("--spec", help="Tên hoặc mã số Epic cần verify", default="")
 
     # Command: attach
     att_p = subparsers.add_parser("attach", help="Kết nối xem trực tiếp Agent làm việc qua tmux")
@@ -1037,7 +1169,7 @@ def main():
         print(f"\n{C_GREEN}✓ Đã ghi nhận thành công {item_id}: {args.idea}{C_RESET}\n")
 
     elif args.command == "verify":
-        spec_name = resolve_spec_name("", policy)
+        spec_name = resolve_spec_name(args.spec or "", policy)
         engine = LoopEngine(spec_name, policy) if spec_name else LoopEngine("DEFAULT", policy)
         print(f"\n{C_CYAN}🔍 Đang kiểm tra toàn bộ Verify Gates...{C_RESET}")
         passed, msg = engine.verify_gates()

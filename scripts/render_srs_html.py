@@ -1,8 +1,15 @@
 import re
+import argparse
 import markdown
 
-input_path = "Specification/SRS/SRS-001-CORE-IAM.md"
-output_path = "Specification/SRS/SRS-001-CORE-IAM.html"
+parser = argparse.ArgumentParser(description="Render Markdown SRS 7 mục sang HTML trực quan.")
+parser.add_argument("--input", "-i", required=True, help="Đường dẫn file Markdown SRS đầu vào")
+parser.add_argument("--output", "-o", help="Đường dẫn file HTML đầu ra (mặc định cùng tên .html)")
+parser.add_argument("--title", "-t", default="Tài Liệu Đặc Tả Nghiệp Vụ SRS 7 Mục", help="Tiêu đề trang HTML")
+args = parser.parse_args()
+
+input_path = args.input
+output_path = args.output or re.sub(r"\.md$", ".html", input_path, flags=re.I)
 
 with open(input_path, "r", encoding="utf-8") as f:
     md_content = f.read()
@@ -66,7 +73,7 @@ html_template = f"""<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SRS-001-CORE-IAM: Nền Tảng Quản Trị Định Danh & Phân Quyền Đa Tầng</title>
+  <title>{args.title}</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
@@ -175,7 +182,7 @@ html_template = f"""<!DOCTYPE html>
         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
         Hệ sinh thái Phần mềm Doanh nghiệp • Enterprise Agent Ecosystem
       </div>
-      <div>Bản quyền tài liệu nghiệp vụ © 2026 • Biên soạn bởi BA SRS Copilot (BMad Method)</div>
+      <div>Bản quyền tài liệu nghiệp vụ © 2026 • Biên soạn bởi TC IT Agent BA</div>
     </footer>
   </main>
 

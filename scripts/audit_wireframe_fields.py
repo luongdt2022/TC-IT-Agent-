@@ -108,14 +108,31 @@ def main():
     parser.add_argument("--wireframe", help="Đường dẫn file HTML Wireframe")
     parser.add_argument("--component", "--tsx", dest="component", help="Đường dẫn file Component (TSX, JSX, Vue, v.v.)")
     parser.add_argument("--min-coverage", type=float, default=80.0, help="Tỷ lệ bao phủ tối thiểu (%)")
+    parser.add_argument("--auto-discover", action="store_true", help="Tự động quét cặp Wireframe <-> Component từ specs/*/plan.md")
     
     args = parser.parse_args()
     
     if args.wireframe and args.component:
         success = audit_pair(args.wireframe, args.component, args.min_coverage)
         sys.exit(0 if success else 1)
-        
-    print("ℹ️  Chạy audit_wireframe_fields với tham số --wireframe <file.html> --component <file.tsx> để kiểm tra cụ thể.")
+
+    if args.auto_discover:
+        import pathlib, glob
+        root = pathlib.Path(__file__).resolve().parent.parent
+        pairs = []
+        for plan in root.glob("specs/*/plan.md"):
+            txt = plan.read_text(encoding="utf-8", errors="ignore")
+            for m in re.finditer(r"([\w./-]+\.html)\s*(?:<->|->|vs)\s*([\w./-]+\.(?:tsx|jsx|vue|svelte))", txt):
+                wf_p, cp_p = root / m.group(1), root / m.group(2)
+                if wf_p.exists() and cp_p.exists():
+                    pairs.append((str(wf_p), str(cp_p)))
+        if not pairs:
+            print("SKIPPED: Chưa tìm thấy cặp Wireframe <-> Component trong specs/*/plan.md.")
+            sys.exit(0)
+        all_ok = all(audit_pair(wf, cp, args.min_coverage) for wf, cp in pairs)
+        sys.exit(0 if all_ok else 1)
+
+    print("SKIPPED: Thiếu --wireframe và --component.")
     sys.exit(0)
 
 if __name__ == "__main__":

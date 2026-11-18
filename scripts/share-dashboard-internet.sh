@@ -24,7 +24,7 @@ fi
 echo "🔍 1. Kiểm tra dịch vụ Agent Dashboard (Port 8420)..."
 if ! lsof -i :8420 >/dev/null 2>&1; then
   echo "⚠️ Port 8420 chưa chạy. Đang khởi động Agent Dashboard API Server..."
-  python3 "$PROJECT_ROOT/dashboard/api/server.py" >/dev/null 2>&1 &
+  TC_PUBLIC_PORTAL=1 python3 "$PROJECT_ROOT/dashboard/api/server.py" >/dev/null 2>&1 &
   sleep 2
 fi
 echo "   ✅ Port 8420 đang sẵn sàng."

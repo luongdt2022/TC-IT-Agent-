@@ -85,8 +85,12 @@ def get_modified_files() -> list[str]:
 def verify_facts_for_file(filepath: str) -> tuple[bool, str]:
     """Kiểm tra xem tệp Tier-1 đã có bản khai Fact-Sheet hợp lệ chưa."""
     os.makedirs(FACTS_DIR, exist_ok=True)
-    basename = os.path.basename(filepath)
-    fact_file = os.path.join(FACTS_DIR, f"{basename}.facts.json")
+    safe_key = filepath.replace("\\", "/").strip("/").replace("/", "__")
+    fact_file = os.path.join(FACTS_DIR, f"{safe_key}.facts.json")
+    if not os.path.exists(fact_file):
+        legacy_file = os.path.join(FACTS_DIR, f"{os.path.basename(filepath)}.facts.json")
+        if os.path.exists(legacy_file):
+            fact_file = legacy_file
     
     if not os.path.exists(fact_file):
         return False, (
@@ -159,8 +163,10 @@ def cmd_check_file(target_file: str):
 def cmd_submit_facts(target_file: str, json_str: str):
     """Nộp Fact-Sheet cho một tệp Tier-1."""
     os.makedirs(FACTS_DIR, exist_ok=True)
-    basename = os.path.basename(target_file)
-    fact_file = os.path.join(FACTS_DIR, f"{basename}.facts.json")
+    rel = os.path.relpath(target_file, PROJECT_ROOT) if os.path.isabs(target_file) else target_file
+    safe_key = rel.replace("\\", "/").strip("/").replace("/", "__")
+    fact_file = os.path.join(FACTS_DIR, f"{safe_key}.facts.json")
+    basename = safe_key
     
     try:
         data = json.loads(json_str)

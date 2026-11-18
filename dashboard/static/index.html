@@ -11,6 +11,16 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
     tailwind.config = {
       darkMode: 'class',
       theme: {
@@ -565,7 +575,7 @@
     /* ============================================================== */
     /* NACENTECH DESIGN SYSTEM: BUTTONS & CONTROLS                    */
     /* ============================================================== */
-    .btn-nacen-primary {
+    .btn-tc-primary {
       background-color: #3c5999 !important;
       color: #ffffff !important;
       border: 1px solid #30477a !important;
@@ -575,16 +585,16 @@
       transition: all 0.15s ease;
       cursor: pointer;
     }
-    .btn-nacen-primary:hover {
+    .btn-tc-primary:hover {
       background-color: #30477a !important;
       box-shadow: 0 2px 5px rgba(60, 89, 153, 0.35);
       transform: translateY(-0.5px);
     }
-    .btn-nacen-primary:active {
+    .btn-tc-primary:active {
       transform: translateY(0);
     }
 
-    .btn-nacen-cta {
+    .btn-tc-cta {
       background-color: #2d9a85 !important;
       color: #ffffff !important;
       border: 1px solid #258b78 !important;
@@ -594,16 +604,16 @@
       transition: all 0.15s ease;
       cursor: pointer;
     }
-    .btn-nacen-cta:hover {
+    .btn-tc-cta:hover {
       background-color: #258b78 !important;
       box-shadow: 0 2px 5px rgba(45, 154, 133, 0.35);
       transform: translateY(-0.5px);
     }
-    .btn-nacen-cta:active {
+    .btn-tc-cta:active {
       transform: translateY(0);
     }
 
-    .btn-nacen-outline {
+    .btn-tc-outline {
       background-color: #ffffff !important;
       color: #334155 !important;
       border: 1px solid #e2e8f0 !important;
@@ -613,22 +623,22 @@
       transition: all 0.15s ease;
       cursor: pointer;
     }
-    .btn-nacen-outline:hover {
+    .btn-tc-outline:hover {
       background-color: #f8fafc !important;
       color: #0f172a !important;
       border-color: #cbd5e1 !important;
     }
-    html.dark .btn-nacen-outline {
+    html.dark .btn-tc-outline {
       background-color: #1e293b !important;
       color: #cbd5e1 !important;
       border-color: #334155 !important;
     }
-    html.dark .btn-nacen-outline:hover {
+    html.dark .btn-tc-outline:hover {
       background-color: #334155 !important;
       color: #ffffff !important;
     }
 
-    .btn-nacen-danger {
+    .btn-tc-danger {
       background-color: #fff1f2 !important;
       color: #e11d48 !important;
       border: 1px solid #fecdd3 !important;
@@ -637,26 +647,26 @@
       transition: all 0.15s ease;
       cursor: pointer;
     }
-    .btn-nacen-danger:hover {
+    .btn-tc-danger:hover {
       background-color: #ffe4e6 !important;
       color: #be123c !important;
       border-color: #fda4af !important;
     }
-    html.dark .btn-nacen-danger {
+    html.dark .btn-tc-danger {
       background-color: #4c0519 !important;
       color: #fda4af !important;
       border-color: #881337 !important;
     }
-    html.dark .btn-nacen-danger:hover {
+    html.dark .btn-tc-danger:hover {
       background-color: #881337 !important;
       color: #fff1f2 !important;
     }
 
     /* Common Button Reset & Enforced Flex Center */
-    .btn-nacen-primary,
-    .btn-nacen-cta,
-    .btn-nacen-outline,
-    .btn-nacen-danger {
+    .btn-tc-primary,
+    .btn-tc-cta,
+    .btn-tc-outline,
+    .btn-tc-danger {
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -669,9 +679,9 @@
     /* ============================================================== */
 
     /* 1. Form Controls (40px) - Used in Modals & Forms */
-    .nacen-form-control,
-    input.nacen-form-control,
-    select.nacen-form-control {
+    .tc-form-control,
+    input.tc-form-control,
+    select.tc-form-control {
       height: 40px !important;
       min-height: 40px !important;
       max-height: 40px !important;
@@ -709,9 +719,9 @@
     }
 
     /* 3. Toolbar Controls (34px) - Used in Backlog & Main Filter Rows */
-    .nacen-toolbar-control,
-    input.nacen-toolbar-control,
-    select.nacen-toolbar-control {
+    .tc-toolbar-control,
+    input.tc-toolbar-control,
+    select.tc-toolbar-control {
       height: 34px !important;
       min-height: 34px !important;
       max-height: 34px !important;
@@ -735,9 +745,9 @@
     }
 
     /* 4. Compact Controls (30px) - Used in Wave DAG Roadmap Filter Bar & Table Cells */
-    .nacen-compact-control,
-    input.nacen-compact-control,
-    select.nacen-compact-control {
+    .tc-compact-control,
+    input.tc-compact-control,
+    select.tc-compact-control {
       height: 30px !important;
       min-height: 30px !important;
       max-height: 30px !important;
@@ -761,9 +771,9 @@
     }
 
     /* Styled Select with custom chevron arrow for all comboboxes */
-    select.nacen-form-control,
-    select.nacen-toolbar-control,
-    select.nacen-compact-control {
+    select.tc-form-control,
+    select.tc-toolbar-control,
+    select.tc-compact-control {
       appearance: none !important;
       -webkit-appearance: none !important;
       -moz-appearance: none !important;
@@ -775,15 +785,15 @@
       cursor: pointer;
     }
 
-    select.nacen-compact-control {
+    select.tc-compact-control {
       background-position: right 0.5rem center !important;
       background-size: 0.875rem 0.875rem !important;
       padding-right: 1.75rem !important;
     }
 
-    html:not(.dark) select.nacen-form-control,
-    html:not(.dark) select.nacen-toolbar-control,
-    html:not(.dark) select.nacen-compact-control {
+    html:not(.dark) select.tc-form-control,
+    html:not(.dark) select.tc-toolbar-control,
+    html:not(.dark) select.tc-compact-control {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
     }
 
@@ -948,18 +958,18 @@
         SSE: <span class="text-emerald-400 font-mono font-bold">CONNECTED</span>
       </span>
 
-      <button onclick="openCreateCRModal()" class="btn-nacen-primary btn-control-header px-3.5 text-xs flex items-center gap-1.5">
+      <button onclick="openCreateCRModal()" class="btn-tc-primary btn-control-header px-3.5 text-xs flex items-center gap-1.5">
         <span class="text-sm leading-none">＋</span> Tạo Task / CR Mới
       </button>
 
-      <button onclick="refreshData()" class="btn-nacen-outline btn-control-header px-2.5 text-xs flex items-center gap-1.5" title="Làm mới dữ liệu">
+      <button onclick="refreshData()" class="btn-tc-outline btn-control-header px-2.5 text-xs flex items-center gap-1.5" title="Làm mới dữ liệu">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         <span class="hidden md:inline">Làm mới</span>
       </button>
 
       <!-- GOM CHUNG CẤU HÌNH & GIAO DIỆN VÀO 1 MỤC CÀI ĐẶT DROPDOWN -->
       <div class="relative" id="dropdownSettingsContainer">
-        <button id="btnSettingsToggle" onclick="toggleSettingsMenu(event)" class="btn-nacen-outline btn-control-header px-3 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs" title="Cài đặt hệ thống & giao diện">
+        <button id="btnSettingsToggle" onclick="toggleSettingsMenu(event)" class="btn-tc-outline btn-control-header px-3 text-xs flex items-center gap-1.5 cursor-pointer shadow-xs" title="Cài đặt hệ thống & giao diện">
           <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
           <span class="font-medium">Cài đặt</span>
           <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -992,7 +1002,7 @@
         </div>
       </div>
 
-      <button onclick="stopAgent()" class="btn-nacen-danger btn-control-header px-3 text-xs flex items-center gap-1" title="Dừng khẩn cấp tiến trình">
+      <button onclick="stopAgent()" class="btn-tc-danger btn-control-header px-3 text-xs flex items-center gap-1" title="Dừng khẩn cấp tiến trình">
         ⏹ Dừng
       </button>
     </div>
@@ -1005,7 +1015,7 @@
       <span class="text-slate-300">Task <strong id="alertTaskId" class="text-amber-300 font-mono">TASK-01-CR19</strong>: <span id="alertTaskTitle" class="text-slate-200">Đang chờ bạn duyệt kế hoạch thi công</span></span>
     </div>
     <div class="flex items-center gap-2">
-      <button onclick="switchView('autopilot')" class="btn-nacen-primary px-3.5 py-1.5 text-xs flex items-center gap-1.5">
+      <button onclick="switchView('autopilot')" class="btn-tc-primary px-3.5 py-1.5 text-xs flex items-center gap-1.5">
         <span>Xem Kế Hoạch & Phê Duyệt Ngay</span>
         <span>→</span>
       </button>
@@ -1113,12 +1123,12 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-            <span>Tiến Độ 10 Phân Hệ Dự Án NacenTwin</span>
+            <span>Tiến Độ Các Phân Hệ Dự Án</span>
             <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">TASK-00 → TASK-09</span>
           </h2>
           <p class="text-xs text-slate-400 mt-0.5">Bấm vào phân hệ để lọc và xem danh sách task chi tiết tương ứng.</p>
         </div>
-        <button onclick="switchView('dag')" class="btn-nacen-outline btn-control-compact text-xs flex items-center gap-1.5">
+        <button onclick="switchView('dag')" class="btn-tc-outline btn-control-compact text-xs flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
           <span>Xem Toàn Bộ 581 Tasks trên Wave DAG</span>
         </button>
@@ -1176,7 +1186,7 @@
           <div class="text-slate-400 text-[11px]">Chuyển sang chế độ Wave DAG Roadmap để theo dõi mạng nhện 581 nodes và luồng điều phối đa luồng.</div>
         </div>
       </div>
-      <button onclick="switchView('dag')" class="btn-nacen-primary btn-control-header px-4 text-xs font-semibold shrink-0">
+      <button onclick="switchView('dag')" class="btn-tc-primary btn-control-header px-4 text-xs font-semibold shrink-0">
         Mở Đồ Thị Wave DAG ↗
       </button>
     </div>
@@ -1196,20 +1206,20 @@
         </div>
 
         <!-- DROPDOWNS -->
-        <select id="selAssignee" class="nacen-compact-control bg-slate-900 border border-borderDark rounded-lg px-2.5 text-slate-300 focus:outline-none focus:border-blue-500">
+        <select id="selAssignee" class="tc-compact-control bg-slate-900 border border-borderDark rounded-lg px-2.5 text-slate-300 focus:outline-none focus:border-blue-500">
           <option>Anyone</option>
           <option>Agent (Planner)</option>
           <option>Agent (Coder)</option>
           <option>Agent (QC)</option>
         </select>
 
-        <select id="selEpic" onchange="applyFilters()" class="nacen-compact-control bg-slate-900 border border-borderDark rounded-lg px-2.5 text-slate-300 focus:outline-none focus:border-blue-500">
+        <select id="selEpic" onchange="applyFilters()" class="tc-compact-control bg-slate-900 border border-borderDark rounded-lg px-2.5 text-slate-300 focus:outline-none focus:border-blue-500">
           <option value="all">Any epic</option>
         </select>
 
         <!-- SEARCH INPUT -->
         <div class="relative flex items-center">
-          <input id="txtSearch" oninput="applyFilters()" type="text" placeholder="Find..." class="nacen-compact-control bg-slate-900 border border-borderDark rounded-lg pl-7 pr-3 text-slate-300 w-44 focus:w-60 transition-all focus:outline-none focus:border-blue-500" />
+          <input id="txtSearch" oninput="applyFilters()" type="text" placeholder="Find..." class="tc-compact-control bg-slate-900 border border-borderDark rounded-lg pl-7 pr-3 text-slate-300 w-44 focus:w-60 transition-all focus:outline-none focus:border-blue-500" />
           <svg class="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
 
@@ -1266,7 +1276,7 @@
         <span id="runtimeBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">STATUS: IDLE</span>
       </div>
       <div class="flex items-center space-x-3">
-        <button id="btnApproveHeader" onclick="approveHumanGate()" class="btn-nacen-cta btn-control-header px-3.5 text-xs flex items-center gap-1.5">
+        <button id="btnApproveHeader" onclick="approveHumanGate()" class="btn-tc-cta btn-control-header px-3.5 text-xs flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           Phê duyệt Plan (Human Gate)
         </button>
@@ -1449,7 +1459,7 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="openCreateCRModal()" class="btn-nacen-primary btn-control-header px-4 text-xs flex items-center gap-2">
+        <button onclick="openCreateCRModal()" class="btn-tc-primary btn-control-header px-4 text-xs flex items-center gap-2">
           <span class="text-base leading-none">＋</span> Thêm Yêu Cầu / CR Mới
         </button>
       </div>
@@ -1505,29 +1515,22 @@
             oninput="renderFilteredBacklog()" 
             type="text" 
             placeholder="Tìm theo mã, nội dung, người gửi..." 
-            class="nacen-toolbar-control bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 text-slate-200 w-64 focus:w-80 transition-all focus:outline-none focus:border-blue-500"
+            class="tc-toolbar-control bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 text-slate-200 w-64 focus:w-80 transition-all focus:outline-none focus:border-blue-500"
           />
           <svg class="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
 
         <!-- FILTER EPIC -->
-        <select id="selBacklogEpic" onchange="renderFilteredBacklog()" class="nacen-toolbar-control bg-slate-900 border border-slate-700 rounded-lg px-3 text-slate-300 focus:outline-none focus:border-blue-500">
+        <select id="selBacklogEpic" onchange="renderFilteredBacklog()" class="tc-toolbar-control bg-slate-900 border border-slate-700 rounded-lg px-3 text-slate-300 focus:outline-none focus:border-blue-500">
           <option value="all">Mọi phân hệ (All Epics)</option>
-          <option value="TASK-00">TASK-00: Platform Foundation</option>
-          <option value="TASK-01">TASK-01: Trang chủ & Sự kiện</option>
-          <option value="TASK-02">TASK-02: Doanh nghiệp ĐMST</option>
-          <option value="TASK-03">TASK-03: Khảo sát Nhu cầu (Buyer)</option>
-          <option value="TASK-04">TASK-04: Gian hàng Chào bán (Seller)</option>
-          <option value="TASK-05">TASK-05: Chuyên gia KH&CN</option>
-          <option value="TASK-06">TASK-06: Danh mục ngành TT17</option>
-          <option value="TASK-07">TASK-07: Quản trị Phân quyền Admin</option>
-          <option value="TASK-08">TASK-08: Sàn Ghép nối Cung Cầu</option>
-          <option value="TASK-09">TASK-09: Đánh giá Năng lực TT17</option>
-          <option value="NEW">NEW: Phân hệ / Ý tưởng mới</option>
+          <option value="EPIC-01">EPIC-01: Core System Module</option>
+              <option value="EPIC-02">EPIC-02: Business Workflow</option>
+              <option value="GENERAL">GENERAL: Toàn Hệ Thống</option>
+<option value="NEW">NEW: Phân hệ / Ý tưởng mới</option>
         </select>
 
         <!-- FILTER TYPE -->
-        <select id="selBacklogType" onchange="renderFilteredBacklog()" class="nacen-toolbar-control bg-slate-900 border border-slate-700 rounded-lg px-3 text-slate-300 focus:outline-none focus:border-blue-500">
+        <select id="selBacklogType" onchange="renderFilteredBacklog()" class="tc-toolbar-control bg-slate-900 border border-slate-700 rounded-lg px-3 text-slate-300 focus:outline-none focus:border-blue-500">
           <option value="all">Mọi loại yêu cầu</option>
           <option value="CR">Change Request (CR)</option>
           <option value="TASK">Task / Feature mới</option>
@@ -1537,7 +1540,7 @@
         </select>
 
         <!-- FILTER PRIORITY -->
-        <select id="selBacklogPriority" onchange="renderFilteredBacklog()" class="nacen-toolbar-control bg-slate-900 border border-slate-700 rounded-lg px-3 text-slate-300 focus:outline-none focus:border-blue-500">
+        <select id="selBacklogPriority" onchange="renderFilteredBacklog()" class="tc-toolbar-control bg-slate-900 border border-slate-700 rounded-lg px-3 text-slate-300 focus:outline-none focus:border-blue-500">
           <option value="all">Mọi mức ưu tiên</option>
           <option value="P1">P1 - Cao / Khẩn cấp</option>
           <option value="P2">P2 - Tiêu chuẩn</option>
@@ -1627,11 +1630,11 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2 pt-4 border-t border-slate-800 shrink-0 mt-2">
-        <button onclick="closeModal()" class="btn-nacen-outline btn-control-header px-4 text-xs font-semibold">Đóng</button>
-        <button onclick="triggerRunTask(false)" class="btn-nacen-primary btn-control-header px-4 text-xs flex items-center gap-1.5 font-semibold" title="Chạy bước Lập kế hoạch và dừng tại cổng Duyệt">
+        <button onclick="closeModal()" class="btn-tc-outline btn-control-header px-4 text-xs font-semibold">Đóng</button>
+        <button onclick="triggerRunTask(false)" class="btn-tc-primary btn-control-header px-4 text-xs flex items-center gap-1.5 font-semibold" title="Chạy bước Lập kế hoạch và dừng tại cổng Duyệt">
           📋 Lập Kế Hoạch (Có Duyệt)
         </button>
-        <button onclick="triggerRunTask(true)" class="btn-nacen-cta btn-control-header px-4 text-xs flex items-center gap-1.5 font-semibold" title="Tự động chạy toàn trình từ Plan đến Kiểm thử và Tick [x]">
+        <button onclick="triggerRunTask(true)" class="btn-tc-cta btn-control-header px-4 text-xs flex items-center gap-1.5 font-semibold" title="Tự động chạy toàn trình từ Plan đến Kiểm thử và Tick [x]">
           ⚡ Kích Hoạt Tự Động Toàn Trình
         </button>
       </div>
@@ -1671,22 +1674,22 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="block text-slate-300 font-semibold mb-1.5">Phân hệ (Epic):</label>
-            <select id="crEpic" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 nacen-form-control text-slate-200 focus:border-blue-500 focus:outline-none">
+            <select id="crEpic" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 tc-form-control text-slate-200 focus:border-blue-500 focus:outline-none">
               <option value="TASK-03" selected>TASK-03: Khảo sát Nhu cầu (Buyer)</option>
               <option value="TASK-01">TASK-01: Trang chủ & Sự kiện</option>
               <option value="TASK-02">TASK-02: Doanh nghiệp ĐMST</option>
               <option value="TASK-04">TASK-04: Gian hàng Chào bán (Seller)</option>
               <option value="TASK-05">TASK-05: Chuyên gia KH&CN</option>
-              <option value="TASK-06">TASK-06: Danh mục ngành TT17</option>
+              <option value="TASK-06">TASK-06: Danh mục ngành Enterprise</option>
               <option value="TASK-07">TASK-07: Quản trị Phân quyền Admin</option>
               <option value="TASK-08">TASK-08: Sàn Ghép nối Cung Cầu</option>
-              <option value="TASK-09">TASK-09: Đánh giá Năng lực TT17</option>
+              <option value="TASK-09">TASK-09: Đánh giá Năng lực Enterprise</option>
               <option value="TASK-00">TASK-00: Platform Foundation</option>
             </select>
           </div>
           <div>
             <label class="block text-slate-300 font-semibold mb-1.5">Mức ưu tiên:</label>
-            <select id="crPriority" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 nacen-form-control text-slate-200 focus:border-blue-500 focus:outline-none">
+            <select id="crPriority" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 tc-form-control text-slate-200 focus:border-blue-500 focus:outline-none">
               <option value="P1" selected>P1 - Cao / Khẩn cấp</option>
               <option value="P2">P2 - Trung bình</option>
               <option value="P3">P3 - Thấp</option>
@@ -1698,7 +1701,7 @@
               id="crAuthor" 
               type="text" 
               placeholder="VD: Nguyễn Văn A (PO/BA)" 
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 nacen-form-control text-slate-200 focus:border-blue-500 focus:outline-none"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 tc-form-control text-slate-200 focus:border-blue-500 focus:outline-none"
             />
           </div>
         </div>
@@ -1710,7 +1713,7 @@
             type="text" 
             required 
             placeholder="VD: Đổi tab 5 E. Nhu cầu TNI lên vị trí 2, bắt buộc tab 1 & 2" 
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 nacen-form-control text-slate-200 focus:border-blue-500 focus:outline-none"
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 tc-form-control text-slate-200 focus:border-blue-500 focus:outline-none"
           />
         </div>
 
@@ -1766,8 +1769,8 @@
         </div>
 
         <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800 shrink-0">
-          <button type="button" onclick="closeCreateCRModal()" class="btn-nacen-outline btn-control-form px-5 text-xs font-semibold rounded-lg">Hủy</button>
-          <button type="submit" class="btn-nacen-primary btn-control-form px-6 text-xs font-semibold rounded-lg flex items-center gap-1.5">
+          <button type="button" onclick="closeCreateCRModal()" class="btn-tc-outline btn-control-form px-5 text-xs font-semibold rounded-lg">Hủy</button>
+          <button type="submit" class="btn-tc-primary btn-control-form px-6 text-xs font-semibold rounded-lg flex items-center gap-1.5">
             🚀 Gửi Đề Bài Cho Agent
           </button>
         </div>
@@ -1822,8 +1825,8 @@
           Khôi phục mặc định (Recommended)
         </button>
         <div class="flex items-center gap-2.5">
-          <button onclick="closeModelConfigModal()" class="btn-nacen-outline btn-control-header px-4 text-xs font-semibold">Đóng</button>
-          <button onclick="saveModelConfig()" class="btn-nacen-cta btn-control-header px-5 text-xs flex items-center gap-1.5 font-semibold shadow-md">
+          <button onclick="closeModelConfigModal()" class="btn-tc-outline btn-control-header px-4 text-xs font-semibold">Đóng</button>
+          <button onclick="saveModelConfig()" class="btn-tc-cta btn-control-header px-5 text-xs flex items-center gap-1.5 font-semibold shadow-md">
             💾 Lưu Cấu Hình Model
           </button>
         </div>
@@ -2412,14 +2415,14 @@
             <td class="py-3.5 px-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-2">
                 ${!isDone ? `
-                  <button onclick="activateTaskWithAgent('${item.id}', '${item.epic}', '${encodeURIComponent(item.title)}')" class="btn-nacen-primary btn-control-compact px-3 text-[11px] flex items-center gap-1 font-medium">
+                  <button onclick="activateTaskWithAgent('${item.id}', '${item.epic}', '${encodeURIComponent(item.title)}')" class="btn-tc-primary btn-control-compact px-3 text-[11px] flex items-center gap-1 font-medium">
                     🚀 Dev Nhận & Chạy
                   </button>
-                  <button onclick="toggleBacklogItemStatus('${item.id}')" title="Đánh dấu đã hoàn thành" class="btn-nacen-outline btn-control-compact px-2.5 text-[11px] font-medium">
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" title="Đánh dấu đã hoàn thành" class="btn-tc-outline btn-control-compact px-2.5 text-[11px] font-medium">
                     ✓ Xong
                   </button>
                 ` : `
-                  <button onclick="toggleBacklogItemStatus('${item.id}')" title="Mở lại task này" class="btn-nacen-outline btn-control-compact px-2.5 text-[11px] font-medium">
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" title="Mở lại task này" class="btn-tc-outline btn-control-compact px-2.5 text-[11px] font-medium">
                     ↺ Mở lại
                   </button>
                 `}
@@ -2466,14 +2469,14 @@
               </span>
               <div class="flex items-center gap-1.5">
                 ${!isDone ? `
-                  <button onclick="activateTaskWithAgent('${item.id}', '${item.epic}', '${encodeURIComponent(item.title)}')" class="btn-nacen-primary h-[26px] px-2.5 text-[10px] flex items-center gap-1 font-medium rounded">
+                  <button onclick="activateTaskWithAgent('${item.id}', '${item.epic}', '${encodeURIComponent(item.title)}')" class="btn-tc-primary h-[26px] px-2.5 text-[10px] flex items-center gap-1 font-medium rounded">
                     🚀 Dev Chạy
                   </button>
-                  <button onclick="toggleBacklogItemStatus('${item.id}')" class="btn-nacen-outline h-[26px] px-2 text-[10px] font-medium flex items-center justify-center rounded">
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" class="btn-tc-outline h-[26px] px-2 text-[10px] font-medium flex items-center justify-center rounded">
                     ✓
                   </button>
                 ` : `
-                  <button onclick="toggleBacklogItemStatus('${item.id}')" class="btn-nacen-outline h-[26px] px-2.5 text-[10px] font-medium flex items-center justify-center rounded">
+                  <button onclick="toggleBacklogItemStatus('${item.id}')" class="btn-tc-outline h-[26px] px-2.5 text-[10px] font-medium flex items-center justify-center rounded">
                     ↺ Mở lại
                   </button>
                 `}
@@ -2784,7 +2787,7 @@
                 <span class="btn-control-header text-[11px] font-mono px-3 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 font-semibold">
                   ⚡ Chiến Lược: ${pt.strategic_decision}
                 </span>
-                <button onclick="openWireframeTab('${pt.wireframe_file || '/wireframes/01_trang_chu.html'}')" class="btn-nacen-primary btn-control-header px-3.5 text-xs flex items-center gap-1.5 shadow-xs">
+                <button onclick="openWireframeTab('${pt.wireframe_file || '/wireframes/01_trang_chu.html'}')" class="btn-tc-primary btn-control-header px-3.5 text-xs flex items-center gap-1.5 shadow-xs">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                   🌐 Mở Wireframe HTML (Basic Design)
                 </button>
@@ -3354,10 +3357,10 @@
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <button onclick="openWireframeTab('${(data.po_triage && data.po_triage.wireframe_file) || '/wireframes/01_trang_chu.html'}')" class="btn-nacen-primary btn-control-header px-3.5 text-xs flex items-center gap-1.5">
+                <button onclick="openWireframeTab('${(data.po_triage && data.po_triage.wireframe_file) || '/wireframes/01_trang_chu.html'}')" class="btn-tc-primary btn-control-header px-3.5 text-xs flex items-center gap-1.5">
                   🌐 Mở Wireframe HTML (Tab Mới)
                 </button>
-                <button onclick="approveGate1()" class="btn-nacen-cta btn-control-header px-4 text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                <button onclick="approveGate1()" class="btn-tc-cta btn-control-header px-4 text-xs font-bold flex items-center gap-1.5 shadow-sm">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                   Duyệt Wireframe Cổng 1
                 </button>
@@ -3398,7 +3401,7 @@
                   </div>
                 </div>
               </div>
-              <button onclick="approveGate3()" class="btn-nacen-cta btn-control-header px-4 text-xs font-bold flex items-center gap-2 shadow-sm">
+              <button onclick="approveGate3()" class="btn-tc-cta btn-control-header px-4 text-xs font-bold flex items-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 Ký Duyệt Nghiệm Thu Cổng 3 & Xuất Xưởng
               </button>
@@ -3450,7 +3453,7 @@
                       <div class="text-[11px] text-slate-300 mt-0.5">Kiểm tra hồ sơ kế hoạch thi công bên dưới. Bấm nút để kích hoạt Senior Dev bắt tay vào viết code và chạy kiểm thử 4 tầng!</div>
                     </div>
                   </div>
-                  <button onclick="approveGate2()" class="btn-nacen-cta btn-control-header px-4 text-xs font-bold flex items-center gap-2 shadow-xs whitespace-nowrap self-end sm:self-auto">
+                  <button onclick="approveGate2()" class="btn-tc-cta btn-control-header px-4 text-xs font-bold flex items-center gap-2 shadow-xs whitespace-nowrap self-end sm:self-auto">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Duyệt Kế Hoạch Cổng 2 & Bắt Đầu Code
                   </button>
@@ -3470,7 +3473,7 @@
                   </span>
                 </div>
                 ${isWaiting ? `
-                  <button onclick="approveGate2()" class="btn-nacen-cta btn-control-header px-4 text-xs flex items-center gap-1.5 shadow-xs">
+                  <button onclick="approveGate2()" class="btn-tc-cta btn-control-header px-4 text-xs flex items-center gap-1.5 shadow-xs">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Duyệt Kế Hoạch Cổng 2
                   </button>
@@ -4317,12 +4320,12 @@
               </div>
             </td>
             <td class="p-3">
-              <select id="selPrimary_${agentId}" class="nacen-compact-control px-2.5 text-xs text-blue-400 font-mono w-full rounded-lg bg-slate-900 border border-slate-700 focus:border-blue-500 focus:outline-none">
+              <select id="selPrimary_${agentId}" class="tc-compact-control px-2.5 text-xs text-blue-400 font-mono w-full rounded-lg bg-slate-900 border border-slate-700 focus:border-blue-500 focus:outline-none">
                 ${primaryOpts}
               </select>
             </td>
             <td class="p-3">
-              <select id="selFallback_${agentId}" class="nacen-compact-control px-2.5 text-xs text-slate-300 font-mono w-full rounded-lg bg-slate-900 border border-slate-700 focus:border-blue-500 focus:outline-none">
+              <select id="selFallback_${agentId}" class="tc-compact-control px-2.5 text-xs text-slate-300 font-mono w-full rounded-lg bg-slate-900 border border-slate-700 focus:border-blue-500 focus:outline-none">
                 ${fallbackOpts}
               </select>
             </td>

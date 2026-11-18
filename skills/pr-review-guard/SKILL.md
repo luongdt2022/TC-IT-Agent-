@@ -32,7 +32,7 @@ flowchart TD
 
 ### Bước 1: Quét Ranh giới Kiến trúc (Clean Architecture Boundary)
 - Quét các file thay đổi trong PR:
-  - Nếu có `using Microsoft.EntityFrameworkCore;` hoặc `using NacenTwin.Infrastructure;` trong thư mục `Domain/` $\rightarrow$ **FLAG VIOLATION**.
+  - Nếu có `using Microsoft.EntityFrameworkCore;` hoặc `using MyApp.Infrastructure;` trong thư mục `Domain/` $\rightarrow$ **FLAG VIOLATION**.
   - Nếu có inject trực tiếp `AppDbContext` vào `Controllers/` hoặc `Endpoints/` $\rightarrow$ **FLAG VIOLATION** (Bắt buộc dùng `ISender` / `IMediator`).
   - Kiểm tra xem Command/Query có trả về Entity thô thay vì DTO không.
 

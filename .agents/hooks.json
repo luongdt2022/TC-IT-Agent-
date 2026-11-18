@@ -1,0 +1,30 @@
+{
+  "zero-bypass-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ../scripts/antigravity-hook.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "fact-forcing-tier1-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "write_file|edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ../scripts/antigravity-hook.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

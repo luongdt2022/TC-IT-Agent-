@@ -1,12 +1,11 @@
 ---
-name: "speckit-roadmap"
+name: speckit-roadmap
 description: "Master Roadmap & Epic Registry Manager: Tra cứu tiến độ tổng thể các Epic, đối soát tự động tiến độ từ tasks.md và cập nhật specs/ROADMAP.md cho ManageAgent."
 compatibility: "Requires spec-kit project structure with specs/ and specs/ROADMAP.md"
 metadata:
   author: "github-spec-kit"
   source: "custom/speckit-roadmap"
 ---
-
 # Kỹ Năng Quản Lý Master Roadmap (`speckit-roadmap`)
 
 ## 1. Mục Đích & Vai Trò

@@ -32,3 +32,5 @@ __pycache__/
 # Autonomous loop runtime state & logs
 .tc-loop/
 .nacen-loop/
+logs/
+*.log

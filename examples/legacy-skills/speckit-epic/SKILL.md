@@ -1,12 +1,11 @@
 ---
-name: "speckit-epic"
+name: speckit-epic
 description: "Khởi tạo một Epic mới, đăng ký vào Master Roadmap (specs/ROADMAP.md) và thiết lập thư mục specs/<epic-id> với đầy đủ bộ 3 tài liệu chuẩn (spec.md, plan.md, tasks.md) cho ManageAgent."
 compatibility: "Requires spec-kit project structure with .specify/ directory"
 metadata:
   author: "github-spec-kit"
   source: "custom/speckit-epic"
 ---
-
 ## User Input
 
 ```text

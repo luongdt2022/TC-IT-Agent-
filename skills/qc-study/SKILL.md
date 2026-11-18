@@ -3,7 +3,7 @@ name: qc-study
 description: "Quy trình Study Nghiệp vụ & Thiết kế Kịch bản Kiểm thử Toàn trình 4 Cấp Độ (QC 4-Level Business Reconnaissance & Scenario Design Protocol). Bắt buộc thực hiện trước khi test bất kỳ Epic/Chức năng nào: Cấp 1 (Control & Field Validation), Cấp 2 (Màn hình & Tương tác cục bộ), Cấp 3 (Luồng nghiệp vụ nhỏ - Sub-workflows), Cấp 4 (Hành trình toàn trình lớn - E2E Journeys & 10 Roles). Dừng lại trao đổi số lượng với PO/User và chỉ thực thi khi được duyệt."
 ---
 
-# Quy Trình Study Nghiệp Vụ & Thiết Kế Kịch Bản Kiểm Thử 4 Cấp Độ (nacen-qc-study)
+# Quy Trình Study Nghiệp Vụ & Thiết Kế Kịch Bản Kiểm Thử 4 Cấp Độ (qc-study)
 
 > **Hiến chương bắt buộc**: Mỗi khi tiếp nhận kiểm thử một Epic hoặc Chức năng bất kỳ trong hệ sinh thái Enterprise, Ban QC **tuyệt đối không được nhảy vào code test ngay** hay chỉ test luồng lớn mà bỏ quên các chi tiết vi mô. Bắt buộc phải triển khai theo **Mô hình Kim tự tháp 4 Cấp Độ Kiểm Thử**, mở phiên trao đổi thống nhất số lượng với PO và Product Leader (User), sau đó mới đi vào thực thi tuần tự từng cấp độ.
 

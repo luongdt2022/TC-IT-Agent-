@@ -1,10 +1,16 @@
 # ==============================================================================
-# TC IT AGENT — AUTONOMOUS LOOP & E2E PIPELINE POLICY
-# Kế thừa triết lý bmad-loop & spec-kit: Deterministic control, No-LLM-in-the-control-loop, Fresh Context
+# TC IT AGENT — AUTONOMOUS LOOP & E2E PIPELINE POLICY (v4.0)
+# Single Source of Configuration cho tc-loop.py, dag_engine.py, server.py & live_runner.py
 # ==============================================================================
 
 [project]
 name = "TC IT Enterprise Project"
+docs_dir = "docs"
+wireframes_dir = "docs/wireframes"
+src_dir = "src"
+frontend_dir = "src/WebApp"
+backend_dir = "src"
+tests_dir = "tests"
 
 [loop]
 project_root = "."
@@ -14,26 +20,31 @@ task_specs_dir = "specs"
 backlog_file = "backlog/BACKLOG.md"
 # Thư mục Thiết kế cơ sở (Basic Design)
 basic_design_dir = "docs/01-basic-design"
+# Thư mục lưu trạng thái vòng lặp
+state_dir = ".tc-loop"
 # Giới hạn số lần thử tối đa cho một task trước khi chuyển sang Attention escalation
 max_attempts_per_task = 3
 # Timeout cho mỗi phiên làm việc của Agent CLI (giây)
 session_timeout_seconds = 600
+# Chu kỳ poll trạng thái hoàn tất của AgentAPI (giây)
+poll_interval_seconds = 5
 # Ngưỡng số lượng files thay đổi tối đa cho 1 task (chống sửa lan tràn)
 blast_radius_max_files = 8
+# Bắt buộc phải có thay đổi mã nguồn thực tế cho task code ([BE]/[FE]/[TEST]/[INFRA])
+require_code_diff = true
 # Tự động tạo git commit sau khi task vượt qua verify gates
 auto_commit = true
 # Tự động chuyển sang task tiếp theo
 auto_advance = true
 
 [agents]
-# Runner chính: Antigravity qua AgentAPI gốc (không dùng CLI bên thứ ba, không dùng API key)
+# Runner chính: "antigravity" | "claude" | "agy" | "auto"
 cli = "antigravity"
 dev_model = "pro"
 review_model = "pro"
 
 [verify]
 # Danh sách các lệnh kiểm tra toán học tĩnh bắt buộc phải pass 100% trước khi commit & tick [x]
-# Bật/tắt hoặc bổ sung các lệnh phù hợp với tech stack của dự án bạn:
 commands = [
     "bash scripts/guard-rails.sh"
     # Ví dụ với .NET:
@@ -45,7 +56,7 @@ commands = [
 ]
 
 [scm]
-# Chế độ cách ly: "branch" (nhánh riêng trên repo) hoặc "worktree"
+# Chế độ cách ly: "branch" (nhánh riêng trên repo) | "worktree" | "none"
 isolation = "branch"
 base_branch = "main"
 branch_prefix = "loop/"

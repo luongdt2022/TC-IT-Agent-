@@ -1,5 +1,5 @@
 ---
-name: md-to-docx-review
+name: ba-docx
 description: Chuyển tài liệu Markdown, đặc biệt SRS theo template dự án, sang DOCX có định dạng đọc duyệt và kiểm tra mở được. Dùng khi cần tạo bản Word để gửi reviewer/PO/QA.
 metadata:
   short-description: Xuất SRS Markdown thành Word để duyệt
@@ -31,8 +31,8 @@ Tạo một bản `.docx` từ file `.md` làm bản phát hành để người 
 
 ```bash
 python3 md-to-docx-review/scripts/md_to_docx.py \
-  TRUYXUAT/SRS-RBAC-PHAN-QUYEN-TRACEPRO.md \
-  TRUYXUAT/SRS-RBAC-PHAN-QUYEN-TRACEPRO.docx
+  docs/01-basic-design/MASTER-SRS.md \
+  docs/01-basic-design/MASTER-SRS.docx
 ```
 
 Sau đó kiểm tra:
@@ -40,7 +40,7 @@ Sau đó kiểm tra:
 ```bash
 soffice --headless --convert-to pdf \
   --outdir /tmp/srs-docx-check \
-  TRUYXUAT/SRS-RBAC-PHAN-QUYEN-TRACEPRO.docx
+  docs/01-basic-design/MASTER-SRS.docx
 ```
 
 `python-docx` và LibreOffice là dependency runtime. Nếu thiếu, báo dependency cụ thể; không tự cài package ngoài phạm vi người dùng yêu cầu.

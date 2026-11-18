@@ -1,12 +1,11 @@
 ---
-name: "speckit-test"
+name: speckit-test
 description: "Chuyên gia Thiết kế & Thực thi Kiểm thử Toàn Diện (Testing Specialist): Tự động xây dựng Unit Test (Vitest), Database Integration Test, và End-to-End Visual QA (Playwright) đạt chuẩn Quality Gate 100% pass."
 compatibility: "Requires Node.js, Vitest/Jest, and Playwright in project"
 metadata:
   author: "github-spec-kit"
   source: "custom/speckit-test"
 ---
-
 ## User Input
 
 ```text
@@ -56,12 +55,16 @@ Hệ thống tuân thủ mô hình **Testing Pyramid** 3 tầng nghiêm ngặt:
   - `beforeAll`: Chuẩn bị dữ liệu mẫu cô lập.
   - `afterAll`: Dọn dẹp sạch sẽ (cleanup) và đóng kết nối pool.
 
-### Tầng 3: Playwright E2E & Visual QA (`tests/e2e/*.spec.ts`)
+### Tầng 3: Playwright E2E & Visual QA (`tests/e2e/*.spec.ts` hoặc `*.py`)
 - **Phạm vi**:
   - Luồng thao tác của người dùng từ đầu đến cuối (User Journeys).
   - Đa ngôn ngữ (Language Switcher Parity).
   - Đa kích thước màn hình (Desktop 1440px, Mobile 390px PWA, Tablet).
   - Chụp ảnh Visual QA độ phân giải cao Retina (lưu vào `docs/screenshots/<epic>/`).
+- **Kỷ Luật Zero-Mock & Đối Soát CSDL Đóng Vòng (Deep DB State Verification)**:
+  - **Tuyệt đối cấm kiểm thử bề mặt**: Không được chỉ assert text hiển thị trên UI (`is_visible()`) rồi kết luận PASS.
+  - **Triệt tiêu Mock Ngầm**: Cấm Frontend hardcode mảng dữ liệu tĩnh `useState([...])` hoặc tự sinh dữ liệu giả `fakeItem / fakeCode` trong khối `catch / else` khi API trả về lỗi. Phát hiện mock ngầm $\rightarrow$ ĐÁNH RỚT NGAY LẬP TỨC.
+  - **Đối soát tận CSDL**: Mọi hành vi nộp form, tạo mới, chỉnh sửa, chuyển đổi trạng thái trên giao diện đều phải có bước kiểm chứng truy vấn trực tiếp CSDL PostgreSQL thật (qua Docker `psql` hoặc client) để chứng minh dữ liệu đã được ghi nhận và chuyển đổi trạng thái thực sự.
 
 ---
 
